@@ -1,0 +1,1 @@
+// minimap must be foldable
