@@ -10,6 +10,8 @@ import bfg.backend.repository.user.UserRepository;
 import bfg.backend.service.logic.TypeModule;
 import bfg.backend.service.logic.TypeResources;
 import bfg.backend.service.logic.zones.Zones;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,10 +33,13 @@ public class SuccessfulService {
         this.resourceRepository = resourceRepository;
     }
 
-    public Successful getSuccessful(Long idUser){
-        Optional<User> optionalUser = userRepository.findById(idUser);
+    public Successful getSuccessful(){
+        // Получаем аутентификацию из контекста
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName(); // Логин пользователя
+        Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            throw new RuntimeException("Такого пользователя нет");
+            return null;
         }
         User user = optionalUser.get();
 

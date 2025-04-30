@@ -71,7 +71,7 @@ public class Plantation extends Module implements Component {
             }
         }
         if(connect){
-            return Math.toIntExact(Math.min(100, resources.get(TypeResources.FOOD.ordinal()).getProduction() /
+            return Math.toIntExact(Math.min(100, 100 - resources.get(TypeResources.FOOD.ordinal()).getProduction() /
                     resources.get(TypeResources.FOOD.ordinal()).getConsumption() * 1000 / 3));
         }
         return null;

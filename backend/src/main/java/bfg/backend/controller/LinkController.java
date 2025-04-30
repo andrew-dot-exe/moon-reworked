@@ -15,10 +15,10 @@ public class LinkController {
         this.linkService = linkService;
     }
 
-    @DeleteMapping
+   /* @DeleteMapping
     public void delete(@RequestParam Link link){
         linkService.delete(link);
-    }
+    }*/
 
     @PostMapping
     public Integer create(@RequestBody Link link){

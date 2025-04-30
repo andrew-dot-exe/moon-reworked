@@ -14,14 +14,14 @@ public class ColonyController {
         this.colonyService = colonyService;
     }
 
-    @DeleteMapping(path = "{idUser}")
-    public void delete(@PathVariable Long idUser){
-        colonyService.delete(idUser);
+    @DeleteMapping()
+    public void delete(){
+        colonyService.delete();
     }
 
-    @PostMapping
-    public AllUserInfo create(@RequestBody Long idUser){
-        return colonyService.create(idUser);
+    @GetMapping
+    public void create(){
+        colonyService.create();
     }
 
 }

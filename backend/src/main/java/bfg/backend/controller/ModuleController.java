@@ -1,5 +1,6 @@
 package bfg.backend.controller;
 
+import bfg.backend.dto.request.module.CreatedModule;
 import bfg.backend.dto.responce.optimality.Optimality;
 import bfg.backend.repository.module.Module;
 import bfg.backend.service.ModuleService;
@@ -17,19 +18,19 @@ public class ModuleController {
         this.moduleService = moduleService;
     }
 
-    @GetMapping(path = "{idUser}")
-    public List<Optimality> optimality(@PathVariable Long idUser){
-        return moduleService.getOptimality(idUser);
+    @GetMapping()
+    public List<Optimality> optimality(){
+        return moduleService.getOptimality();
     }
-
+/*
     @DeleteMapping(path = "{idUser}")
     public void delete(@PathVariable Long idUser,
                        @RequestParam Long id){
         moduleService.delete(idUser, id);
-    }
+    }*/
 
     @PostMapping
-    public Integer create(@RequestBody Module module){
+    public CreatedModule create(@RequestBody Module module){
         return moduleService.create(module);
     }
 }

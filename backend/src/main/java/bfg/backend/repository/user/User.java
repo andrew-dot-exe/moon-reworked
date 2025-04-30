@@ -1,10 +1,16 @@
 package bfg.backend.repository.user;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +27,7 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
+        setPassword(password);
         this.current_day = current_day;
         this.days_before_delivery = days_before_delivery;
         this.live = live;
@@ -28,7 +35,17 @@ public class User {
 
     public User() {}
 
+    // Метод для хэширования пароля перед сохранением
+    public void setPassword(String password) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        this.password = encoder.encode(password);
+    }
 
+    // Проверка пароля
+    public boolean checkPassword(String rawPassword) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.matches(rawPassword, this.password);
+    }
 
     public Long getId() {
         return id;
@@ -54,13 +71,9 @@ public class User {
         this.email = email;
     }
 
-    public String getPassword() {
+   /* public String getPassword() {
         return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    }*/
 
     public Integer getCurrent_day() {
         return current_day;
@@ -84,5 +97,20 @@ public class User {
 
     public void setLive(Boolean live) {
         this.live = live;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 }

@@ -1,6 +1,7 @@
 package bfg.backend.service;
 
 import bfg.backend.dto.responce.allUserInfo.AllUserInfo;
+import bfg.backend.dto.responce.exception.ColonizationIsNotCompletedException;
 import bfg.backend.mapping.MappingToResponse;
 import bfg.backend.repository.link.Link;
 import bfg.backend.repository.link.LinkRepository;
@@ -11,6 +12,8 @@ import bfg.backend.repository.resource.ResourceRepository;
 import bfg.backend.repository.user.User;
 import bfg.backend.repository.user.UserRepository;
 import bfg.backend.service.logic.TypeResources;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,16 +37,19 @@ public class ColonyService {
         this.resourceRepository = resourceRepository;
     }
 
-    public void delete(Long idUser){
-        Optional<User> optionalUser = userRepository.findById(idUser);
+    public void delete(){
+        // Получаем аутентификацию из контекста
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName(); // Логин пользователя
+        Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            throw new RuntimeException("Такого пользователя нет");
+            return;
         }
         User user = optionalUser.get();
 
-        List<Link> links = linkRepository.findByIdUser(idUser);
-        List<Module> modules = moduleRepository.findByIdUser(idUser);
-        List<Resource> resources = resourceRepository.findByIdUser(idUser);
+        List<Link> links = linkRepository.findByIdUser(user.getId());
+        List<Module> modules = moduleRepository.findByIdUser(user.getId());
+        List<Resource> resources = resourceRepository.findByIdUser(user.getId());
 
         linkRepository.deleteAll(links);
         moduleRepository.deleteAll(modules);
@@ -53,14 +59,17 @@ public class ColonyService {
         userRepository.save(user);
     }
 
-    public AllUserInfo create(Long idUser){
-        Optional<User> optionalUser = userRepository.findById(idUser);
+    public void create(){
+        // Получаем аутентификацию из контекста
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName(); // Логин пользователя
+        Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            throw new RuntimeException("Такого пользователя нет");
+            return;
         }
         User user = optionalUser.get();
         if(user.getLive()){
-            throw new RuntimeException("У пользователя уже есть колония");
+            throw new ColonizationIsNotCompletedException();
         }
 
         user.setLive(true);
@@ -69,13 +78,9 @@ public class ColonyService {
 
         List<Resource> resources = new ArrayList<>();
         for (int i = 0; i < TypeResources.values().length; i++) {
-            resources.add(new Resource(new Resource.PrimaryKey(i, idUser), TypeResources.values()[i].getStartCount(), 0L, 0L, 0L, 0L));
+            resources.add(new Resource(new Resource.PrimaryKey(i, user.getId()), TypeResources.values()[i].getStartCount(), 0L, 0L, 0L, 0L));
         }
         resourceRepository.saveAll(resources);
 
-        List<Module> modules = moduleRepository.findByIdUser(user.getId());
-        List<Link> links = linkRepository.findByIdUser(user.getId());
-
-        return MappingToResponse.mapToAllUserInfo(user, modules, links, resources);
     }
 }

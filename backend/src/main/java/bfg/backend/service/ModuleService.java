@@ -1,6 +1,11 @@
 package bfg.backend.service;
 
+import bfg.backend.dto.request.module.CreatedModule;
 import bfg.backend.dto.request.modulePlace.ModulePlace;
+import bfg.backend.dto.responce.exception.CannotBePutException;
+import bfg.backend.dto.responce.exception.ColonizationIsCompletedException;
+import bfg.backend.dto.responce.exception.NotResourceException;
+import bfg.backend.dto.responce.exception.UserNotFoundException;
 import bfg.backend.dto.responce.optimality.Optimality;
 import bfg.backend.repository.link.Link;
 import bfg.backend.repository.link.LinkRepository;
@@ -13,6 +18,8 @@ import bfg.backend.repository.user.UserRepository;
 import bfg.backend.service.logic.Component;
 import bfg.backend.service.logic.TypeModule;
 import bfg.backend.service.logic.TypeResources;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,7 +45,7 @@ public class ModuleService {
         this.productionService = productionService;
         this.checkPlaceService = checkPlaceService;
     }
-
+/*
     public void delete(Long idUser, Long id) {
         Optional<User> optionalUser = userRepository.findById(idUser);
         if(optionalUser.isEmpty()){
@@ -60,49 +67,54 @@ public class ModuleService {
         else {
             throw new RuntimeException("Такого модуля нет");
         }
-    }
+    }*/
 
-    public Integer create(Module module) {
-        if(!checkPlaceService.check(new ModulePlace(module.getId_user(), module.getModule_type(),
-                module.getX(), module.getY(), module.getId_zone())).possible()){
-            throw new RuntimeException("Нельзя поставить в этом месте");
-        }
-
-        Optional<User> optionalUser = userRepository.findById(module.getId_user());
+    public CreatedModule create(Module module) {
+        // Получаем аутентификацию из контекста
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName(); // Логин пользователя
+        Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            throw new RuntimeException("Такого пользователя нет");
+            throw new UserNotFoundException();
         }
         User user = optionalUser.get();
-        if(!user.getLive()){
-            throw new RuntimeException("Данный пользоваель завершил колнизацию");
+
+        if(!checkPlaceService.check(new ModulePlace(module.getModule_type(),
+                module.getX(), module.getY(), module.getId_zone())).possible()){
+            throw new CannotBePutException();
         }
-/*
-        if(moduleRepository.findById(module.getId()).isPresent()){
-            throw new RuntimeException("Такой модуль уже есть");
-        }*/
-        moduleRepository.save(module);
 
-        productionService.recountingProduction(module.getId_user(), moduleRepository, linkRepository, resourceRepository);
+        if(!user.getLive()){
+            throw new ColonizationIsCompletedException();
+        }
 
-        Optional<Resource> optionalResource = resourceRepository.findById(new Resource.PrimaryKey(TypeResources.MATERIAL.ordinal(), module.getId_user()));
+        module.setId_user(user.getId());
+        Module resm = moduleRepository.save(module);
+
+        productionService.recountingProduction(resm.getId_user(), moduleRepository, linkRepository, resourceRepository);
+
+        Optional<Resource> optionalResource = resourceRepository.findById(new Resource.PrimaryKey(TypeResources.MATERIAL.ordinal(), resm.getId_user()));
         if(optionalResource.isEmpty()){
-            throw new RuntimeException("Такого ресурса нет (как так?)");
+            throw new NotResourceException();
         }
         Resource mat = optionalResource.get();
-        int cost = TypeModule.values()[module.getModule_type()].getCost();
+        long cost = TypeModule.values()[resm.getModule_type()].getCost();
         mat.setCount(mat.getCount() - cost);
         if(mat.getCount() < 0){
             user.setLive(false);
             userRepository.save(user);
         }
 
-        return cost;
+        return new CreatedModule(resm.getId(), cost);
     }
 
-    public List<Optimality> getOptimality(Long idUser){
-        Optional<User> optionalUser = userRepository.findById(idUser);
+    public List<Optimality> getOptimality(){
+        // Получаем аутентификацию из контекста
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName(); // Логин пользователя
+        Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            throw new RuntimeException("Нет такого пользователя");
+            return null;
         }
         User user = optionalUser.get();
 

@@ -46,7 +46,7 @@ class ProductionService {
         }
         consWt = consWt * 12L / 10000;
 
-        for (int i = 0; i < resources.size() - 1; i++) { // dirty hack
+        for (int i = 0; i < resources.size(); i++) {
             resources.get(i).setProduction(production.get(i));
             resources.get(i).setConsumption(consumption.get(i) + (i == TypeResources.WT.ordinal() ? consWt : 0L));
         }
