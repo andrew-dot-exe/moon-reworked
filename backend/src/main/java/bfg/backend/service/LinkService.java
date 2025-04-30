@@ -59,7 +59,7 @@ public class LinkService {
 
     }*/
 
-    public Integer create(Link link) {
+    public Long create(Link link) {
         // Получаем аутентификацию из контекста
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName(); // Логин пользователя
@@ -77,7 +77,7 @@ public class LinkService {
             throw new LinkHasBeenAlreadyException();
         }
         linkRepository.save(link);
-        int way = Zones.getZones().get(link.getPrimaryKey().getId_zone1()).getWays()[link.getPrimaryKey().getId_zone2()];
+        long way = Zones.getZones().get(link.getPrimaryKey().getId_zone1()).getWays()[link.getPrimaryKey().getId_zone2()];
         if(link.getPrimaryKey().getType() == 0) {
             Optional<Resource> optionalResource = resourceRepository.findById(new Resource.PrimaryKey(TypeResources.MATERIAL.ordinal(), link.getPrimaryKey().getId_user()));
             if(optionalResource.isEmpty()){
@@ -90,7 +90,7 @@ public class LinkService {
                 userRepository.save(user);
             }
             resourceRepository.save(mat);
-            return way;
+            return way * 1000;
         }
         Optional<Resource> optionalResource = resourceRepository.findById(new Resource.PrimaryKey(TypeResources.WT.ordinal(), link.getPrimaryKey().getId_user()));
         if(optionalResource.isEmpty()){
@@ -99,6 +99,6 @@ public class LinkService {
         Resource wt = optionalResource.get();
         wt.setConsumption(wt.getConsumption() + way * 12L / 10000);
         resourceRepository.save(wt);
-        return 0;
+        return 0L;
     }
 }

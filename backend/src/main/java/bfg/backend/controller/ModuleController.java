@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Контроллер для работы с модулями колонии.
+ * Предоставляет API для управления модулями и анализа их оптимальности.
+ */
 @RestController
 @RequestMapping(path = "module")
 public class ModuleController {
@@ -18,19 +22,27 @@ public class ModuleController {
         this.moduleService = moduleService;
     }
 
+    /**
+     * Возвращает данные об оптимальности размещения всех модулей.
+     *
+     * @return Список объектов Optimality с показателями оптимальности для каждого модуля
+     * @see Optimality
+     */
     @GetMapping()
-    public List<Optimality> optimality(){
+    public List<Optimality> optimality() {
         return moduleService.getOptimality();
     }
-/*
-    @DeleteMapping(path = "{idUser}")
-    public void delete(@PathVariable Long idUser,
-                       @RequestParam Long id){
-        moduleService.delete(idUser, id);
-    }*/
 
+    /**
+     * Создает новый модуль.
+     *
+     * @param module DTO с данными для создания модуля
+     * @return DTO с информацией об идентификаторе созданного модуля и количество материалов на его строительство
+     * @see Module
+     * @see CreatedModule
+     */
     @PostMapping
-    public CreatedModule create(@RequestBody Module module){
+    public CreatedModule create(@RequestBody Module module) {
         return moduleService.create(module);
     }
 }

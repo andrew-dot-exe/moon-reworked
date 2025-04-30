@@ -14,8 +14,21 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Класс для преобразования (маппинга) сущностей предметной области
+ * в DTO (Data Transfer Objects) для ответов API.
+ */
 public class MappingToResponse {
 
+    /**
+     * Преобразует данные пользователя и связанные сущности в комплексный DTO.
+     *
+     * @param user сущность пользователя
+     * @param modules список модулей пользователя
+     * @param links список связей между областями
+     * @param resources список ресурсов пользователя
+     * @return DTO со всей информацией о пользователе
+     */
     public static AllUserInfo mapToAllUserInfo(User user, List<Module> modules, List<Link> links, List<Resource> resources){
         List<bfg.backend.dto.responce.allUserInfo.Module> resMod = new LinkedList<>();
         List<bfg.backend.dto.responce.allUserInfo.Link> resLink = new LinkedList<>();
@@ -31,9 +44,20 @@ public class MappingToResponse {
             resLink.add(new bfg.backend.dto.responce.allUserInfo.Link(link));
         }
 
-        return new AllUserInfo(user.getName(), user.getCurrent_day(), user.getDays_before_delivery(), user.getLive(), resResource, resLink, resMod);
+        return new AllUserInfo(user.getName(),
+                user.getCurrent_day(),
+                user.getDays_before_delivery(),
+                user.getLive(),
+                resResource,
+                resLink,
+                resMod);
     }
 
+    /**
+     * Преобразует все зоны в список DTO.
+     *
+     * @return список DTO зон
+     */
     public static List<Zone> mapToZone(){
         int l = Zones.getLength();
         List<Zone> zones = new ArrayList<>(l);
@@ -44,6 +68,13 @@ public class MappingToResponse {
         return zones;
     }
 
+    /**
+     * Преобразует ячейки указанной зоны в DTO.
+     *
+     * @param i индекс зоны
+     * @return DTO с ячейками зоны
+     * @throws IndexOutOfBoundsException если индекс выходит за границы
+     */
     public static CellsOfZone mapToCells(int i){
         return new CellsOfZone(Zones.getZones().get(i).getCells());
     }

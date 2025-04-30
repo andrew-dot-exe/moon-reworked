@@ -1,5 +1,10 @@
 package bfg.backend.dto.responce.allUserInfo;
 
+/**
+ * Представляет собой ресурс колонии.
+ * Содержит информацию о типе ресурса, его количестве
+ * и его суммарном производстве/потреблении для ответа.
+ */
 public class Resource {
     private Integer type;
     private Long count;

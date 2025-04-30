@@ -5,6 +5,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+/**
+ * Описывает сущность {@code module}
+ */
 @Entity
 public class Module implements Comparable<Module>{
 

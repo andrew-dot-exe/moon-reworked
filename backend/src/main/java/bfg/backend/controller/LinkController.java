@@ -5,6 +5,10 @@ import bfg.backend.repository.link.Link;
 import bfg.backend.service.LinkService;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Контроллер для управления связями между областями.
+ * Предоставляет API для создания связей.
+ */
 @RestController
 @RequestMapping(path = "link")
 public class LinkController {
@@ -15,13 +19,15 @@ public class LinkController {
         this.linkService = linkService;
     }
 
-   /* @DeleteMapping
-    public void delete(@RequestParam Link link){
-        linkService.delete(link);
-    }*/
-
+    /**
+     * Создает новую связь между областями.
+     *
+     * @param link DTO с данными для создания связи
+     * @return Количесво затраченных материалов для создания
+     * @see Link
+     */
     @PostMapping
-    public Integer create(@RequestBody Link link){
+    public Long create(@RequestBody Link link){
         return linkService.create(link);
     }
 }
