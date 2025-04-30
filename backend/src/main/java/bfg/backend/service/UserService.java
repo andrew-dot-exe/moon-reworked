@@ -1,9 +1,14 @@
 package bfg.backend.service;
 
+import bfg.backend.dto.request.token.RefreshRequest;
 import bfg.backend.dto.request.user.UserIn;
 import bfg.backend.dto.responce.allUserInfo.AllUserInfo;
+import bfg.backend.dto.responce.exception.EmailHasBeenUsedAlreadyException;
+import bfg.backend.dto.responce.exception.NotRefreshTokenException;
+import bfg.backend.dto.responce.exception.UserNotFoundException;
 import bfg.backend.dto.responce.statistics.Statistics;
 import bfg.backend.dto.responce.statistics.ZoneProduction;
+import bfg.backend.dto.responce.token.JwtResponse;
 import bfg.backend.mapping.MappingToResponse;
 import bfg.backend.repository.link.*;
 import bfg.backend.repository.module.Module;
@@ -14,7 +19,10 @@ import bfg.backend.service.logic.Component;
 import bfg.backend.service.logic.TypeModule;
 import bfg.backend.service.logic.TypeResources;
 import bfg.backend.service.logic.zones.Zones;
+import bfg.backend.token.JwtTokenUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,23 +37,26 @@ public class UserService {
     private final ResourceRepository resourceRepository;
     private final SuccessfulService successfulService;
 
-    public UserService(UserRepository userRepository, LinkRepository linkRepository, ModuleRepository moduleRepository, ResourceRepository resourceRepository, SuccessfulService successfulService) {
+    private final JwtTokenUtil jwtTokenUtil;
+
+    public UserService(UserRepository userRepository, LinkRepository linkRepository, ModuleRepository moduleRepository, ResourceRepository resourceRepository, SuccessfulService successfulService, JwtTokenUtil jwtTokenUtil) {
         this.userRepository = userRepository;
         this.linkRepository = linkRepository;
         this.moduleRepository = moduleRepository;
         this.resourceRepository = resourceRepository;
         this.successfulService = successfulService;
+        this.jwtTokenUtil = jwtTokenUtil;
     }
 
-    public AllUserInfo find(UserIn userIn){
-        Optional<User> optionalUser = userRepository.findByEmail(userIn.email());
+    public AllUserInfo info(){
+        // Получаем аутентификацию из контекста
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName(); // Логин пользователя
+        Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            return null;
+            throw new UserNotFoundException();
         }
         User user = optionalUser.get();
-        if(!user.getPassword().equals(userIn.password())){
-            return null;
-        }
 
         List<Module> modules = moduleRepository.findByIdUser(user.getId());
         List<Link> links = linkRepository.findByIdUser(user.getId());
@@ -54,11 +65,13 @@ public class UserService {
         return MappingToResponse.mapToAllUserInfo(user, modules, links, resources);
     }
 
-    // TODO потребление электричества за гидролиз кислорода
-    public Statistics getStatistics(Long idUser){
-        Optional<User> optionalUser = userRepository.findById(idUser);
+    public Statistics getStatistics(){
+        // Получаем аутентификацию из контекста
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName(); // Логин пользователя
+        Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            throw new RuntimeException("Такого пользователя нет");
+            throw new UserNotFoundException();
         }
         User user = optionalUser.get();
 
@@ -92,15 +105,51 @@ public class UserService {
             zoneProductions.add(new ZoneProduction(i, production, consumption));
         }
 
-        return new Statistics(user.getCurrent_day(), successfulService.getSuccessful(idUser).successful(), count, sproduction, sconsumption, zoneProductions);
+        return new Statistics(user.getCurrent_day(), successfulService.getSuccessful().successful(), count, sproduction, sconsumption, zoneProductions);
     }
 
-    public Long create(UserIn userIn) {
+    public JwtResponse login(UserIn userIn) {
+        Optional<User> optionalUser = userRepository.findByEmail(userIn.email());
+        if(optionalUser.isEmpty()){
+            throw new UserNotFoundException();
+        }
+        User user = optionalUser.get();
+        if(!user.checkPassword(userIn.password())){
+            throw new UserNotFoundException();
+        }
+        String accessToken = jwtTokenUtil.generateToken(user);
+        String refreshToken = jwtTokenUtil.generateRefreshToken(user);
+
+        return new JwtResponse(accessToken, refreshToken);
+    }
+
+    public JwtResponse create(UserIn userIn) {
         Optional<User> optionalUser = userRepository.findByEmail(userIn.email());
         if(optionalUser.isPresent()){
-            throw new IllegalStateException("Пользователь уже есть");
+            throw new EmailHasBeenUsedAlreadyException();
         }
         User user = new User(null, userIn.name(), userIn.email(), userIn.password(), 0, 0, false);
-        return userRepository.save(user).getId();
+        userRepository.save(user);
+        String accessToken = jwtTokenUtil.generateToken(user);
+        String refreshToken = jwtTokenUtil.generateRefreshToken(user);
+
+        return new JwtResponse(accessToken, refreshToken);
+    }
+
+    public JwtResponse refresh(RefreshRequest request){
+        String refreshToken = request.refreshToken();
+
+        // Проверяем, что токен валиден и не отозван
+        if (jwtTokenUtil.isTokenExpired(refreshToken)) {
+            String username = jwtTokenUtil.extractUsername(refreshToken);
+            Optional<User> optionalUser = userRepository.findByEmail(username);
+            if(optionalUser.isEmpty()){
+                throw new UserNotFoundException();
+            }
+            String newAccessToken = jwtTokenUtil.generateToken(optionalUser.get());
+            return new JwtResponse(newAccessToken, refreshToken);
+        } else {
+            throw new NotRefreshTokenException();
+        }
     }
 }

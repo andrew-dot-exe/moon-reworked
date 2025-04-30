@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 public class Area {
+    private Integer id;
     private String name;
     private Integer widthSecond;
     private Integer longitudeSecond;
@@ -14,7 +15,8 @@ public class Area {
     private int[] ways;
     private Cell[][] cells;
 
-    Area(int illumination, String file, String name){
+    Area(int id, int illumination, String file, String name){
+        this.id = id;
         this.illumination = illumination;
         this.name = name;
 
@@ -83,5 +85,13 @@ public class Area {
 
     public void setWays(int[] ways) {
         this.ways = ways;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

@@ -49,6 +49,7 @@ public class MineBase extends Module implements Component {
 
     @Override
     public Integer getRationality(List<Module> modules, List<Link> links, List<Resource> resources) {
+        if(getId_zone() < 4) return null;
         if(!enoughPeople(modules, getId())) return null;
         boolean admin = false;
         for (Module module : modules) {

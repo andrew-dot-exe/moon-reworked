@@ -14,7 +14,7 @@ public class Zones {
         String[] names = {"Равнина 1","Равнина 2","Высота 1","Высота 2","Низина 1","Низина 2"};
         String path = System.getProperty("user.dir") + "/src/main/resources/zones/";
         for (int i = 0; i < LENGTH; i++) {
-            areas.add(new Area(ILLUMINATION[i], path + names[i] + ".txt", names[i]));
+            areas.add(new Area(i, ILLUMINATION[i], path + names[i] + ".txt", names[i]));
         }
     }
 

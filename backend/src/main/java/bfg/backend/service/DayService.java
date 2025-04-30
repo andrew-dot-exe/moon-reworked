@@ -1,12 +1,16 @@
 package bfg.backend.service;
 
 import bfg.backend.dto.responce.day.ChangeDay;
+import bfg.backend.dto.responce.exception.ColonizationIsCompletedException;
+import bfg.backend.dto.responce.exception.UserNotFoundException;
 import bfg.backend.repository.resource.Resource;
 import bfg.backend.repository.resource.ResourceRepository;
 import bfg.backend.repository.user.User;
 import bfg.backend.repository.user.UserRepository;
 import bfg.backend.service.logic.TypeModule;
 import bfg.backend.service.logic.TypeResources;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,14 +30,17 @@ public class DayService {
         this.resourceRepository = resourceRepository;
     }
 
-    public ChangeDay addDay(Long idUser){
-        Optional<User> optionalUser = userRepository.findById(idUser);
+    public ChangeDay addDay(){
+        // Получаем аутентификацию из контекста
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName(); // Логин пользователя
+        Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            throw new RuntimeException("Такого пользователя нет");
+            throw new UserNotFoundException();
         }
         User user = optionalUser.get();
         if(!user.getLive()){
-            throw new RuntimeException("Данный пользоваель завершил колнизацию");
+            throw new ColonizationIsCompletedException();
         }
 
         user.setCurrent_day(user.getCurrent_day() + 1);
@@ -41,7 +48,7 @@ public class DayService {
         if(delivery) user.setDays_before_delivery(DAYS_DELIVERY);
         else user.setDays_before_delivery(user.getDays_before_delivery() - 1);
 
-        List<Resource> resources = resourceRepository.findByIdUser(idUser);
+        List<Resource> resources = resourceRepository.findByIdUser(user.getId());
         resources.sort(Resource::compareTo);
 
         // Проверка на достаток кислорода
