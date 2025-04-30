@@ -3,10 +3,7 @@ package bfg.backend.controller;
 import bfg.backend.dto.responce.area.CellsOfZone;
 import bfg.backend.dto.responce.area.Zone;
 import bfg.backend.mapping.MappingToResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,7 +17,7 @@ public class AreaController {
     }
 
     @GetMapping(path = "cells/{id}")
-    public CellsOfZone getCells(@RequestParam Integer id){
+    public CellsOfZone getCells(@PathVariable Integer id){
         return MappingToResponse.mapToCells(id);
     }
 }
