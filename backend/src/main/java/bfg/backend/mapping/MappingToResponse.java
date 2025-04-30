@@ -1,11 +1,16 @@
 package bfg.backend.mapping;
 
 import bfg.backend.dto.responce.allUserInfo.*;
+import bfg.backend.dto.responce.area.CellsOfZone;
+import bfg.backend.dto.responce.area.Zone;
 import bfg.backend.repository.link.Link;
 import bfg.backend.repository.module.Module;
 import bfg.backend.repository.user.User;
 import bfg.backend.repository.resource.Resource;
+import bfg.backend.service.logic.zones.Area;
+import bfg.backend.service.logic.zones.Zones;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,5 +32,19 @@ public class MappingToResponse {
         }
 
         return new AllUserInfo(user.getName(), user.getCurrent_day(), user.getDays_before_delivery(), user.getLive(), resResource, resLink, resMod);
+    }
+
+    public static List<Zone> mapToZone(){
+        int l = Zones.getLength();
+        List<Zone> zones = new ArrayList<>(l);
+        for (int i = 0; i < l; i++) {
+            Area area = Zones.getZones().get(i);
+            zones.add(new Zone(area.getName(), area.getWidthSecond(), area.getLongitudeSecond(), area.getIllumination(), area.getWays()));
+        }
+        return zones;
+    }
+
+    public static CellsOfZone mapToCells(int i){
+        return new CellsOfZone(Zones.getZones().get(i).getCells());
     }
 }
