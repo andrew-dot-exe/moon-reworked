@@ -3,6 +3,7 @@ package bfg.backend.service;
 import bfg.backend.dto.request.modulePlace.ModulePlace;
 import bfg.backend.dto.responce.checkPlace.CheckedPlace;
 import bfg.backend.dto.responce.exception.ColonizationIsCompletedException;
+import bfg.backend.dto.responce.exception.UserNotFoundException;
 import bfg.backend.repository.link.*;
 import bfg.backend.repository.module.Module;
 import bfg.backend.repository.module.ModuleRepository;
@@ -38,7 +39,7 @@ public class CheckPlaceService {
         String email = auth.getName(); // Логин пользователя
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            return null;
+            throw new UserNotFoundException();
         }
         User user = optionalUser.get();
 

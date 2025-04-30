@@ -4,6 +4,6 @@ import org.springframework.http.HttpStatus;
 
 public class NotRefreshTokenException extends AbstractException{
     public NotRefreshTokenException(){
-        super(HttpStatus.NOT_FOUND, "Данного refresh токена нет, или истекло время его дейсвия");
+        super(HttpStatus.NOT_FOUND, "Данного refresh токена нет, или истекло время его действия");
     }
 }

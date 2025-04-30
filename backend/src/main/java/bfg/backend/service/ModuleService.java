@@ -114,7 +114,7 @@ public class ModuleService {
         String email = auth.getName(); // Логин пользователя
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            return null;
+            throw new UserNotFoundException();
         }
         User user = optionalUser.get();
 

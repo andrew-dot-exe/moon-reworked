@@ -1,5 +1,6 @@
 package bfg.backend.service;
 
+import bfg.backend.dto.responce.exception.UserNotFoundException;
 import bfg.backend.dto.responce.successful.Successful;
 import bfg.backend.repository.module.Module;
 import bfg.backend.repository.module.ModuleRepository;
@@ -39,7 +40,7 @@ public class SuccessfulService {
         String email = auth.getName(); // Логин пользователя
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            return null;
+            throw new UserNotFoundException();
         }
         User user = optionalUser.get();
 

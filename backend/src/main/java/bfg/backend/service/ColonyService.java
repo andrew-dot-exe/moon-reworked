@@ -2,6 +2,7 @@ package bfg.backend.service;
 
 import bfg.backend.dto.responce.allUserInfo.AllUserInfo;
 import bfg.backend.dto.responce.exception.ColonizationIsNotCompletedException;
+import bfg.backend.dto.responce.exception.UserNotFoundException;
 import bfg.backend.mapping.MappingToResponse;
 import bfg.backend.repository.link.Link;
 import bfg.backend.repository.link.LinkRepository;
@@ -43,7 +44,7 @@ public class ColonyService {
         String email = auth.getName(); // Логин пользователя
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            return;
+            throw new UserNotFoundException();
         }
         User user = optionalUser.get();
 
@@ -65,7 +66,7 @@ public class ColonyService {
         String email = auth.getName(); // Логин пользователя
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            return;
+            throw new UserNotFoundException();
         }
         User user = optionalUser.get();
         if(user.getLive()){

@@ -4,6 +4,6 @@ import org.springframework.http.HttpStatus;
 
 public class ColonizationIsCompletedException extends AbstractException{
     public ColonizationIsCompletedException(){
-        super(HttpStatus.CONFLICT, "Данный пользоваель завершил колнизацию");
+        super(HttpStatus.CONFLICT, "Данный пользователь завершил колонизацию");
     }
 }

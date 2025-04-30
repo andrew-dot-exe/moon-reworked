@@ -2,6 +2,7 @@ package bfg.backend.service;
 
 import bfg.backend.dto.responce.day.ChangeDay;
 import bfg.backend.dto.responce.exception.ColonizationIsCompletedException;
+import bfg.backend.dto.responce.exception.UserNotFoundException;
 import bfg.backend.repository.resource.Resource;
 import bfg.backend.repository.resource.ResourceRepository;
 import bfg.backend.repository.user.User;
@@ -35,7 +36,7 @@ public class DayService {
         String email = auth.getName(); // Логин пользователя
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            return null;
+            throw new UserNotFoundException();
         }
         User user = optionalUser.get();
         if(!user.getLive()){
