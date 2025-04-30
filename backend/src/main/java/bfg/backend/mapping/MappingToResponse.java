@@ -39,7 +39,7 @@ public class MappingToResponse {
         List<Zone> zones = new ArrayList<>(l);
         for (int i = 0; i < l; i++) {
             Area area = Zones.getZones().get(i);
-            zones.add(new Zone(area.getName(), area.getWidthSecond(), area.getLongitudeSecond(), area.getIllumination(), area.getWays()));
+            zones.add(new Zone(area.getId(), area.getName(), area.getWidthSecond(), area.getLongitudeSecond(), area.getIllumination(), area.getWays()));
         }
         return zones;
     }
