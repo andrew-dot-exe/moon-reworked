@@ -6,6 +6,18 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+/**
+ * Класс, описывающий характеристики области:
+ * <ul>
+ *     <li>id - Уникальный индификатор области (0-5)</li>
+ *     <li>name - Название области</li>
+ *     <li>widthSecond - Широта (географическая координата области) в секундах</li>
+ *     <li>longitudeSecond - Долгота (географическая координата области) в секундах</li>
+ *     <li>illumination - Освещенность области (0-100)</li>
+ *     <li>ways - Массив расстояний до других областей (в метрах)</li>
+ *     <li>cells - ячейки области</li>
+ * </ul>
+ */
 public class Area {
     private Integer id;
     private String name;

@@ -13,6 +13,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * Фильтр для обработки JWT токенов в входящих запросах.
+ * Извлекает токен из заголовка Authorization и устанавливает аутентификацию в контекст безопасности.
+ */
 @Component
 public class JwtTokenFilter extends OncePerRequestFilter {
 
@@ -30,13 +34,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        // Пропускаем публичные пути
-        /*if (request.getServletPath().equals("/user/login/") ||
-                request.getServletPath().equals("/user/refresh/") ||
-                request.getServletPath().equals("/user/create/")) {
-            filterChain.doFilter(request, response);
-            return;
-        }*/
 
         final String header = request.getHeader("Authorization");
 

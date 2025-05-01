@@ -1,5 +1,8 @@
 package bfg.backend.service.logic;
 
+/**
+ * Перечисление типов ресурсов в колонии с их начальными значениями.
+ */
 public enum TypeResources {
     H2O(600),
     FUEL(0),

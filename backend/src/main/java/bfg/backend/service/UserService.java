@@ -28,6 +28,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Сервис для работы с пользователями и их данными.
+ * Обеспечивает аутентификацию, регистрацию и доступ к пользовательской информации.
+ */
 @Service
 public class UserService {
 
@@ -48,6 +52,12 @@ public class UserService {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
+    /**
+     * Получает полную информацию о пользователе и его колонии
+     *
+     * @return объект AllUserInfo с данными пользователя
+     * @throws UserNotFoundException если пользователь не найден
+     */
     public AllUserInfo info(){
         // Получаем аутентификацию из контекста
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -65,6 +75,12 @@ public class UserService {
         return MappingToResponse.mapToAllUserInfo(user, modules, links, resources);
     }
 
+    /**
+     * Получает статистику колонии пользователя
+     *
+     * @return объект Statistics с данными
+     * @throws UserNotFoundException если пользователь не найден
+     */
     public Statistics getStatistics(){
         // Получаем аутентификацию из контекста
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -98,9 +114,10 @@ public class UserService {
                 consumption.add(0L);
             }
             for(Module module : modules){
+                if(module.getId_zone() != i) continue;
                 Component component = TypeModule.values()[module.getModule_type()].createModule(module);
-                component.getProduction(i, modules, production);
-                component.getConsumption(i, modules, consumption);
+                component.getProduction(modules, production);
+                component.getConsumption(modules, consumption);
             }
             zoneProductions.add(new ZoneProduction(i, production, consumption));
         }
@@ -108,6 +125,13 @@ public class UserService {
         return new Statistics(user.getCurrent_day(), successfulService.getSuccessful().successful(), count, sproduction, sconsumption, zoneProductions);
     }
 
+    /**
+     * Выполняет аутентификацию пользователя
+     *
+     * @param userIn данные пользователя для входа
+     * @return JWT токены доступа
+     * @throws UserNotFoundException если пользователь не найден или пароль неверный
+     */
     public JwtResponse login(UserIn userIn) {
         Optional<User> optionalUser = userRepository.findByEmail(userIn.email());
         if(optionalUser.isEmpty()){
@@ -123,6 +147,13 @@ public class UserService {
         return new JwtResponse(accessToken, refreshToken);
     }
 
+    /**
+     * Регистрирует нового пользователя
+     *
+     * @param userIn данные нового пользователя
+     * @return JWT токены доступа
+     * @throws EmailHasBeenUsedAlreadyException если email уже занят
+     */
     public JwtResponse create(UserIn userIn) {
         Optional<User> optionalUser = userRepository.findByEmail(userIn.email());
         if(optionalUser.isPresent()){
@@ -136,6 +167,14 @@ public class UserService {
         return new JwtResponse(accessToken, refreshToken);
     }
 
+    /**
+     * Обновляет JWT токены
+     *
+     * @param request запрос с refresh токеном
+     * @return новые JWT токены
+     * @throws NotRefreshTokenException если токен невалиден
+     * @throws UserNotFoundException если пользователь не найден
+     */
     public JwtResponse refresh(RefreshRequest request){
         String refreshToken = request.refreshToken();
 

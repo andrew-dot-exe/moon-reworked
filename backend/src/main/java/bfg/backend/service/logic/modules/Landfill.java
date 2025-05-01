@@ -86,7 +86,7 @@ public class Landfill extends Module implements Component {
     }
 
     @Override
-    public void getProduction(int idZone, List<Module> modules, List<Long> production) {
+    public void getProduction(List<Module> modules, List<Long> production) {
         long count = 0;
 
         for (Module module : modules) {
@@ -96,7 +96,7 @@ public class Landfill extends Module implements Component {
                 for (int i = 0; i < production.size(); i++) {
                     t.add(0L);
                 }
-                c.getConsumption(idZone, modules, t);
+                c.getConsumption(modules, t);
                 count += t.get(TypeResources.MATERIAL.ordinal());
             }
         }
@@ -107,7 +107,7 @@ public class Landfill extends Module implements Component {
     }
 
     @Override
-    public void getConsumption(int idZone, List<Module> modules, List<Long> consumption) {
+    public void getConsumption(List<Module> modules, List<Long> consumption) {
         consumption.set(TypeResources.WT.ordinal(),consumption.get(TypeResources.WT.ordinal()) +  mass * 2000);
     }
 

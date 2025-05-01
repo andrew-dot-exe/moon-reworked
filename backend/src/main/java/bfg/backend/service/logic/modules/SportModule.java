@@ -94,12 +94,12 @@ public class SportModule extends Module implements Component {
     }
 
     @Override
-    public void getProduction(int idZone, List<Module> modules, List<Long> production) {
+    public void getProduction(List<Module> modules, List<Long> production) {
         production.set(TypeResources.WT.ordinal(), production.get(TypeResources.WT.ordinal()) + 40L * countPeople);
     }
 
     @Override
-    public void getConsumption(int idZone, List<Module> modules, List<Long> consumption) {
+    public void getConsumption(List<Module> modules, List<Long> consumption) {
         consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 7000L);
     }
 
