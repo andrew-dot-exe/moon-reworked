@@ -1,4 +1,4 @@
-package bfg.backend.token;
+package bfg.backend;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import bfg.backend.token.JwtTokenFilter;
 
 /**
  * Конфигурация безопасности приложения.
@@ -24,7 +26,8 @@ public class SecurityConfig {
             "/user/create",
             "/error",
             "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/area/**" // Возможно, стоит удалить, но смысла не вижу
     };
 
     private final JwtTokenFilter jwtTokenFilter;
