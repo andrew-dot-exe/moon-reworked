@@ -12,6 +12,7 @@ import bfg.backend.service.logic.TypeResources;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,10 @@ import java.util.Optional;
 
 import static bfg.backend.service.logic.Constants.*;
 
+/**
+ * Сервис для обработки игровых дней и связанных с ними процессов.
+ * Отвечает за переход на следующий день, расчет ресурсов и проверку выживания колонии.
+ */
 @Service
 public class DayService {
 
@@ -30,6 +35,15 @@ public class DayService {
         this.resourceRepository = resourceRepository;
     }
 
+    /**
+     * Переводит колонию на следующий игровой день.
+     * Выполняет расчеты ресурсов, проверяет условия выживания.
+     *
+     * @return DTO с результатами перехода на новый день
+     * @throws UserNotFoundException если пользователь не найден
+     * @throws ColonizationIsCompletedException если колонизация уже завершена
+     */
+    @Transactional
     public ChangeDay addDay(){
         // Получаем аутентификацию из контекста
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

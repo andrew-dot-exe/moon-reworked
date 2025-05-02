@@ -67,12 +67,12 @@ public class Cosmodrome extends Module implements Component {
     }
 
     @Override
-    public void getProduction(int idZone, List<Module> modules, List<Long> production) {
+    public void getProduction(List<Module> modules, List<Long> production) {
 
     }
 
     @Override
-    public void getConsumption(int idZone, List<Module> modules, List<Long> consumption) {
+    public void getConsumption(List<Module> modules, List<Long> consumption) {
 
     }
 

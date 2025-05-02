@@ -1,8 +1,13 @@
 package bfg.backend.repository.resource;
 
+import bfg.backend.repository.link.Link;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 
+/**
+ * Сущность, представляющая ресурсы.
+ * Использует составной первичный ключ {@link PrimaryKey}.
+ */
 @Entity
 public class Resource implements Comparable<Resource>{
 
@@ -11,9 +16,19 @@ public class Resource implements Comparable<Resource>{
     private Long count;
     private Long production;
     private Long consumption;
+    /**
+     * Суммарное производство ресурса за все время
+     */
     private Long sum_production;
+    /**
+     * Суммарное потребление ресурса за все время
+     */
     private Long sum_consumption;
 
+    /**
+     * Статический класс для составного первичного ключа ресурса.
+     * Содержит тип ресурса и идентификатор пользователя.
+     */
     public static class PrimaryKey implements Comparable<PrimaryKey>{
         private Integer resource_type;
         private Long id_user;

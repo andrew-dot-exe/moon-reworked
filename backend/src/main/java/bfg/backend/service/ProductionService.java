@@ -15,9 +15,21 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Сервис для пересчета производства и потребления ресурсов колонии.
+ * Вычисляет суммарные показатели производства и потребления для всех модулей и связей.
+ */
 @Service
 class ProductionService {
 
+    /**
+     * Пересчитывает производство и потребление ресурсов для указанного пользователя
+     *
+     * @param idUser идентификатор пользователя
+     * @param moduleRepository репозиторий модулей
+     * @param linkRepository репозиторий связей
+     * @param resourceRepository репозиторий ресурсов
+     */
     public void recountingProduction(Long idUser, ModuleRepository moduleRepository,
                                      LinkRepository linkRepository, ResourceRepository resourceRepository){
         List<Module> modules = moduleRepository.findByIdUser(idUser);
@@ -34,8 +46,8 @@ class ProductionService {
 
         for(Module mod : modules){
             Component component = TypeModule.values()[mod.getModule_type()].createModule(mod);
-            component.getProduction(-1, modules, production);
-            component.getConsumption(-1, modules, consumption);
+            component.getProduction(modules, production);
+            component.getConsumption(modules, consumption);
         }
 
         long consWt = 0L;

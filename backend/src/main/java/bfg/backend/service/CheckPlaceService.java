@@ -18,6 +18,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Сервис для проверки возможности размещения модулей в области.
+ * Оценивает рельеф и рациональность размещения нового модуля.
+ */
 @Service
 public class CheckPlaceService {
 
@@ -33,6 +37,14 @@ public class CheckPlaceService {
         this.resourceRepository = resourceRepository;
     }
 
+    /**
+     * Проверяет возможность размещения модуля в указанной позиции
+     *
+     * @param modulePlace DTO с параметрами размещаемого модуля
+     * @return результат проверки с показателями рельефа и рациональности
+     * @throws UserNotFoundException если пользователь не найден
+     * @throws ColonizationIsCompletedException если колонизация завершена
+     */
     public CheckedPlace check(ModulePlace modulePlace){
         // Получаем аутентификацию из контекста
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

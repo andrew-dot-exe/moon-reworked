@@ -1,5 +1,9 @@
 package bfg.backend.dto.responce.allUserInfo;
 
+/**
+ * Представляет собой модуль.
+ * Содержит информацию о id модуля, зоны, тип модуля и координатах X, Y для ответа.
+ */
 public class Module {
     private Long id;
     private Integer idZone;

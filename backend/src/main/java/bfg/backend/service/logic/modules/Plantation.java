@@ -78,13 +78,13 @@ public class Plantation extends Module implements Component {
     }
 
     @Override
-    public void getProduction(int idZone, List<Module> modules, List<Long> production) {
+    public void getProduction(List<Module> modules, List<Long> production) {
         production.set(TypeResources.FOOD.ordinal(), production.get(TypeResources.FOOD.ordinal()) + 1640);
         production.set(TypeResources.O2.ordinal(), production.get(TypeResources.O2.ordinal()) + 3650);
     }
 
     @Override
-    public void getConsumption(int idZone, List<Module> modules, List<Long> consumption) {
+    public void getConsumption(List<Module> modules, List<Long> consumption) {
         consumption.set(TypeResources.CO2.ordinal(), consumption.get(TypeResources.CO2.ordinal()) + 5000);
         consumption.set(TypeResources.H2O.ordinal(), consumption.get(TypeResources.H2O.ordinal()) + 25350);
         consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 175000L);

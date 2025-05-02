@@ -8,6 +8,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Сущность пользователя системы, реализующая интерфейс UserDetails для интеграции с Spring Security.
+ * Представляет аккаунт пользователя с учетными данными и показателями его колонии.
+ */
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {

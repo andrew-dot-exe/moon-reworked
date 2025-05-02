@@ -3,6 +3,14 @@ package bfg.backend.service.logic;
 import bfg.backend.repository.module.Module;
 import bfg.backend.service.logic.modules.*;
 
+/**
+ * Перечисление всех типов модулей.
+ * Определяет свойства и поведение каждого типа модуля, включая:
+ * - Необходимый персонал
+ * - Стоимость строительства
+ * - Является ли жилым
+ * - Конструктор соответствующего компонента
+ */
 public enum TypeModule {
     LIVE_MODULE_X(0, 9500, true, LiveModuleX::new),
     LIVE_MODULE_Y(0, 9500, true, LiveModuleY::new),

@@ -21,6 +21,10 @@ import java.util.Optional;
 import static bfg.backend.service.logic.Constants.DAYS_DELIVERY;
 import static bfg.backend.service.logic.Constants.MASS;
 
+/**
+ * Сервис для расчета показателей успешности колонии.
+ * Вычисляет комплексную оценку состояния колонии на основе различных факторов.
+ */
 @Service
 public class SuccessfulService {
 
@@ -34,6 +38,12 @@ public class SuccessfulService {
         this.resourceRepository = resourceRepository;
     }
 
+    /**
+     * Рассчитывает комплексные показатели успешности колонии
+     *
+     * @return объект Successful с показателями успешности
+     * @throws UserNotFoundException если пользователь не найден
+     */
     public Successful getSuccessful(){
         // Получаем аутентификацию из контекста
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

@@ -8,7 +8,6 @@ import bfg.backend.service.logic.TypeModule;
 import bfg.backend.service.logic.TypeResources;
 import bfg.backend.service.logic.zones.Zones;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -93,10 +92,10 @@ public class AdministrativeModule extends Module implements Component {
     }
 
     @Override
-    public void getProduction(int idZone, List<Module> modules, List<Long> production) {}
+    public void getProduction(List<Module> modules, List<Long> production) {}
 
     @Override
-    public void getConsumption(int idZone, List<Module> modules, List<Long> consumption) {
+    public void getConsumption(List<Module> modules, List<Long> consumption) {
         consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 7800L);
     }
 

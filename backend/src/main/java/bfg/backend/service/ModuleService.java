@@ -21,11 +21,16 @@ import bfg.backend.service.logic.TypeResources;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Сервис для управления модулями колонии.
+ * Обеспечивает создание модулей и анализ их оптимальности.
+ */
 @Service
 public class ModuleService {
 
@@ -45,30 +50,18 @@ public class ModuleService {
         this.productionService = productionService;
         this.checkPlaceService = checkPlaceService;
     }
-/*
-    public void delete(Long idUser, Long id) {
-        Optional<User> optionalUser = userRepository.findById(idUser);
-        if(optionalUser.isEmpty()){
-            throw new RuntimeException("Такого пользователя нет");
-        }
-        User user = optionalUser.get();
-        if(!user.getLive()){
-            throw new RuntimeException("Данный пользоваель завершил колнизацию");
-        }
-        Optional<Module> optionalModule = moduleRepository.findById(id);
-        if(optionalModule.isEmpty()){
-            throw new RuntimeException("Такого модуля нет");
-        }
-        Module module = optionalModule.get();
-        if(module.getId_user().equals(idUser)){
-            moduleRepository.delete(module);
-            productionService.recountingProduction(idUser, moduleRepository, linkRepository, resourceRepository);
-        }
-        else {
-            throw new RuntimeException("Такого модуля нет");
-        }
-    }*/
 
+    /**
+     * Создает новый модуль в указанной зоне
+     *
+     * @param module данные нового модуля
+     * @return DTO с информацией о созданном модуле
+     * @throws UserNotFoundException если пользователь не найден
+     * @throws CannotBePutException если нельзя разместить модуль в указанном месте
+     * @throws ColonizationIsCompletedException если колонизация завершена
+     * @throws NotResourceException если недостаточно ресурсов
+     */
+    @Transactional
     public CreatedModule create(Module module) {
         // Получаем аутентификацию из контекста
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -91,6 +84,7 @@ public class ModuleService {
         module.setId_user(user.getId());
         Module resm = moduleRepository.save(module);
 
+        // TODO возврат нового производства/потребления
         productionService.recountingProduction(resm.getId_user(), moduleRepository, linkRepository, resourceRepository);
 
         Optional<Resource> optionalResource = resourceRepository.findById(new Resource.PrimaryKey(TypeResources.MATERIAL.ordinal(), resm.getId_user()));
@@ -108,6 +102,12 @@ public class ModuleService {
         return new CreatedModule(resm.getId(), cost);
     }
 
+    /**
+     * Получает информацию об оптимальности размещения всех модулей
+     *
+     * @return список показателей оптимальности для каждого модуля
+     * @throws UserNotFoundException если пользователь не найден
+     */
     public List<Optimality> getOptimality(){
         // Получаем аутентификацию из контекста
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

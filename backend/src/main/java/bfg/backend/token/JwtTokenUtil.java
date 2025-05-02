@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Утилита для работы с JWT токенами.
+ * Обеспечивает генерацию, валидацию и извлечение данных из токенов.
+ */
 @Component
 public class JwtTokenUtil {
 
@@ -39,6 +43,9 @@ public class JwtTokenUtil {
         return createToken(claims, userDetails.getUsername(), refreshExpiration);
     }
 
+    /**
+     * Создает JWT токен с указанными параметрами
+     */
     private String createToken(Map<String, Object> claims, String subject, long tExpiration) {
 
         return Jwts.builder()
@@ -56,6 +63,13 @@ public class JwtTokenUtil {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
+    /**
+     * Извлекает почту пользователя из токена
+     *
+     * @param token JWT токен
+     * @return имя пользователя
+     * @throws JwtException если токен невалиден
+     */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }

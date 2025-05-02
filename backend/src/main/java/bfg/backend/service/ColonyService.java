@@ -23,6 +23,10 @@ import java.util.Optional;
 
 import static bfg.backend.service.logic.Constants.DAYS_DELIVERY;
 
+/**
+ * Сервис для управления колонией пользователя.
+ * Обеспечивает создание новой колонии и удаление существующей.
+ */
 @Service
 public class ColonyService {
 
@@ -38,6 +42,11 @@ public class ColonyService {
         this.resourceRepository = resourceRepository;
     }
 
+    /**
+     * Удаляет колонию пользователя и все связанные данные.
+     *
+     * @throws UserNotFoundException если пользователь не найден
+     */
     public void delete(){
         // Получаем аутентификацию из контекста
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -60,6 +69,12 @@ public class ColonyService {
         userRepository.save(user);
     }
 
+    /**
+     * Создает новую колонию для пользователя.
+     *
+     * @throws UserNotFoundException если пользователь не найден
+     * @throws ColonizationIsNotCompletedException если у пользователя уже есть активная колония
+     */
     public void create(){
         // Получаем аутентификацию из контекста
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

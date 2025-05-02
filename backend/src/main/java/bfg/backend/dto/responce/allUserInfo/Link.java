@@ -1,5 +1,9 @@
 package bfg.backend.dto.responce.allUserInfo;
 
+/**
+ * Представляет собой связь между двумя зонами в колонии.
+ * Содержит информацию о типе связи и соединённых зонах для ответа.
+ */
 public class Link {
     private Integer type;
     private Integer idZone1;

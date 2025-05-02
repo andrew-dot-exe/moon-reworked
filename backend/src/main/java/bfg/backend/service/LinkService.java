@@ -16,9 +16,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
+/**
+ * Сервис для управления связями между зонами колонии.
+ * Обрабатывает создание связей и связанные с этим расходы ресурсов.
+ */
 @Service
 public class LinkService {
 
@@ -31,35 +34,18 @@ public class LinkService {
         this.userRepository = userRepository;
         this.resourceRepository = resourceRepository;
     }
-/*
-    public void delete(Link link) {
-        Optional<User> optionalUser = userRepository.findById(link.getPrimaryKey().getId_user());
-        if(optionalUser.isEmpty()){
-            throw new UserNotFoundException();
-        }
-        User user = optionalUser.get();
-        if(!user.getLive()){
-            throw new ColonizationIsCompletedException();
-        }
-        //linkRepository.deleteById(new Link.PrimaryKey(type, idUser, idZone1, idZone2));
-        if(linkRepository.findById(link.getPrimaryKey()).isEmpty()){
-            throw new RuntimeException("Такой связи нет");
-        }
-        if(link.getPrimaryKey().getType() == 1){
-            Optional<Resource> optionalResource = resourceRepository.findById(new Resource.PrimaryKey(TypeResources.WT.ordinal(), link.getPrimaryKey().getId_user()));
-            if(optionalResource.isEmpty()){
-                throw new RuntimeException("Такого ресурса нет (как так?)");
-            }
-            Resource wt = optionalResource.get();
-            int way = Zones.getZones().get(link.getPrimaryKey().getId_zone1()).getWays()[link.getPrimaryKey().getId_zone2()];
-            wt.setConsumption(wt.getConsumption() - way * 12L / 10000);
-            resourceRepository.save(wt);
-        }
-        linkRepository.delete(link);
 
-    }*/
-
-    public Integer create(Link link) {
+    /**
+     * Создает новую связь между зонами и обрабатывает связанные расходы ресурсов
+     *
+     * @param link создаваемая связь
+     * @return стоимость создания связи (в материальных ресурсах)
+     * @throws UserNotFoundException если пользователь не найден
+     * @throws ColonizationIsCompletedException если колония завершена
+     * @throws LinkHasBeenAlreadyException если связь уже существует
+     * @throws NotResourceException если не найден требуемый ресурс
+     */
+    public Long create(Link link) {
         // Получаем аутентификацию из контекста
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName(); // Логин пользователя
@@ -77,7 +63,7 @@ public class LinkService {
             throw new LinkHasBeenAlreadyException();
         }
         linkRepository.save(link);
-        int way = Zones.getZones().get(link.getPrimaryKey().getId_zone1()).getWays()[link.getPrimaryKey().getId_zone2()];
+        long way = Zones.getZones().get(link.getPrimaryKey().getId_zone1()).getWays()[link.getPrimaryKey().getId_zone2()];
         if(link.getPrimaryKey().getType() == 0) {
             Optional<Resource> optionalResource = resourceRepository.findById(new Resource.PrimaryKey(TypeResources.MATERIAL.ordinal(), link.getPrimaryKey().getId_user()));
             if(optionalResource.isEmpty()){
@@ -90,7 +76,7 @@ public class LinkService {
                 userRepository.save(user);
             }
             resourceRepository.save(mat);
-            return way;
+            return way * 1000;
         }
         Optional<Resource> optionalResource = resourceRepository.findById(new Resource.PrimaryKey(TypeResources.WT.ordinal(), link.getPrimaryKey().getId_user()));
         if(optionalResource.isEmpty()){
@@ -99,6 +85,6 @@ public class LinkService {
         Resource wt = optionalResource.get();
         wt.setConsumption(wt.getConsumption() + way * 12L / 10000);
         resourceRepository.save(wt);
-        return 0;
+        return 0L;
     }
 }
