@@ -1,26 +1,40 @@
 package bfg.backend.service;
 
+import bfg.backend.dto.responce.exception.UserNotFoundException;
 import bfg.backend.repository.link.Link;
 import bfg.backend.repository.link.LinkRepository;
 import bfg.backend.repository.module.Module;
 import bfg.backend.repository.module.ModuleRepository;
 import bfg.backend.repository.resource.Resource;
 import bfg.backend.repository.resource.ResourceRepository;
+import bfg.backend.repository.user.User;
+import bfg.backend.repository.user.UserRepository;
 import bfg.backend.service.logic.Component;
 import bfg.backend.service.logic.TypeModule;
 import bfg.backend.service.logic.TypeResources;
 import bfg.backend.service.logic.zones.Zones;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Сервис для пересчета производства и потребления ресурсов колонии.
  * Вычисляет суммарные показатели производства и потребления для всех модулей и связей.
  */
 @Service
-class ProductionService {
+public class ProductionService {
+
+    private final UserRepository userRepository;
+    private final ResourceRepository resourceRepository;
+
+    ProductionService(UserRepository userRepository, ResourceRepository resourceRepository) {
+        this.userRepository = userRepository;
+        this.resourceRepository = resourceRepository;
+    }
 
     /**
      * Пересчитывает производство и потребление ресурсов для указанного пользователя
@@ -28,10 +42,9 @@ class ProductionService {
      * @param idUser идентификатор пользователя
      * @param moduleRepository репозиторий модулей
      * @param linkRepository репозиторий связей
-     * @param resourceRepository репозиторий ресурсов
      */
     public void recountingProduction(Long idUser, ModuleRepository moduleRepository,
-                                     LinkRepository linkRepository, ResourceRepository resourceRepository){
+                                     LinkRepository linkRepository){
         List<Module> modules = moduleRepository.findByIdUser(idUser);
         List<Link> links = linkRepository.findByIdUser(idUser);
         List<Resource> resources = resourceRepository.findByIdUser(idUser);
@@ -64,5 +77,25 @@ class ProductionService {
         }
 
         resourceRepository.saveAll(resources);
+    }
+
+    /**
+     * Находит и возвращает ресурсы пользователя
+     * @return Список ресурсов с их количеством, производством и типом
+     */
+    public List<bfg.backend.dto.responce.allUserInfo.Resource> getResources(){
+        // Получаем аутентификацию из контекста
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName(); // Логин пользователя
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if(optionalUser.isEmpty()){
+            throw new UserNotFoundException();
+        }
+        User user = optionalUser.get();
+
+        List<Resource> resources = resourceRepository.findByIdUser(user.getId());
+        List<bfg.backend.dto.responce.allUserInfo.Resource> res = new ArrayList<>(resources.size());
+        resources.forEach(e -> {res.add(new bfg.backend.dto.responce.allUserInfo.Resource(e));});
+        return res;
     }
 }

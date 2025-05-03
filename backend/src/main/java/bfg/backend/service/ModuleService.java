@@ -55,14 +55,14 @@ public class ModuleService {
      * Создает новый модуль в указанной зоне
      *
      * @param module данные нового модуля
-     * @return DTO с информацией о созданном модуле
+     * @return Индентификатор нового модуля
      * @throws UserNotFoundException если пользователь не найден
      * @throws CannotBePutException если нельзя разместить модуль в указанном месте
      * @throws ColonizationIsCompletedException если колонизация завершена
      * @throws NotResourceException если недостаточно ресурсов
      */
     @Transactional
-    public CreatedModule create(Module module) {
+    public Long create(Module module) {
         // Получаем аутентификацию из контекста
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName(); // Логин пользователя
@@ -84,8 +84,7 @@ public class ModuleService {
         module.setId_user(user.getId());
         Module resm = moduleRepository.save(module);
 
-        // TODO возврат нового производства/потребления
-        productionService.recountingProduction(resm.getId_user(), moduleRepository, linkRepository, resourceRepository);
+        productionService.recountingProduction(resm.getId_user(), moduleRepository, linkRepository);
 
         Optional<Resource> optionalResource = resourceRepository.findById(new Resource.PrimaryKey(TypeResources.MATERIAL.ordinal(), resm.getId_user()));
         if(optionalResource.isEmpty()){
@@ -99,7 +98,7 @@ public class ModuleService {
             userRepository.save(user);
         }
 
-        return new CreatedModule(resm.getId(), cost);
+        return resm.getId();
     }
 
     /**

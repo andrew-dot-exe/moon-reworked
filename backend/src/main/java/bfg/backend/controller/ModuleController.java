@@ -37,12 +37,11 @@ public class ModuleController {
      * Создает новый модуль.
      *
      * @param module DTO с данными для создания модуля
-     * @return DTO с информацией об идентификаторе созданного модуля и количество материалов на его строительство
+     * @return Идентификатор созданного модуля
      * @see Module
-     * @see CreatedModule
      */
     @PostMapping
-    public CreatedModule create(@RequestBody Module module) {
+    public Long create(@RequestBody Module module) {
         return moduleService.create(module);
     }
 }

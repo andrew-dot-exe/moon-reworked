@@ -26,19 +26,14 @@ public class MappingToResponse {
      * @param user сущность пользователя
      * @param modules список модулей пользователя
      * @param links список связей между областями
-     * @param resources список ресурсов пользователя
      * @return DTO со всей информацией о пользователе
      */
-    public static AllUserInfo mapToAllUserInfo(User user, List<Module> modules, List<Link> links, List<Resource> resources){
+    public static AllUserInfo mapToAllUserInfo(User user, List<Module> modules, List<Link> links){
         List<bfg.backend.dto.responce.allUserInfo.Module> resMod = new LinkedList<>();
         List<bfg.backend.dto.responce.allUserInfo.Link> resLink = new LinkedList<>();
-        List<bfg.backend.dto.responce.allUserInfo.Resource> resResource = new LinkedList<>();
 
         for(Module module : modules){
             resMod.add(new bfg.backend.dto.responce.allUserInfo.Module(module));
-        }
-        for (Resource resource : resources){
-            resResource.add(new bfg.backend.dto.responce.allUserInfo.Resource(resource));
         }
         for (Link link : links){
             resLink.add(new bfg.backend.dto.responce.allUserInfo.Link(link));
@@ -48,7 +43,6 @@ public class MappingToResponse {
                 user.getCurrent_day(),
                 user.getDays_before_delivery(),
                 user.getLive(),
-                resResource,
                 resLink,
                 resMod);
     }

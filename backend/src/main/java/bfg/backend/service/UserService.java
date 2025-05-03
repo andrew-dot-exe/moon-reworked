@@ -70,9 +70,8 @@ public class UserService {
 
         List<Module> modules = moduleRepository.findByIdUser(user.getId());
         List<Link> links = linkRepository.findByIdUser(user.getId());
-        List<Resource> resources = resourceRepository.findByIdUser(user.getId());
 
-        return MappingToResponse.mapToAllUserInfo(user, modules, links, resources);
+        return MappingToResponse.mapToAllUserInfo(user, modules, links);
     }
 
     /**

@@ -21,7 +21,7 @@ public class Resource {
     public Resource(bfg.backend.repository.resource.Resource resource){
         type = resource.getPrimaryKey().getResource_type();
         count = resource.getCount();
-        production = resource.getProduction();
+        production = resource.getProduction() - resource.getConsumption();
     }
 
     public Integer getType() {
