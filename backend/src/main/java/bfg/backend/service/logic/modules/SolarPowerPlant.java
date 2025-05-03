@@ -9,6 +9,7 @@ import bfg.backend.service.logic.TypeResources;
 import bfg.backend.service.logic.zones.Zones;
 
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -61,8 +62,7 @@ public class SolarPowerPlant extends Module implements Component {
                 if(c.cross(getX(), getY(), w, h)){
                     return null;
                 }
-                shadowCalculator.addShadow(solarObject,
-                        new SolarObject(module.getX() * SIZE_CELL, module.getY() * SIZE_CELL, c.getRadius()));
+                shadowCalculator.addShadowFromModule(solarObject, module, c.getRadius());
             }
         }
         return (int) shadowCalculator.calculateTotalEfficiency(Zones.getZones().get(getId_zone()).getIllumination());
@@ -90,38 +90,69 @@ public class SolarPowerPlant extends Module implements Component {
     }
 
     /**
-     * @param x      координата X
-     * @param y      координата Y
-     * @param radius радиус объекта
      */
-    record SolarObject(double x, double y, double radius) {
+    static class SolarObject {
+        private double x;
+        private double y;
+        private double radius;
+
+        public SolarObject(double x, double y, double radius){
+            this.x = x;
+            this.y = y;
+            this.radius = radius;
+        }
+
+        public double getX() {
+            return x;
+        }
+
+        public void setX(double x) {
+            this.x = x;
+        }
+
+        public double getY() {
+            return y;
+        }
+
+        public void setY(double y) {
+            this.y = y;
+        }
+
+        public double getRadius() {
+            return radius;
+        }
+
+        public void setRadius(double radius) {
+            this.radius = radius;
+        }
 
         /**
-             * Вычисляет расстояние до другого объекта
-             */
-            public double distanceTo(SolarObject other) {
-                return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
-            }
-
-            /**
-             * Вычисляет угол (в градусах) от текущего объекта к другому
-             * Возвращает значение от 0 до 360
-             */
-            public double angleTo(SolarObject other) {
-                double dx = other.x - this.x;
-                double dy = other.y - this.y;
-                double angle = Math.toDegrees(Math.atan2(dy, dx));
-                return (angle + 360) % 360; // Нормализуем угол к [0, 360)
-            }
+         * Вычисляет расстояние до другого объекта
+         */
+        public double distanceTo(SolarObject other) {
+            double dx = this.x - other.x;
+            double dy = this.y - other.y;
+            return Math.sqrt(dx * dx + dy * dy);
         }
+
+        /**
+         * Вычисляет угол (в градусах) от текущего объекта к другому
+         * Возвращает значение от 0 до 360
+         */
+        public double angleTo(SolarObject other) {
+            double dx = other.x - this.x;
+            double dy = other.y - this.y;
+            return (int) (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+        }
+    }
 
     static class ShadowCalculator {
         private static final int DEGREES = 360;
-        private final boolean[] illumination; // Массив освещенности
+        private final BitSet illumination;
 
         public ShadowCalculator() {
-            illumination = new boolean[DEGREES];
-            Arrays.fill(illumination, true); // Изначально все углы освещены
+            illumination = new BitSet(DEGREES);
+            illumination.set(0, DEGREES); // Изначально все углы освещены
         }
 
         /**
@@ -132,7 +163,7 @@ public class SolarPowerPlant extends Module implements Component {
         public void addShadow(SolarObject station, SolarObject obstacle) {
             double distance = station.distanceTo(obstacle);
             double angle = station.angleTo(obstacle);
-            double shadowAngle = 2 * Math.toDegrees(Math.asin(obstacle.radius() / distance));
+            double shadowAngle = 2 * (Math.asin(obstacle.getRadius() / distance) * 180 / Math.PI + 360) % 360;
 
             markShadow(angle, shadowAngle);
         }
@@ -143,21 +174,15 @@ public class SolarPowerPlant extends Module implements Component {
          * @param shadowWidth - ширина тени в градусах
          */
         private void markShadow(double centerAngle, double shadowWidth) {
-            int start = (int)Math.round(centerAngle - shadowWidth/2 + DEGREES) % DEGREES;
-            int end = (int)Math.round(centerAngle + shadowWidth/2 + DEGREES) % DEGREES;
+            double halfShadow = shadowWidth / 2 + DEGREES;
+            int start = (int) Math.floor(centerAngle - halfShadow) % DEGREES;
+            int end = (int) Math.ceil(centerAngle + halfShadow) % DEGREES;
 
-            if (start < end) {
-                for (int i = start; i <= end; i++) {
-                    illumination[i % DEGREES] = false;
-                }
+            if (start <= end) {
+                illumination.clear(start, end + 1);
             } else {
-                // Обрабатываем переход через 360°
-                for (int i = start; i < DEGREES; i++) {
-                    illumination[i] = false;
-                }
-                for (int i = 0; i <= end; i++) {
-                    illumination[i] = false;
-                }
+                illumination.clear(start, DEGREES);
+                illumination.clear(0, end + 1);
             }
         }
 
@@ -166,11 +191,7 @@ public class SolarPowerPlant extends Module implements Component {
          * @return эффективность в процентах
          */
         public double calculateEfficiency() {
-            int illuminatedCount = 0;
-            for (boolean lit : illumination) {
-                if (lit) illuminatedCount++;
-            }
-            return (illuminatedCount * 100.0) / DEGREES;
+            return (illumination.cardinality() * 100.0) / DEGREES;
         }
 
         /**
@@ -179,6 +200,21 @@ public class SolarPowerPlant extends Module implements Component {
          */
         public double calculateTotalEfficiency(double maxEfficiency) {
             return maxEfficiency * calculateEfficiency() / 100.0;
+        }
+
+        /**
+         * Переиспользуемый объект для уменьшения нагрузки на GC
+         */
+        private static final SolarObject reusableObstacle = new SolarObject(0, 0, 0);
+
+        /**
+         * Оптимизированный метод добавления тени для модуля
+         */
+        public void addShadowFromModule(SolarObject station, Module module, double r) {
+            reusableObstacle.x = module.getX() * SIZE_CELL;
+            reusableObstacle.y = module.getY() * SIZE_CELL;
+            reusableObstacle.radius = r;
+            addShadow(station, reusableObstacle);
         }
     }
 }
