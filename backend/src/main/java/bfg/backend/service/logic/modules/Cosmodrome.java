@@ -45,12 +45,21 @@ public class Cosmodrome extends Module implements Component {
 
     @Override
     public Integer getRationality(List<Module> modules, List<Link> links, List<Resource> resources) {
+        if(hasConflict(modules)) return null;
+        return 20 + 20 * getCountWarehouse(modules);
+    }
+
+    private boolean hasConflict(List<Module> modules){
         for (Module value : modules) {
             if (Objects.equals(value.getModule_type(), getModule_type())) {
                 if(Objects.equals(value.getId(), getId())) continue;
-                return null;
+                return true;
             }
         }
+        return false;
+    }
+
+    public int getCountWarehouse(List<Module> modules){
         int count1 = 0;
         int count2 = 0;
         int count3 = 0;
@@ -63,7 +72,7 @@ public class Cosmodrome extends Module implements Component {
                 case WAREHOUSE_MATERIAL -> count4 = 1;
             }
         }
-        return 20 + 20 * (count1 + count2 + count3 + count4);
+        return count1 + count2 + count3 + count4;
     }
 
     @Override

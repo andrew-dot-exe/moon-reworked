@@ -16,6 +16,7 @@ import bfg.backend.service.logic.TypeResources;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,15 +48,9 @@ public class ColonyService {
      *
      * @throws UserNotFoundException если пользователь не найден
      */
+    @Transactional
     public void delete(){
-        // Получаем аутентификацию из контекста
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName(); // Логин пользователя
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if(optionalUser.isEmpty()){
-            throw new UserNotFoundException();
-        }
-        User user = optionalUser.get();
+        User user = UserService.getUser(userRepository);
 
         List<Link> links = linkRepository.findByIdUser(user.getId());
         List<Module> modules = moduleRepository.findByIdUser(user.getId());
@@ -75,28 +70,44 @@ public class ColonyService {
      * @throws UserNotFoundException если пользователь не найден
      * @throws ColonizationIsNotCompletedException если у пользователя уже есть активная колония
      */
+    @Transactional
     public void create(){
-        // Получаем аутентификацию из контекста
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName(); // Логин пользователя
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if(optionalUser.isEmpty()){
-            throw new UserNotFoundException();
-        }
-        User user = optionalUser.get();
-        if(user.getLive()){
-            throw new ColonizationIsNotCompletedException();
-        }
+        User user = validateUserAndColony();
 
         user.setLive(true);
         user.setCurrent_day(0);
         user.setDays_before_delivery(DAYS_DELIVERY);
 
+        deleteOld(user);
+
+        updateResources(user.getId());
+        userRepository.save(user);
+    }
+
+    private User validateUserAndColony(){
+        User user = UserService.getUser(userRepository);
+        if(user.getLive()){
+            throw new ColonizationIsNotCompletedException();
+        }
+        return user;
+    }
+
+    private void deleteOld(User user){
+        List<Link> links = linkRepository.findByIdUser(user.getId());
+        if(!links.isEmpty()){
+            linkRepository.deleteAll(links);
+        }
+        List<Module> modules = moduleRepository.findByIdUser(user.getId());
+        if(!modules.isEmpty()){
+            moduleRepository.deleteAll(modules);
+        }
+    }
+
+    private void updateResources(Long idUser){
         List<Resource> resources = new ArrayList<>();
         for (int i = 0; i < TypeResources.values().length; i++) {
-            resources.add(new Resource(new Resource.PrimaryKey(i, user.getId()), TypeResources.values()[i].getStartCount(), 0L, 0L, 0L, 0L));
+            resources.add(new Resource(new Resource.PrimaryKey(i, idUser), TypeResources.values()[i].getStartCount(), 0L, 0L, 0L, 0L));
         }
         resourceRepository.saveAll(resources);
-
     }
 }

@@ -8,6 +8,7 @@ import bfg.backend.repository.resource.Resource;
 import bfg.backend.repository.resource.ResourceRepository;
 import bfg.backend.repository.user.User;
 import bfg.backend.repository.user.UserRepository;
+import bfg.backend.service.logic.Constants;
 import bfg.backend.service.logic.TypeModule;
 import bfg.backend.service.logic.TypeResources;
 import bfg.backend.service.logic.zones.Zones;
@@ -44,36 +45,134 @@ public class SuccessfulService {
      * @return объект Successful с показателями успешности
      * @throws UserNotFoundException если пользователь не найден
      */
-    public Successful getSuccessful(){
-        // Получаем аутентификацию из контекста
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName(); // Логин пользователя
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if(optionalUser.isEmpty()){
-            throw new UserNotFoundException();
-        }
-        User user = optionalUser.get();
+    public Successful getSuccessful() {
+        User user = UserService.getUser(userRepository);
 
+        List<Module> modules = getSortedUserModules(user);
+        List<Resource> resources = getSortedUserResources(user);
+
+        int statResources = calculateResourceStability(resources);
+        int countPeople = calculatePopulation(modules);
+
+        ModuleStats stats = countModuleStats(modules, countPeople);
+
+        int mood = calculateMood(stats, countPeople, resources, statResources);
+        int central = calculateCentralization(stats);
+        int search = calculateResearchProgress(stats);
+
+        int successful = calculateOverallSuccess(
+                mood,
+                stats.needCountPeople,
+                countPeople,
+                statResources,
+                central,
+                search
+        );
+
+        return new Successful(
+                successful,
+                mood,
+                countPeople,
+                stats.needCountPeople,
+                statResources,
+                central,
+                search
+        );
+    }
+
+    private List<Module> getSortedUserModules(User user) {
         List<Module> modules = moduleRepository.findByIdUser(user.getId());
         modules.sort(Module::compareTo);
+        return modules;
+    }
+
+    private List<Resource> getSortedUserResources(User user) {
         List<Resource> resources = resourceRepository.findByIdUser(user.getId());
         resources.sort(Resource::compareTo);
+        return resources;
+    }
 
-        int successful = 0;
-        int mood = 0;
-        int countPeople = 0;
-        int needCountPeople = 0;
-        int statResources = 0;
-        int central = 0;
-        int search = 0;
+    private int calculateResourceStability(List<Resource> resources) {
+        long sumDeficit = resources.stream()
+                .mapToLong(r -> Math.max(0, r.getConsumption() - r.getProduction()))
+                .sum();
+        return Math.toIntExact(100 - (sumDeficit * DAYS_DELIVERY) / MASS * 100);
+    }
 
-        long sumDiff = 0L;
-        for(Resource resource : resources){
-            long diff = resource.getProduction() - resource.getConsumption();
-            if(diff < 0) sumDiff -= diff;
+    private int calculatePopulation(List<Module> modules) {
+        return (int) modules.stream()
+                .filter(m -> m.getModule_type() == TypeModule.LIVE_MODULE_Y.ordinal() ||
+                        m.getModule_type() == TypeModule.LIVE_MODULE_X.ordinal())
+                .count() * Constants.COUNT_PEOPLE_IN_LIVE_MODULE;
+    }
+
+    private ModuleStats countModuleStats(List<Module> modules, int availablePeople) {
+        ModuleStats stats = new ModuleStats();
+
+        for (Module module : modules) {
+            TypeModule type = TypeModule.values()[module.getModule_type()];
+            stats.needCountPeople += type.getPeople();
+
+            if (stats.needCountPeople > availablePeople) continue;
+
+            switch (type) {
+                case ADMINISTRATIVE_MODULE:
+                case LIVE_ADMINISTRATIVE_MODULE:
+                    stats.countA++;
+                    break;
+                case RESEARCH_MODULE_MINE:
+                    stats.mSearch = 1;
+                    break;
+                case RESEARCH_MODULE_PLANTATION:
+                    stats.pSearch = 1;
+                    break;
+                case RESEARCH_MODULE_TELESCOPE:
+                    stats.aSearch = 1;
+                    break;
+                case RESEARCH_MODULE_TERRITORY:
+                    stats.lSearch = 1;
+                    break;
+                case MEDICAL_MODULE:
+                    stats.countM++;
+                    break;
+                case SPORT_MODULE:
+                    stats.countS++;
+                    break;
+            }
         }
-        statResources = Math.toIntExact(100 - (sumDiff * DAYS_DELIVERY) / MASS * 100);
 
+        return stats;
+    }
+
+    private int calculateMood(ModuleStats stats, int countPeople,
+                              List<Resource> resources, int statResources) {
+        if (countPeople == 0) return 0;
+
+        double foodRatio = resources.get(TypeResources.FOOD.ordinal()).getProduction() /
+                (resources.get(TypeResources.FOOD.ordinal()).getConsumption() * 0.3);
+
+        return (int) (Math.min((stats.countM + stats.countS) * 3 *
+                Constants.COUNT_PEOPLE_IN_LIVE_MODULE / countPeople * 25, 50) +
+                (statResources + Math.min(foodRatio, 100)) / 4);
+    }
+
+    private int calculateCentralization(ModuleStats stats) {
+        return Math.min(stats.countA / Zones.getLength() * 100, 100);
+    }
+
+    private int calculateResearchProgress(ModuleStats stats) {
+        return Math.min((stats.pSearch + stats.mSearch + stats.lSearch + stats.aSearch) * 25, 100);
+    }
+
+    private int calculateOverallSuccess(int mood, int neededPeople, int availablePeople,
+                                        int statResources, int central, int search) {
+        int populationScore = 100 - Math.max(neededPeople - availablePeople, 0) * 15;
+        return (int) (mood * 0.19 + populationScore * 0.21 + statResources * 0.21 +
+                central * 0.21 + search * 0.18);
+    }
+
+    // Вспомогательный класс для хранения статистики по модулям
+    private static class ModuleStats {
         int countA = 0;
         int pSearch = 0;
         int mSearch = 0;
@@ -81,56 +180,6 @@ public class SuccessfulService {
         int aSearch = 0;
         int countM = 0;
         int countS = 0;
-
-        countPeople = Math.toIntExact(modules.stream().filter(e -> e.getModule_type() == TypeModule.LIVE_MODULE_Y.ordinal() ||
-                e.getModule_type() == TypeModule.LIVE_MODULE_X.ordinal()).count()) * 8;
-
-        for (Module module : modules){
-            switch (TypeModule.values()[module.getModule_type()]){
-                case ADMINISTRATIVE_MODULE:
-                case LIVE_ADMINISTRATIVE_MODULE:
-                    if(needCountPeople >= countPeople) break;
-                    countA++;
-                    break;
-
-                case RESEARCH_MODULE_MINE:
-                    if(needCountPeople >= countPeople) break;
-                    mSearch = 1;
-                    break;
-                case RESEARCH_MODULE_PLANTATION:
-                    if(needCountPeople >= countPeople) break;
-                    pSearch = 1;
-                    break;
-                case RESEARCH_MODULE_TELESCOPE:
-                    if(needCountPeople >= countPeople) break;
-                    aSearch = 1;
-                    break;
-                case RESEARCH_MODULE_TERRITORY:
-                    if(needCountPeople >= countPeople) break;
-                    lSearch = 1;
-                    break;
-
-                case MEDICAL_MODULE:
-                    countM++;
-                    break;
-
-                case SPORT_MODULE:
-                    countS++;
-                    break;
-            }
-            needCountPeople += TypeModule.values()[module.getModule_type()].getPeople();
-        }
-
-        if(countPeople != 0) {
-            mood = (int) (Math.min((countM + countS) * 3 * 8 / countPeople * 25, 50) +
-                    (statResources +
-                            Math.min(resources.get(TypeResources.FOOD.ordinal()).getProduction() /
-                                    (resources.get(TypeResources.FOOD.ordinal()).getConsumption() * 0.3), 100)) / 4);
-        }
-        central = Math.min(countA / Zones.getLength() * 100, 100);
-        search = Math.min((pSearch + mSearch + lSearch + aSearch) * 25, 100);
-        successful = (int) (mood * 0.19 + (100 - Math.max(needCountPeople - countPeople, 0) * 15) * 0.21 + statResources * 0.21 +
-                        central * 0.21 + search * 0.18);
-        return new Successful(successful, mood, countPeople, needCountPeople, statResources, central, search);
+        int needCountPeople = 0;
     }
 }

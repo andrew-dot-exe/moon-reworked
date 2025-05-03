@@ -10,6 +10,7 @@ import bfg.backend.service.logic.zones.Zones;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static bfg.backend.service.logic.Constants.*;
 import static bfg.backend.service.logic.Constants.DANGER_ZONE;
@@ -51,44 +52,32 @@ public class AdministrativeModule extends Module implements Component {
 
     @Override
     public Integer getRationality(List<Module> modules, List<Link> links, List<Resource> resources) {
-        int cos = -1;
-        for (int i = 0; i < modules.size(); i++) {
-            if(Objects.equals(modules.get(i).getId_zone(), getId_zone())) {
-                if (Objects.equals(modules.get(i).getModule_type(), getModule_type()) ||
-                        modules.get(i).getModule_type() == TypeModule.LIVE_ADMINISTRATIVE_MODULE.ordinal()) {
-                    return null;
-                }
-            }
-            if(modules.get(i).getModule_type() == TypeModule.COSMODROME.ordinal()) cos = i;
-        }
-        if(cos == -1) return null;
-
-        for (Module module : modules){
-            if(Objects.equals(module.getId_zone(), getId_zone())){
-                if(Objects.equals(module.getId(), getId())) continue;
-                Component c = TypeModule.values()[module.getModule_type()].createModule(module);
-                if(c.cross(getX(), getY(), w, h)){
-                    return null;
-                }
-                if(module.getModule_type() == TypeModule.COSMODROME.ordinal()){
-                    if(cross(module.getX() - DANGER_ZONE, module.getY() - DANGER_ZONE,
-                            COSMODROME_W + 2 * DANGER_ZONE, COSMODROME_H + 2 * DANGER_ZONE)){
-                        return null;
-                    }
-                }
-            }
+        if (hasConflictingModules(modules)) {
+            return null;
         }
 
-        if(Objects.equals(getId_zone(), modules.get(cos).getId_zone())) return 100;
+        Optional<Integer> cosmodromeIndex = findCosmodromeIndex(modules);
+        if (cosmodromeIndex.isEmpty()) {
+            return null;
+        }
+        int cos = cosmodromeIndex.get();
 
-        UnionFind unionFind = new UnionFind(Zones.getLength());
-        for (Link link: links){
-            if(link.getPrimaryKey().getType() == 1) continue;
-            unionFind.union(link.getPrimaryKey().getId_zone1(), link.getPrimaryKey().getId_zone2());
+        if (hasCollisionsWithOtherModules(modules, getId(), getId_zone(), getX(), getY(), w, h)) {
+            return null;
         }
 
-        if(unionFind.find(cos) == unionFind.find(getId_zone())) return 100;
+        if(hasLink(getId_zone(), modules.get(cos).getId_zone(), links)) return 100;
         return null;
+    }
+
+    /**
+     * Проверяет наличие конфликтующих модулей в той же зоне
+     */
+    private boolean hasConflictingModules(List<Module> modules) {
+        return modules.stream()
+                .filter(m -> Objects.equals(m.getId_zone(), getId_zone()))
+                .anyMatch(m -> Objects.equals(m.getModule_type(), getModule_type()) ||
+                        m.getModule_type() == TypeModule.LIVE_ADMINISTRATIVE_MODULE.ordinal());
     }
 
     @Override

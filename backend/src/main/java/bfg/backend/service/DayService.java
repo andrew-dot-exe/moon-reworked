@@ -7,16 +7,12 @@ import bfg.backend.repository.resource.Resource;
 import bfg.backend.repository.resource.ResourceRepository;
 import bfg.backend.repository.user.User;
 import bfg.backend.repository.user.UserRepository;
-import bfg.backend.service.logic.TypeModule;
 import bfg.backend.service.logic.TypeResources;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static bfg.backend.service.logic.Constants.*;
 
@@ -45,19 +41,13 @@ public class DayService {
      */
     @Transactional
     public ChangeDay addDay(){
-        // Получаем аутентификацию из контекста
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName(); // Логин пользователя
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if(optionalUser.isEmpty()){
-            throw new UserNotFoundException();
-        }
-        User user = optionalUser.get();
+        User user = UserService.getUser(userRepository);
         if(!user.getLive()){
             throw new ColonizationIsCompletedException();
         }
 
         user.setCurrent_day(user.getCurrent_day() + 1);
+
         boolean delivery = user.getDays_before_delivery() == 1;
         if(delivery) user.setDays_before_delivery(DAYS_DELIVERY);
         else user.setDays_before_delivery(user.getDays_before_delivery() - 1);
@@ -65,6 +55,25 @@ public class DayService {
         List<Resource> resources = resourceRepository.findByIdUser(user.getId());
         resources.sort(Resource::compareTo);
 
+        checkOxygen(resources);
+
+        List<Long> diffResources = new ArrayList<>(resources.size());
+        changingResources(resources, delivery, diffResources);
+
+        Boolean live = resources.stream().allMatch(e -> e.getCount() >= 0);
+        resourceRepository.saveAll(resources);
+        user.setLive(live);
+        userRepository.save(user);
+        return new ChangeDay(live, diffResources);
+    }
+
+    /**
+     * Проверят не уходит ли в минус кислород,
+     * и если уходит пересчитывает производство ресурсов
+     * с учетом нехватки кислорода.
+     * @param resources Список ресурсов
+     */
+    private void checkOxygen(List<Resource> resources){
         // Проверка на достаток кислорода
         long d = resources.get(TypeResources.O2.ordinal()).getConsumption() - resources.get(TypeResources.O2.ordinal()).getProduction();
         if(d > 0){
@@ -72,8 +81,15 @@ public class DayService {
             resources.get(TypeResources.H2O.ordinal()).setConsumption((long) (d * H2O_FOR_KG_O2) + resources.get(TypeResources.H2O.ordinal()).getConsumption());
             resources.get(TypeResources.O2.ordinal()).setProduction(d + resources.get(TypeResources.O2.ordinal()).getProduction());
         }
+    }
 
-        List<Long> diffResources = new ArrayList<>(resources.size());
+    /**
+     * Изменяет количество ресурсов в соответсвии с их производством.
+     * @param resources Список ресурсов
+     * @param delivery флаг - день доставки ресурсов с Земли
+     * @param diffResources Список, в который записываются изменения ресурсов
+     */
+    private void changingResources(List<Resource> resources, boolean delivery, List<Long> diffResources){
         Long diff;
         for (Resource resource : resources) {
             diff = resource.getProduction() - resource.getConsumption();
@@ -85,11 +101,5 @@ public class DayService {
             resource.setSum_production(resource.getSum_production() + resource.getProduction());
             resource.setSum_consumption(resource.getSum_consumption() + resource.getConsumption());
         }
-
-        Boolean live = resources.stream().allMatch(e -> e.getCount() >= 0);
-        resourceRepository.saveAll(resources);
-        user.setLive(live);
-        userRepository.save(user);
-        return new ChangeDay(live, diffResources);
     }
 }

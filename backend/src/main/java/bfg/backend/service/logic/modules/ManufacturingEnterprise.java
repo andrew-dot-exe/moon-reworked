@@ -50,37 +50,27 @@ public class ManufacturingEnterprise extends Module implements Component {
     @Override
     public Integer getRationality(List<Module> modules, List<Link> links, List<Resource> resources) {
         if(!enoughPeople(modules, getId())) return null;
-        boolean admin = false;
-        boolean mine = false;
-        for (Module module : modules){
+        if(!checkAdmin(modules, getId_zone())){
+            return null;
+        }
+        if (hasCollisionsWithOtherModules(modules, getId(), getId_zone(), getX(), getY(), w, h)) return null;
 
+        for (Module module : modules){
             if(Objects.equals(module.getId_zone(), getId_zone())){
-                if(Objects.equals(module.getId(), getId())) continue;
-                Component c = TypeModule.values()[module.getModule_type()].createModule(module);
-                if(c.cross(getX(), getY(), w, h)){
-                    return null;
-                }
-                if(module.getModule_type() == TypeModule.COSMODROME.ordinal()){
-                    if(cross(module.getX() - DANGER_ZONE, module.getY() - DANGER_ZONE,
-                            COSMODROME_W + 2 * DANGER_ZONE, COSMODROME_H + 2 * DANGER_ZONE)){
-                        return null;
-                    }
-                }
-                if(module.getModule_type() == TypeModule.ADMINISTRATIVE_MODULE.ordinal() ||
-                        module.getModule_type() == TypeModule.LIVE_ADMINISTRATIVE_MODULE.ordinal()){
-                    admin = true;
-                }
-                else if(module.getModule_type() == TypeModule.MINE_BASE.ordinal()){
-                    mine = true;
+                if(module.getModule_type() == TypeModule.MINE_BASE.ordinal()){
+                    return Math.max(0, getEffect(resources));
                 }
             }
         }
-        if(!(admin && mine)) return null;
+        return null;
+    }
+
+    private int getEffect(List<Resource> resources){
         int o2 = (int) (100 - resources.get(TypeResources.O2.ordinal()).getProduction() / resources.get(TypeResources.O2.ordinal()).getConsumption() * 100);
         int h20 = (int) (100 - resources.get(TypeResources.H2O.ordinal()).getProduction() / resources.get(TypeResources.H2O.ordinal()).getConsumption() * 100);
         int mat = (int) (100 - resources.get(TypeResources.MATERIAL.ordinal()).getProduction() / resources.get(TypeResources.MATERIAL.ordinal()).getConsumption() * 100);
 
-        return Math.max(0, (o2 + 2 * h20 + mat) / 4);
+        return (o2 + 2 * h20 + mat) / 4;
     }
 
     @Override

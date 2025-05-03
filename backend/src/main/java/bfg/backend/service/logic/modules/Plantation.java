@@ -50,31 +50,11 @@ public class Plantation extends Module implements Component {
     @Override
     public Integer getRationality(List<Module> modules, List<Link> links, List<Resource> resources) {
         if(!enoughPeople(modules, getId())) return null;
-        boolean connect = false;
-        for(Module module : modules){
-            if(Objects.equals(module.getId_zone(), getId_zone())){
-                if(Objects.equals(module.getId(), getId())) continue;
-                Component c = TypeModule.values()[module.getModule_type()].createModule(module);
-                if(c.cross(getX(), getY(), w, h)){
-                    return null;
-                }
-                if(module.getModule_type() == TypeModule.COSMODROME.ordinal()){
-                    if(cross(module.getX() - DANGER_ZONE, module.getY() - DANGER_ZONE,
-                            COSMODROME_W + 2 * DANGER_ZONE, COSMODROME_H + 2 * DANGER_ZONE)){
-                        return null;
-                    }
-                }
-                if(!connect && TypeModule.values()[module.getModule_type()].isLive()){
-                    connect = c.cross(getX() + 1, getY(), w, h) || c.cross(getX() - 1, getY(), w, h) ||
-                            c.cross(getX(), getY() + 1, w, h) || c.cross(getX(), getY() - 1, w, h);
-                }
-            }
-        }
-        if(connect){
-            return Math.toIntExact(Math.min(100, 100 - resources.get(TypeResources.FOOD.ordinal()).getProduction() /
+        if(hasCollisionsWithOtherModules(modules, getId(), getId_zone(), getX(), getY(), w, h)) return null;
+        if(!hasConnectWithOtherModules(modules, getId(), getId_zone(), getX(), getY(), w, h)) return null;
+
+        return Math.toIntExact(Math.min(100, 100 - resources.get(TypeResources.FOOD.ordinal()).getProduction() /
                     resources.get(TypeResources.FOOD.ordinal()).getConsumption() * 1000 / 3));
-        }
-        return null;
     }
 
     @Override

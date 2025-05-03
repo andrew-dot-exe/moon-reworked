@@ -52,45 +52,32 @@ public class SportModule extends Module implements Component {
     @Override
     public Integer getRationality(List<Module> modules, List<Link> links, List<Resource> resources) {
         if(!enoughPeople(modules, getId())) return null;
-        boolean connect = false;
-        int countLive = 0;
-        int countSport = 1;
-        for(Module module : modules){
-            if(Objects.equals(module.getId_zone(), getId_zone())){
-                if(Objects.equals(module.getId(), getId())) continue;
-                Component c = TypeModule.values()[module.getModule_type()].createModule(module);
-                if(c.cross(getX(), getY(), w, h)){
-                    return null;
-                }
-                if(module.getModule_type() == TypeModule.COSMODROME.ordinal()){
-                    if(cross(module.getX() - DANGER_ZONE, module.getY() - DANGER_ZONE,
-                            COSMODROME_W + 2 * DANGER_ZONE, COSMODROME_H + 2 * DANGER_ZONE)){
-                        return null;
+        if(hasCollisionsWithOtherModules(modules, getId(), getId_zone(), getX(), getY(), w, h)) return null;
+        if(!hasConnectWithOtherModules(modules, getId(), getId_zone(), getX(), getY(), w, h)){
+            return null;
+        }
+        return Math.min(100, getEffect(modules));
+    }
+
+    private int getEffect(List<Module> modules){
+        int[] count = {3, 0}; // спортивных, жилых
+        modules.stream()
+                .filter(e -> Objects.equals(e.getId_zone(), getId_zone()) &&
+                        !Objects.equals(e.getId(), getId()))
+                .forEach(e -> {
+                    if(Objects.equals(e.getModule_type(),getModule_type())) count[0] += 3;
+                    else if(Objects.equals(e.getModule_type(), TypeModule.LIVE_MODULE_Y.ordinal()) ||
+                            Objects.equals(e.getModule_type(), TypeModule.LIVE_MODULE_X.ordinal())){
+                        count[1]++;
                     }
-                }
-                if(!connect && TypeModule.values()[module.getModule_type()].isLive()){
-                    connect = c.cross(getX() + 1, getY(), w, h) || c.cross(getX() - 1, getY(), w, h) ||
-                            c.cross(getX(), getY() + 1, w, h) || c.cross(getX(), getY() - 1, w, h);
-                }
-                if (module.getModule_type() == TypeModule.MEDICAL_MODULE.ordinal()) {
-                    countSport++;
-                } else if (module.getModule_type() == TypeModule.LIVE_MODULE_X.ordinal() ||
-                        module.getModule_type() == TypeModule.LIVE_MODULE_Y.ordinal()){
-                    countLive++;
-                }
-            }
+                });
+        if(count[1] > count[0]){
+            countPeople = count[0] * 8;
         }
-        if(connect){
-            countSport *= 3;
-            if(countLive > countSport){
-                countPeople = countSport * 8;
-            }
-            else {
-                countPeople = countLive * 8;
-            }
-            return Math.min(100, 100 - (countSport - countLive) / countSport * 100);
+        else {
+            countPeople = count[1] * 8;
         }
-        return null;
+        return 100 - (count[0] - count[1]) / count[0] * 100;
     }
 
     @Override

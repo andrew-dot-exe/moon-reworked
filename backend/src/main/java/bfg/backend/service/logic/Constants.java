@@ -1,6 +1,8 @@
 package bfg.backend.service.logic;
 
 public class Constants {
+    public final static int COUNT_PEOPLE_IN_LIVE_MODULE = 8;
+
     public final static int SIZE_CELL = 5;
 
     public final static int DAYS_DELIVERY = 30;

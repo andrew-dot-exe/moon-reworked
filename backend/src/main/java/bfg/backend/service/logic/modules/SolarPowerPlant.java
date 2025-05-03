@@ -50,7 +50,7 @@ public class SolarPowerPlant extends Module implements Component {
     @Override
     public Integer getRationality(List<Module> modules, List<Link> links, List<Resource> resources) {
         if(!enoughPeople(modules, getId())) return null;
-        boolean admin = false;
+        if(!checkAdmin(modules, getId_zone())) return null;
         ShadowCalculator shadowCalculator = new ShadowCalculator();
         SolarObject solarObject = new SolarObject(getX() * SIZE_CELL, getY() * SIZE_CELL, getRadius());
         for (Module module : modules){
@@ -61,18 +61,11 @@ public class SolarPowerPlant extends Module implements Component {
                 if(c.cross(getX(), getY(), w, h)){
                     return null;
                 }
-                if(module.getModule_type() == TypeModule.ADMINISTRATIVE_MODULE.ordinal() ||
-                        module.getModule_type() == TypeModule.LIVE_ADMINISTRATIVE_MODULE.ordinal()){
-                    admin = true;
-                }
                 shadowCalculator.addShadow(solarObject,
                         new SolarObject(module.getX() * SIZE_CELL, module.getY() * SIZE_CELL, c.getRadius()));
             }
         }
-        if(admin){
-            return (int) shadowCalculator.calculateTotalEfficiency(Zones.getZones().get(getId_zone()).getIllumination());
-        }
-        return null;
+        return (int) shadowCalculator.calculateTotalEfficiency(Zones.getZones().get(getId_zone()).getIllumination());
     }
 
     @Override

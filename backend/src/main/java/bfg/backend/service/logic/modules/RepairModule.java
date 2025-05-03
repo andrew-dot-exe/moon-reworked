@@ -9,6 +9,7 @@ import bfg.backend.service.logic.TypeResources;
 import bfg.backend.service.logic.zones.Zones;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,55 +53,35 @@ public class RepairModule extends Module implements Component {
     @Override
     public Integer getRationality(List<Module> modules, List<Link> links, List<Resource> resources) {
         if(!enoughPeople(modules, getId())) return null;
-        boolean admin = false;
-        boolean cur = false;
+        if(!checkAdmin(modules, getId_zone())) return null;
+        if(hasCollisionsWithOtherModules(modules, getId(), getId_zone(), getX(), getY(), w, h)) return null;
 
         modules.sort(Module::compareTo);
-        List<Component> repair = new ArrayList<>();
+        countingRepairingModules(modules);
 
+        return count / MAX_COUNT_REPAIRED * 100;
+    }
+
+    private void countingRepairingModules(List<Module> modules){
+        boolean cur = false;
+
+        List<Component> repair = new ArrayList<>();
         for (Module module : modules){
             if(Objects.equals(module.getId(), getId())) {
                 cur = true;
-                for(Component component : repair){
-                    if(component.cross(getX() - REPAIR_ZONE, getY() - REPAIR_ZONE,
-                            w + 2 * REPAIR_ZONE, h + 2 * REPAIR_ZONE)){
-                        repair.remove(component);
-                        count++;
-                        if(count == MAX_COUNT_REPAIRED) break;
-                    }
-                }
+                if(currentRepair(repair)) return;
                 continue;
             }
 
             if(Objects.equals(module.getId_zone(), getId_zone())){
                 Component c = TypeModule.values()[module.getModule_type()].createModule(module);
-                if(c.cross(getX(), getY(), w, h)){
-                    return null;
-                }
-                if(module.getModule_type() == TypeModule.COSMODROME.ordinal()){
-                    if(cross(module.getX() - DANGER_ZONE, module.getY() - DANGER_ZONE,
-                            COSMODROME_W + 2 * DANGER_ZONE, COSMODROME_H + 2 * DANGER_ZONE)){
-                        return null;
-                    }
-                }
-                if(module.getModule_type() == TypeModule.ADMINISTRATIVE_MODULE.ordinal() ||
-                        module.getModule_type() == TypeModule.LIVE_ADMINISTRATIVE_MODULE.ordinal()){
-                    admin = true;
-                }
                 if(!cur && Objects.equals(module.getModule_type(), getModule_type())){
-                    int co = MAX_COUNT_REPAIRED;
-                    for(Component component : repair){
-                        if(component.cross(getX() - REPAIR_ZONE, getY() - REPAIR_ZONE,
-                                w + 2 * REPAIR_ZONE, h + 2 * REPAIR_ZONE)){
-                            repair.remove(component);
-                            co--;
-                            if(co == 0) break;
-                        }
-                    }
+                    otherRepair(repair);
                 } else if (cur) {
                     if(count < MAX_COUNT_REPAIRED && c.cross(getX() - REPAIR_ZONE, getY() - REPAIR_ZONE,
                             w + 2 * REPAIR_ZONE, h + 2 * REPAIR_ZONE)){
                         count++;
+                        if(count == MAX_COUNT_REPAIRED) return;
                     }
                 }
                 else {
@@ -108,8 +89,32 @@ public class RepairModule extends Module implements Component {
                 }
             }
         }
-        if(admin) return count / MAX_COUNT_REPAIRED * 100;
-        return null;
+    }
+
+    private void otherRepair(List<Component> repair){
+        int co = MAX_COUNT_REPAIRED;
+        Iterator<Component> iterator = repair.iterator();
+        while (iterator.hasNext()) {
+            Component component = iterator.next();
+            if (component.cross(getX() - REPAIR_ZONE, getY() - REPAIR_ZONE,
+                    w + 2 * REPAIR_ZONE, h + 2 * REPAIR_ZONE)) {
+                iterator.remove();  // Безопасное удаление
+                co--;
+                if (co == 0) break;
+            }
+        }
+    }
+
+    private boolean currentRepair(List<Component> repair){
+        for(Component component : repair){
+            if(component.cross(getX() - REPAIR_ZONE, getY() - REPAIR_ZONE,
+                    w + 2 * REPAIR_ZONE, h + 2 * REPAIR_ZONE)){
+                repair.remove(component);
+                count++;
+                if(count == MAX_COUNT_REPAIRED) return true;
+            }
+        }
+        return false;
     }
 
     @Override

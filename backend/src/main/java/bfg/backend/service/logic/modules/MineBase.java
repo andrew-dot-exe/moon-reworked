@@ -49,33 +49,15 @@ public class MineBase extends Module implements Component {
 
     @Override
     public Integer getRationality(List<Module> modules, List<Link> links, List<Resource> resources) {
-        if(getId_zone() < 4) return null;
-        if(!enoughPeople(modules, getId())) return null;
-        boolean admin = false;
-        for (Module module : modules) {
-            if (Objects.equals(module.getId_zone(), getId_zone())) {
-                if(Objects.equals(module.getId(), getId())) continue;
-                if (Objects.equals(module.getModule_type(), getModule_type())) {
-                    return null;
-                }
-                Component c = TypeModule.values()[module.getModule_type()].createModule(module);
-                if(c.cross(getX(), getY(), w, h)){
-                    return null;
-                }
-                if(module.getModule_type() == TypeModule.COSMODROME.ordinal()){
-                    if(cross(module.getX() - DANGER_ZONE, module.getY() - DANGER_ZONE,
-                            COSMODROME_W + 2 * DANGER_ZONE, COSMODROME_H + 2 * DANGER_ZONE)){
-                        return null;
-                    }
-                }
-                if (module.getModule_type() == TypeModule.ADMINISTRATIVE_MODULE.ordinal() ||
-                        module.getModule_type() == TypeModule.LIVE_ADMINISTRATIVE_MODULE.ordinal()) {
-                    admin = true;
-                }
-            }
-        }
-        if(!admin) return null;
+        if(hasConflict(modules)) return null;
+        if(hasCollisionsWithOtherModules(modules, getId(), getId_zone(), getX(), getY(), w, h)) return null;
         return 100;
+    }
+
+    private boolean hasConflict(List<Module> modules){
+        if(getId_zone() < 4) return false;
+        if(!enoughPeople(modules, getId())) return false;
+        return checkAdmin(modules, getId_zone());
     }
 
     @Override

@@ -50,29 +50,9 @@ public class ManufacturingEnterpriseFuel extends Module implements Component {
     @Override
     public Integer getRationality(List<Module> modules, List<Link> links, List<Resource> resources) {
         if(!enoughPeople(modules, getId())) return null;
-        boolean admin = false;
-        for (Module module : modules){
-
-            if(Objects.equals(module.getId_zone(), getId_zone())){
-                if(Objects.equals(module.getId(), getId())) continue;
-                Component c = TypeModule.values()[module.getModule_type()].createModule(module);
-                if(c.cross(getX(), getY(), w, h)){
-                    return null;
-                }
-                if(module.getModule_type() == TypeModule.COSMODROME.ordinal()){
-                    if(cross(module.getX() - DANGER_ZONE, module.getY() - DANGER_ZONE,
-                            COSMODROME_W + 2 * DANGER_ZONE, COSMODROME_H + 2 * DANGER_ZONE)){
-                        return null;
-                    }
-                }
-                if(module.getModule_type() == TypeModule.ADMINISTRATIVE_MODULE.ordinal() ||
-                        module.getModule_type() == TypeModule.LIVE_ADMINISTRATIVE_MODULE.ordinal()){
-                    admin = true;
-                }
-            }
-        }
-        if(admin) return Math.toIntExact(100 - (resources.get(TypeResources.FUEL.ordinal()).getProduction() * 30 * 6) / MASS * 100);
-        return null;
+        if(!checkAdmin(modules, getId_zone())) return null;
+        if(hasCollisionsWithOtherModules(modules, getId(), getId_zone(), getX(), getY(), w, h)) return null;
+        return Math.toIntExact(100 - (resources.get(TypeResources.FUEL.ordinal()).getProduction() * 30 * 6) / MASS * 100);
     }
 
     @Override

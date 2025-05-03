@@ -24,10 +24,7 @@ public class SecurityConfig {
             "/user/login",
             "/user/refresh",
             "/user/create",
-            "/error",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/area/**" // Возможно, стоит удалить, но смысла не вижу
+            "/error"
     };
 
     private final JwtTokenFilter jwtTokenFilter;

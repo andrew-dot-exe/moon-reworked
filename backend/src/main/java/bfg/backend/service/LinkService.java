@@ -15,6 +15,7 @@ import bfg.backend.service.logic.zones.Zones;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -45,44 +46,84 @@ public class LinkService {
      * @throws LinkHasBeenAlreadyException если связь уже существует
      * @throws NotResourceException если не найден требуемый ресурс
      */
+    @Transactional
     public Long create(Link link) {
-        // Получаем аутентификацию из контекста
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName(); // Логин пользователя
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if(optionalUser.isEmpty()){
-            throw new UserNotFoundException();
-        }
-        User user = optionalUser.get();
+        User user = validateUserAndColony();
+        validateLinkExistence(link, user.getId());
+        linkRepository.save(link);
 
-        if(!user.getLive()){
+        long way = calculateDistanceBetweenZones(link);
+
+        return link.getPrimaryKey().getType() == 0
+                ? handleMaterialResource(link, user, way)
+                : handleEnergyResource(link, way);
+    }
+
+    /**
+     * Проверяет существование пользователя и статус колонии.
+     * @throws UserNotFoundException если пользователь не найден
+     * @throws ColonizationIsCompletedException если колония завершена
+     */
+    private User validateUserAndColony() {
+        User user = UserService.getUser(userRepository);
+        if (!user.getLive()) {
             throw new ColonizationIsCompletedException();
         }
-        link.getPrimaryKey().setId_user(user.getId());
-        if(linkRepository.findById(link.getPrimaryKey()).isPresent()){
+        return user;
+    }
+
+    /**
+     * Проверяет, существует ли уже такая связь.
+     * @throws LinkHasBeenAlreadyException если связь найдена
+     */
+    private void validateLinkExistence(Link link, Long userId) {
+        link.getPrimaryKey().setId_user(userId);
+        if (linkRepository.findById(link.getPrimaryKey()).isPresent()) {
             throw new LinkHasBeenAlreadyException();
         }
-        linkRepository.save(link);
-        long way = Zones.getZones().get(link.getPrimaryKey().getId_zone1()).getWays()[link.getPrimaryKey().getId_zone2()];
-        if(link.getPrimaryKey().getType() == 0) {
-            Optional<Resource> optionalResource = resourceRepository.findById(new Resource.PrimaryKey(TypeResources.MATERIAL.ordinal(), link.getPrimaryKey().getId_user()));
-            if(optionalResource.isEmpty()){
-                throw new NotResourceException();
-            }
-            Resource mat = optionalResource.get();
-            mat.setCount(mat.getCount() - way);
-            if(mat.getCount() < 0){
-                user.setLive(false);
-                userRepository.save(user);
-            }
-            resourceRepository.save(mat);
-            return way * 1000;
+    }
+
+    /**
+     * Возвращает расстояние между зонами.
+     */
+    private long calculateDistanceBetweenZones(Link link) {
+        return Zones.getZones()
+                .get(link.getPrimaryKey().getId_zone1())
+                .getWays()[link.getPrimaryKey().getId_zone2()];
+    }
+
+    /**
+     * Рассчитывает расход материалов на постройку провода.
+     * @return стоимость создания связи в граммах
+     * @throws NotResourceException если ресурс не найден
+     */
+    private Long handleMaterialResource(Link link, User user, long way) {
+        Resource mat = resourceRepository.findById(new Resource.PrimaryKey(
+                        TypeResources.MATERIAL.ordinal(),
+                        link.getPrimaryKey().getId_user()
+                ))
+                .orElseThrow(NotResourceException::new);
+
+        mat.setCount(mat.getCount() - way);
+        if (mat.getCount() < 0) {
+            user.setLive(false);
+            userRepository.save(user);
         }
-        Optional<Resource> optionalResource = resourceRepository.findById(new Resource.PrimaryKey(TypeResources.WT.ordinal(), link.getPrimaryKey().getId_user()));
-        if(optionalResource.isEmpty()){
-            throw new NotResourceException();
-        }
-        Resource wt = optionalResource.get();
+        resourceRepository.save(mat);
+        return way * 1000; // перевод в граммы
+    }
+
+    /**
+     * Рассчитывает расход энергии на работу маршрута.
+     * @throws NotResourceException если ресурс не найден
+     */
+    private Long handleEnergyResource(Link link, long way) {
+        Resource wt = resourceRepository.findById(new Resource.PrimaryKey(
+                        TypeResources.WT.ordinal(),
+                        link.getPrimaryKey().getId_user()
+                ))
+                .orElseThrow(NotResourceException::new);
+
         wt.setConsumption(wt.getConsumption() + way * 12L / 10000);
         resourceRepository.save(wt);
         return 0L;

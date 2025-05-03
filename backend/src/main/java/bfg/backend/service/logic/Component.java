@@ -3,8 +3,14 @@ package bfg.backend.service.logic;
 import bfg.backend.repository.link.Link;
 import bfg.backend.repository.module.Module;
 import bfg.backend.repository.resource.Resource;
+import bfg.backend.service.logic.zones.Zones;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import static bfg.backend.service.logic.Constants.*;
+import static bfg.backend.service.logic.Constants.DANGER_ZONE;
 
 /**
  * Интерфейс, определяющий поведение компонентов (модулей) колонии.
@@ -42,31 +48,6 @@ public interface Component {
     void getConsumption(List<Module> modules, List<Long> consumption);
 
     /**
-     * Проверяет, достаточно ли людей для управления этим модулем, считая по порядку (id).
-     * @param modules Список всех модулей
-     * @param id Идентификатор текущего проверяемого модуля
-     * @return true, если персонала достаточно
-     */
-    default boolean enoughPeople(List<Module> modules, long id){
-        modules.sort(Module::compareTo);
-        int countPeople = 0;
-        int needPeople = 0;
-        boolean cur = false;
-        for(Module module : modules){
-            if(module.getModule_type() == TypeModule.LIVE_MODULE_Y.ordinal() ||
-                module.getModule_type() == TypeModule.LIVE_MODULE_X.ordinal()){
-                countPeople += 8;
-                continue;
-            }
-            if(!cur){
-                needPeople += TypeModule.values()[module.getModule_type()].getPeople();
-            }
-            if(module.getId() == id) cur = true;
-        }
-        return countPeople >= needPeople;
-    }
-
-    /**
      * Проверяет, перекрывается ли этот компонент с другим по следующим параметрам:
      * @param x Координата X модуля
      * @param y Координата Y модуля
@@ -81,6 +62,124 @@ public interface Component {
      * @return Радиус модуля, 0 если жилой
      */
     int getRadius();
+
+    /**
+     * Проверяет, достаточно ли людей для управления этим модулем, считая по порядку (id).
+     * @param modules Список всех модулей
+     * @param id Идентификатор текущего проверяемого модуля
+     * @return true, если персонала достаточно
+     */
+    default boolean enoughPeople(List<Module> modules, long id){
+        modules.sort(Module::compareTo);
+        int countPeople = 0;
+        int needPeople = 0;
+        boolean cur = false;
+        for(Module module : modules){
+            if(module.getModule_type() == TypeModule.LIVE_MODULE_Y.ordinal() ||
+                    module.getModule_type() == TypeModule.LIVE_MODULE_X.ordinal()){
+                countPeople += 8;
+                continue;
+            }
+            if(!cur){
+                needPeople += TypeModule.values()[module.getModule_type()].getPeople();
+            }
+            if(module.getId() == id) cur = true;
+        }
+        return countPeople >= needPeople;
+    }
+
+    /**
+     * Находит индекс космодрома в списке модулей
+     */
+    default Optional<Integer> findCosmodromeIndex(List<Module> modules) {
+        for (int i = 0; i < modules.size(); i++) {
+            if (modules.get(i).getModule_type() == TypeModule.COSMODROME.ordinal()) {
+                return Optional.of(i);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Проверяет наличие АМ в данной зоне
+     */
+    default boolean checkAdmin(List<Module> modules, int idZone) {
+        for (Module module : modules) {
+            if (Objects.equals(module.getId_zone(), idZone)) {
+                if (module.getModule_type() == TypeModule.ADMINISTRATIVE_MODULE.ordinal() ||
+                        module.getModule_type() == TypeModule.LIVE_ADMINISTRATIVE_MODULE.ordinal()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Проверяет коллизии с другими модулями
+     */
+    default boolean hasCollisionsWithOtherModules(List<Module> modules, long id, int idZone, int x, int y, int w, int h) {
+        return modules.stream()
+                .filter(m -> Objects.equals(m.getId_zone(), idZone))
+                .filter(m -> !Objects.equals(m.getId(), id)) // Исключаем текущий модуль
+                .anyMatch(m -> {
+                    Component c = TypeModule.values()[m.getModule_type()].createModule(m);
+
+                    // Проверка пересечения с текущим модулем
+                    if (c.cross(x, y, w, h)) {
+                        return true;
+                    }
+
+                    // Специальная проверка для космодрома
+                    if (m.getModule_type() == TypeModule.COSMODROME.ordinal()) {
+                        return cross(
+                                m.getX() - DANGER_ZONE,
+                                m.getY() - DANGER_ZONE,
+                                COSMODROME_W + 2 * DANGER_ZONE,
+                                COSMODROME_H + 2 * DANGER_ZONE
+                        );
+                    }
+
+                    return false;
+                });
+    }
+
+    /**
+     * Проверяет связь жилого модуля с другими модулями
+     */
+    default boolean hasConnectWithOtherModules(List<Module> modules, long id, int idZone, int x, int y, int w, int h) {
+        return modules.stream()
+                .filter(m -> Objects.equals(m.getId_zone(), idZone))
+                .filter(m -> !Objects.equals(m.getId(), id)) // Исключаем текущий модуль
+                .anyMatch(m -> {
+                    if(!TypeModule.values()[m.getModule_type()].isLive()) return false;
+
+                    Component c = TypeModule.values()[m.getModule_type()].createModule(m);
+
+                    // Проверка пересечения с текущим модулем
+                    return c.cross(x + 1, y, w, h) || c.cross(x, y + 1, w, h) ||
+                            c.cross(x - 1, y, w, h) || c.cross(x, y - 1, w, h);
+                });
+    }
+
+    /**
+     * Проверяет если связь между областями
+     * @param z1 Область 1
+     * @param z2 Область 2
+     * @param links Список связей
+     * @return Наличие связи
+     */
+    default boolean hasLink(int z1, int z2, List<Link> links){
+        if(z1 == z2) return true;
+
+        UnionFind unionFind = new UnionFind(Zones.getLength());
+        for (Link link: links){
+            if(link.getPrimaryKey().getType() == 1) continue;
+            unionFind.union(link.getPrimaryKey().getId_zone1(), link.getPrimaryKey().getId_zone2());
+        }
+
+        return unionFind.find(z1) == unionFind.find(z2);
+    }
 
     /**
      * Класс для проверки связности областей с использованием структуры данных "Система непересекающихся множеств" (Disjoint Set Union).

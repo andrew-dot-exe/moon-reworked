@@ -10,6 +10,7 @@ import bfg.backend.service.logic.zones.Zones;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import static bfg.backend.service.logic.Constants.*;
 import static bfg.backend.service.logic.Constants.DANGER_ZONE;
@@ -49,39 +50,50 @@ public class CommunicationTower extends Module implements Component {
 
     @Override
     public Integer getRationality(List<Module> modules, List<Link> links, List<Resource> resources) {
-        if(!enoughPeople(modules, getId())) return null;
-        int totalRac = 0;
-        for (Module value : modules) {
-            if (Objects.equals(value.getModule_type(), getModule_type())) {
-                totalRac += ILLUMINATION[value.getId_zone()];
-                if (totalRac >= 100) {
-                    return null;
-                }
-            }
+        if(hasConflict(modules)) return null;
+        int totalRac = getTotalRac(modules);
+        if(totalRac >= 100) return null;
+        if(!checkAdmin(modules, getId_zone())){
+            return null;
         }
 
-        boolean admin = false;
-        for (Module module : modules){
-            if(Objects.equals(module.getId_zone(), getId_zone())){
-                if(Objects.equals(module.getId(), getId())) continue;
-                Component c = TypeModule.values()[module.getModule_type()].createModule(module);
-                if(c.cross(getX(), getY(), w, h)){
-                    return null;
-                }
-                if(module.getModule_type() == TypeModule.COSMODROME.ordinal()){
-                    if(cross(module.getX() - DANGER_ZONE, module.getY() - DANGER_ZONE,
-                            COSMODROME_W + 2 * DANGER_ZONE, COSMODROME_H + 2 * DANGER_ZONE)){
-                        return null;
-                    }
-                }
-                if(module.getModule_type() == TypeModule.ADMINISTRATIVE_MODULE.ordinal() ||
-                module.getModule_type() == TypeModule.LIVE_ADMINISTRATIVE_MODULE.ordinal()){
-                    admin = true;
+        if(hasCollisionsWithOtherModules(modules, getId(), getId_zone(), getX(), getY(), w, h)){
+            return null;
+        }
+        return Math.min(100 - totalRac, ILLUMINATION[getId_zone()]);
+    }
+
+    /**
+     * Проверяет на наличие конфликтов для этого модуля.
+     * @param modules Список модулей
+     * @return Наличие конфликта
+     */
+    private boolean hasConflict(List<Module> modules){
+        if(getId_zone() < 4) return true;
+        if(!enoughPeople(modules, getId())) return true;
+        for (Module module : modules) {
+            if (Objects.equals(module.getId_zone(), getId_zone())) {
+                if(Objects.equals(getId(), module.getId())) continue;
+                if (Objects.equals(module.getModule_type(), getModule_type())) {
+                    return true;
                 }
             }
         }
-        if(admin) return Math.min(100 - totalRac, ILLUMINATION[getId_zone()]);
-        return null;
+        return false;
+    }
+
+    /**
+     * Выссчитывает суммарную эффектиквность всех вышек по порядку,
+     * не включая текущую и остальные после неё.
+     * @param modules Список модулей
+     * @return суммарная эффективность
+     */
+    private int getTotalRac(List<Module> modules){
+        return modules.stream()
+                .takeWhile(e -> !Objects.equals(e.getId(), getId()))
+                .filter(e -> Objects.equals(e.getModule_type(), getModule_type()))
+                .flatMapToInt(e -> IntStream.of(ILLUMINATION[e.getId_zone()]))
+                .sum();
     }
 
     @Override

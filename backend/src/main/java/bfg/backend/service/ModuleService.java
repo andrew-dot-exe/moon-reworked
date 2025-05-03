@@ -63,40 +63,16 @@ public class ModuleService {
      */
     @Transactional
     public Long create(Module module) {
-        // Получаем аутентификацию из контекста
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName(); // Логин пользователя
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if(optionalUser.isEmpty()){
-            throw new UserNotFoundException();
-        }
-        User user = optionalUser.get();
+        User user = validateUserAndColony();
 
-        if(!checkPlaceService.check(new ModulePlace(module.getModule_type(),
-                module.getX(), module.getY(), module.getId_zone())).possible()){
-            throw new CannotBePutException();
-        }
-
-        if(!user.getLive()){
-            throw new ColonizationIsCompletedException();
-        }
+        validateModulePlacement(module);
 
         module.setId_user(user.getId());
         Module resm = moduleRepository.save(module);
 
         productionService.recountingProduction(resm.getId_user(), moduleRepository, linkRepository);
 
-        Optional<Resource> optionalResource = resourceRepository.findById(new Resource.PrimaryKey(TypeResources.MATERIAL.ordinal(), resm.getId_user()));
-        if(optionalResource.isEmpty()){
-            throw new NotResourceException();
-        }
-        Resource mat = optionalResource.get();
-        long cost = TypeModule.values()[resm.getModule_type()].getCost();
-        mat.setCount(mat.getCount() - cost);
-        if(mat.getCount() < 0){
-            user.setLive(false);
-            userRepository.save(user);
-        }
+        deductMaterialCost(user, module);
 
         return resm.getId();
     }
@@ -108,14 +84,7 @@ public class ModuleService {
      * @throws UserNotFoundException если пользователь не найден
      */
     public List<Optimality> getOptimality(){
-        // Получаем аутентификацию из контекста
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName(); // Логин пользователя
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if(optionalUser.isEmpty()){
-            throw new UserNotFoundException();
-        }
-        User user = optionalUser.get();
+        User user = UserService.getUser(userRepository);
 
         List<Module> modules = moduleRepository.findByIdUser(user.getId());
         List<Link> links = linkRepository.findByIdUser(user.getId());
@@ -130,5 +99,54 @@ public class ModuleService {
         }
 
         return optimalityList;
+    }
+
+    /**
+     * Проверяет существование пользователя и статус колонии.
+     * @throws ColonizationIsCompletedException если колония завершена
+     */
+    private User validateUserAndColony() {
+        User user = UserService.getUser(userRepository);
+        if (!user.getLive()) {
+            throw new ColonizationIsCompletedException();
+        }
+        return user;
+    }
+
+    /**
+     * Проверяет возможность размещения модуля.
+     * @throws CannotBePutException если размещение невозможно
+     */
+    private void validateModulePlacement(Module module) {
+        ModulePlace place = new ModulePlace(
+                module.getModule_type(),
+                module.getX(),
+                module.getY(),
+                module.getId_zone()
+        );
+
+        if (!checkPlaceService.check(place).possible()) {
+            throw new CannotBePutException();
+        }
+    }
+
+    /**
+     * Вычитает стоимость модуля из ресурсов.
+     * @throws NotResourceException если ресурс не найден
+     */
+    private void deductMaterialCost(User user, Module module) {
+        Resource mat = resourceRepository.findById(new Resource.PrimaryKey(
+                        TypeResources.MATERIAL.ordinal(),
+                        module.getId_user()
+                ))
+                .orElseThrow(NotResourceException::new);
+
+        long cost = TypeModule.values()[module.getModule_type()].getCost();
+        mat.setCount(mat.getCount() - cost);
+
+        if (mat.getCount() < 0) {
+            user.setLive(false);
+            userRepository.save(user);
+        }
     }
 }
