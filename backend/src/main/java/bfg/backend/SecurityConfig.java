@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import bfg.backend.token.JwtTokenFilter;
@@ -25,6 +26,10 @@ public class SecurityConfig {
             "/user/refresh",
             "/user/create",
             "/error"
+    };
+
+    private static final String[] LOCAL_ENDPOINTS = {
+            "/actuator/**"
     };
 
     private final JwtTokenFilter jwtTokenFilter;
@@ -56,6 +61,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Публичные эндпоинты
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+
+                        .requestMatchers(LOCAL_ENDPOINTS)
+                            .access(new WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1') or hasIpAddress('::1')"))
 
                         // Все остальные запросы требуют аутентификации
                         .anyRequest().authenticated()
