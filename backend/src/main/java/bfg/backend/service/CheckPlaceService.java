@@ -94,10 +94,17 @@ public class CheckPlaceService {
             Component component,
             ColonyData data) {
         Integer relief = component.getRelief();
+        if(relief == null){
+            return new CheckedPlace(
+                    false,
+                    null,
+                    null
+            );
+        }
         Integer rationality = component.getRationality(data.modules, data.links, data.resources);
 
         return new CheckedPlace(
-                relief != null && rationality != null,
+                rationality != null,
                 relief,
                 rationality
         );

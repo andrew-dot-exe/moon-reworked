@@ -172,13 +172,18 @@ public interface Component {
     default boolean hasLink(int z1, int z2, List<Link> links){
         if(z1 == z2) return true;
 
-        UnionFind unionFind = new UnionFind(Zones.getLength());
+        UnionFind wire = new UnionFind(Zones.getLength());
+        UnionFind road = new UnionFind(Zones.getLength());
         for (Link link: links){
-            if(link.getPrimaryKey().getType() == 1) continue;
-            unionFind.union(link.getPrimaryKey().getId_zone1(), link.getPrimaryKey().getId_zone2());
+            if(link.getPrimaryKey().getType() == 1) {
+                road.union(link.getPrimaryKey().getId_zone1(), link.getPrimaryKey().getId_zone2());
+            }
+            else {
+                wire.union(link.getPrimaryKey().getId_zone1(), link.getPrimaryKey().getId_zone2());
+            }
         }
 
-        return unionFind.find(z1) == unionFind.find(z2);
+        return wire.find(z1) == wire.find(z2) && road.find(z1) == road.find(z2);
     }
 
     /**
