@@ -68,6 +68,7 @@ public class SecurityConfig {
                         // Все остальные запросы требуют аутентификации
                         .anyRequest().authenticated()
                 )
+                
 
                 // Добавление JWT фильтра перед стандартным фильтром аутентификации
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
