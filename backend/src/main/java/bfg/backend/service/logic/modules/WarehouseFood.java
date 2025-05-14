@@ -70,7 +70,7 @@ public class WarehouseFood extends Module implements Component {
 
     @Override
     public void getConsumption(List<Module> modules, List<Long> consumption) {
-        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 4800L);
+        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 120000L);
 
     }
 

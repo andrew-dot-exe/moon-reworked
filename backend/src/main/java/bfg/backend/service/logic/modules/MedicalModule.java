@@ -79,7 +79,7 @@ public class MedicalModule extends Module implements Component {
 
     @Override
     public void getConsumption(List<Module> modules, List<Long> consumption) {
-        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 7000L);
+        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 33800L);
     }
 
     @Override

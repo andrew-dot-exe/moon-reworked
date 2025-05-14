@@ -87,7 +87,7 @@ public class Landfill extends Module implements Component {
 
     @Override
     public void getConsumption(List<Module> modules, List<Long> consumption) {
-        consumption.set(TypeResources.WT.ordinal(),consumption.get(TypeResources.WT.ordinal()) +  mass * 2000);
+        consumption.set(TypeResources.WT.ordinal(),consumption.get(TypeResources.WT.ordinal()) +  mass * 1000 + 120000);
     }
 
     @Override

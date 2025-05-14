@@ -68,7 +68,7 @@ public class LandfillBio extends Module implements Component {
         double count = 0;
         for (Module module : modules){
             switch (TypeModule.values()[module.getModule_type()]){
-                case LIVE_MODULE_X, LIVE_MODULE_Y -> count += 1.6;
+                case LIVE_MODULE_X, LIVE_MODULE_Y -> count += 0.56;
                 case PLANTATION -> count += 4.9;
             }
         }
@@ -80,7 +80,7 @@ public class LandfillBio extends Module implements Component {
 
     @Override
     public void getConsumption(List<Module> modules, List<Long> consumption) {
-        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + mass * 3);
+        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + mass * 3 + 120000);
         consumption.set(TypeResources.O2.ordinal(), consumption.get(TypeResources.O2.ordinal()) + mass * 1320);
     }
 

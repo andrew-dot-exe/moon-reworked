@@ -70,12 +70,12 @@ public class SolarPowerPlant extends Module implements Component {
 
     @Override
     public void getProduction(List<Module> modules, List<Long> production) {
-        production.set(TypeResources.WT.ordinal(), production.get(TypeResources.WT.ordinal()) + 162500L * getRationality(modules, null, null));
+        production.set(TypeResources.WT.ordinal(), production.get(TypeResources.WT.ordinal()) + 312000L * getRationality(modules, null, null));
     }
 
     @Override
     public void getConsumption(List<Module> modules, List<Long> consumption) {
-        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 1200L);
+        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 60000L);
     }
 
     @Override

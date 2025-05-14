@@ -82,7 +82,7 @@ public class ManufacturingEnterprise extends Module implements Component {
 
     @Override
     public void getConsumption(List<Module> modules, List<Long> consumption) {
-        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) +  34740L);
+        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) +  64740L);
     }
 
     @Override

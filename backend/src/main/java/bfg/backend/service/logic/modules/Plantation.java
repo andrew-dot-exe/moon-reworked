@@ -67,7 +67,7 @@ public class Plantation extends Module implements Component {
     public void getConsumption(List<Module> modules, List<Long> consumption) {
         consumption.set(TypeResources.CO2.ordinal(), consumption.get(TypeResources.CO2.ordinal()) + 5000);
         consumption.set(TypeResources.H2O.ordinal(), consumption.get(TypeResources.H2O.ordinal()) + 25350);
-        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 175000L);
+        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 382000L);
 
     }
 

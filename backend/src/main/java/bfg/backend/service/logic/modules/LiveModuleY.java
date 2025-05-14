@@ -58,15 +58,15 @@ public class LiveModuleY extends Module implements Component {
 
     @Override
     public void getProduction(List<Module> modules, List<Long> production) {
-        production.set(TypeResources.CO2.ordinal(), production.get(TypeResources.CO2.ordinal()) + 8L);
+        production.set(TypeResources.CO2.ordinal(), production.get(TypeResources.CO2.ordinal()) + 8000L);
     }
 
     @Override
     public void getConsumption(List<Module> modules, List<Long> consumption) {
-        consumption.set(TypeResources.O2.ordinal(), consumption.get(TypeResources.O2.ordinal()) + 700 * 8);
-        consumption.set(TypeResources.FOOD.ordinal(), consumption.get(TypeResources.FOOD.ordinal()) + 1720 * 8);
-        consumption.set(TypeResources.H2O.ordinal(), consumption.get(TypeResources.H2O.ordinal()) + 1700 * 8);
-        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 80L + 15400L);
+        consumption.set(TypeResources.O2.ordinal(), consumption.get(TypeResources.O2.ordinal()) + 5600);
+        consumption.set(TypeResources.FOOD.ordinal(), consumption.get(TypeResources.FOOD.ordinal()) + 14000);
+        consumption.set(TypeResources.H2O.ordinal(), consumption.get(TypeResources.H2O.ordinal()) + 13600);
+        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 68680L);
     }
 
     @Override

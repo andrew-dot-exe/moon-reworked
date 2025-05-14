@@ -1,17 +1,22 @@
-CREATE DATABASE moon;
+CREATE DATABASE IF NOT EXISTS moon;
 -- Переход в эту базу
---DROP TABLE users CASCADE;
+DROP TABLE IF EXISTS link CASCADE;
+DROP TABLE IF EXISTS resource CASCADE;
+DROP TABLE IF EXISTS module CASCADE;
+DROP TABLE IF EXISTS module_types CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS areas CASCADE;
+
 CREATE TABLE users(
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    name VARCHAR(64) NOT NULL,
+    email VARCHAR(64) NOT NULL UNIQUE,
+    password VARCHAR(80) NOT NULL,
     current_day BIGINT,
     days_before_delivery INTEGER,
     live BOOLEAN
 );
 
---DROP TABLE module CASCADE;
 CREATE TABLE module(
     id BIGSERIAL PRIMARY KEY,
     id_user BIGINT REFERENCES users(id) NOT NULL,
@@ -21,19 +26,17 @@ CREATE TABLE module(
     y INTEGER NOT NULL
 );
 
---DROP TABLE resource CASCADE;
 CREATE TABLE resource(
     resource_type INTEGER,
     id_user BIGINT REFERENCES users(id),
     count BIGINT,
     production BIGINT,
-    consumption BIGINT, -- больше 0
+    consumption BIGINT,
     sum_production BIGINT,
-    sum_consumption BIGINT, -- больше 0
+    sum_consumption BIGINT, 
     PRIMARY KEY(resource_type, id_user)
 );
 
---DROP TABLE link CASCADE;
 CREATE TABLE link(
     type INTEGER, -- 0 - провод, 1 - дорога
     id_user BIGINT REFERENCES users(id),

@@ -122,50 +122,10 @@ public class RepairModule extends Module implements Component {
 
     @Override
     public void getConsumption(List<Module> modules, List<Long> consumption) {
-        boolean cur = false;
-
         modules.sort(Module::compareTo);
-        List<Component> repair = new ArrayList<>();
+        countingRepairingModules(modules);
 
-        for (Module module : modules){
-            if(Objects.equals(module.getId(), getId())) {
-                cur = true;
-                for(Component component : repair){
-                    if(component.cross(getX() - REPAIR_ZONE, getY() - REPAIR_ZONE,
-                            w + 2 * REPAIR_ZONE, h + 2 * REPAIR_ZONE)){
-                        repair.remove(component);
-                        count++;
-                        if(count == MAX_COUNT_REPAIRED) break;
-                    }
-                }
-                continue;
-            }
-
-            if(Objects.equals(module.getId_zone(), getId_zone())){
-                Component c = TypeModule.values()[module.getModule_type()].createModule(module);
-                if(!cur && Objects.equals(module.getModule_type(), getModule_type())){
-                    int co = MAX_COUNT_REPAIRED;
-                    for(Component component : repair){
-                        if(component.cross(getX() - REPAIR_ZONE, getY() - REPAIR_ZONE,
-                                w + 2 * REPAIR_ZONE, h + 2 * REPAIR_ZONE)){
-                            repair.remove(component);
-                            co--;
-                            if(co == 0) break;
-                        }
-                    }
-                } else if (cur) {
-                    if(count < MAX_COUNT_REPAIRED && c.cross(getX() - REPAIR_ZONE, getY() - REPAIR_ZONE,
-                            w + 2 * REPAIR_ZONE, h + 2 * REPAIR_ZONE)){
-                        count++;
-                    }
-                }
-                else {
-                    repair.add(c);
-                }
-            }
-        }
-
-        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 4800L + 2000L * count);
+        consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 120000L + 2000L * count);
         consumption.set(TypeResources.MATERIAL.ordinal(), (long) (consumption.get(TypeResources.MATERIAL.ordinal()) + CON_MATERIAL_BY_REPAIRED * count * 1000));
     }
 
