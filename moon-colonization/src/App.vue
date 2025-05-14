@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { useComponentStore } from './stores/componentStore';
+
+const componentStore = useComponentStore()
 </script>
 
 <template>
-<!-- Роутер  -->
-  <RouterView class="router-view" />
+  <!-- Роутер  -->
+  <component :is="componentStore.current" class="router-view" />
 </template>
 
 <style>
@@ -15,7 +17,8 @@ import { RouterLink, RouterView } from 'vue-router'
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
