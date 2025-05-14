@@ -53,7 +53,7 @@ public class JwtTokenUtil {
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + tExpiration * 1000))
-                .signWith(SignatureAlgorithm.HS256, secret)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -71,6 +71,7 @@ public class JwtTokenUtil {
      * @throws JwtException если токен невалиден
      */
     public String extractUsername(String token) {
+        
         return extractClaim(token, Claims::getSubject);
     }
 

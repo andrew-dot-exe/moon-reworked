@@ -6,6 +6,12 @@ import bfg.backend.dto.responce.allUserInfo.AllUserInfo;
 import bfg.backend.dto.responce.statistics.Statistics;
 import bfg.backend.dto.responce.token.JwtResponse;
 import bfg.backend.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties.Jwt;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -45,14 +51,34 @@ public class UserController {
     /**
      * Аутентификация пользователя в системе.
      * @param user объект с учетными данными пользователя
-     * @return JWT токен для доступа к системе
+     * @return JWT токен для доступа к системе в cookies
      * @see UserIn
-     * @see JwtResponse
+     * @see String
      */
-    @PostMapping(path = "login")
-    public JwtResponse login(@RequestBody UserIn user){
-        return userService.login(user);
-    }
+@PostMapping(path = "login")
+public String login(@RequestBody UserIn user, HttpServletResponse response){
+    JwtResponse jwtResponse = userService.login(user);
+    
+    // Cookie для access token
+    Cookie tokenCookie = new Cookie("token", jwtResponse.accessToken());
+    tokenCookie.setHttpOnly(true);
+    tokenCookie.setPath("/");
+    tokenCookie.setMaxAge(3600);
+    //tokenCookie.setSecure(true); // Раскомментировать для HTTPS
+    
+    response.addCookie(tokenCookie);
+    
+    // Cookie для refresh token
+    Cookie refreshCookie = new Cookie("refresh_token", jwtResponse.refreshToken());
+    refreshCookie.setHttpOnly(true);
+    refreshCookie.setPath("/");
+    refreshCookie.setMaxAge(259200); // 3 дня
+    //refreshCookie.setSecure(true); // Раскомментировать для HTTPS
+    
+    response.addCookie(refreshCookie);
+    
+    return "logged in";
+}
 
     /**
      * Регистрация нового пользователя.
@@ -62,8 +88,54 @@ public class UserController {
      * @see JwtResponse
      */
     @PostMapping(path = "create")
-    public JwtResponse create(@RequestBody UserIn user){
-        return userService.create(user);
+    public String create(@RequestBody UserIn user, HttpServletResponse response){
+        JwtResponse JwtResponse = userService.create(user);
+        
+        // Cookie для access token
+        Cookie tokenCookie = new Cookie("token", JwtResponse.accessToken());
+        tokenCookie.setHttpOnly(true);
+        tokenCookie.setPath("/");
+        tokenCookie.setMaxAge(3600);
+        //tokenCookie.setSecure(true); // Раскомментировать для HTTPS
+        
+        response.addCookie(tokenCookie);
+        
+        // Cookie для refresh token
+        Cookie refreshCookie = new Cookie("refresh_token", JwtResponse.refreshToken());
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(259200); // 3 дня
+        //refreshCookie.setSecure(true); // Раскомментировать для HTTPS
+        
+        response.addCookie(refreshCookie);
+        
+        return "registered";
+    }
+
+    /**
+     * Выход пользователя из системы.
+     * @return сообщение об успешном выходе
+     */
+    @PostMapping(path = "logout")
+    public String logout(HttpServletResponse response) {
+        // Удаляем cookie с токеном, устанавливая время жизни = 0
+        Cookie tokenCookie = new Cookie("token", null);
+        tokenCookie.setHttpOnly(true);
+        tokenCookie.setPath("/");
+        tokenCookie.setMaxAge(0);
+        response.addCookie(tokenCookie);
+        
+        // Удаляем cookie с refresh токеном
+        Cookie refreshCookie = new Cookie("refresh_token", null);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0);
+        response.addCookie(refreshCookie);
+        
+        // Очищаем контекст безопасности
+        SecurityContextHolder.clearContext();
+        
+        return "logged out";
     }
 
     /**
@@ -73,8 +145,29 @@ public class UserController {
      * @see RefreshRequest
      * @see JwtResponse
      */
-    @PostMapping("refresh")
-    public JwtResponse refreshToken(@RequestBody RefreshRequest request) {
-        return userService.refresh(request);
-    }
+@PostMapping("refresh")
+public String refreshToken(@RequestBody RefreshRequest request, 
+                           HttpServletResponse response) {
+    JwtResponse jwtResponse = userService.refresh(request);
+    
+    // Обновляем токен в cookie
+    Cookie tokenCookie = new Cookie("token", jwtResponse.accessToken());
+    tokenCookie.setHttpOnly(true);
+    tokenCookie.setPath("/");
+    tokenCookie.setMaxAge(3600); // 1 час
+    //tokenCookie.setSecure(true); // Раскомментировать для HTTPS
+    
+    response.addCookie(tokenCookie);
+    
+    // Обновляем refresh токен (по желанию можно сохранить в отдельную cookie)
+    Cookie refreshCookie = new Cookie("refresh_token", jwtResponse.refreshToken());
+    refreshCookie.setHttpOnly(true); 
+    refreshCookie.setPath("/");
+    refreshCookie.setMaxAge(259200); // 3 дня 
+    //refreshCookie.setSecure(true); // Раскомментировать для HTTPS
+    
+    response.addCookie(refreshCookie);
+    
+    return "tokens_refreshed";
+}
 }
