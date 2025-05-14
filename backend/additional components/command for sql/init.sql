@@ -3,9 +3,9 @@ CREATE DATABASE moon;
 --DROP TABLE users CASCADE;
 CREATE TABLE users(
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(64) NOT NULL,
-    email VARCHAR(64) NOT NULL UNIQUE,
-    password VARCHAR(16) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
     current_day BIGINT,
     days_before_delivery INTEGER,
     live BOOLEAN
