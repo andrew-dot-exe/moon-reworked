@@ -145,29 +145,29 @@ public String login(@RequestBody UserIn user, HttpServletResponse response){
      * @see RefreshRequest
      * @see JwtResponse
      */
-@PostMapping("refresh")
-public String refreshToken(@RequestBody RefreshRequest request, 
-                           HttpServletResponse response) {
-    JwtResponse jwtResponse = userService.refresh(request);
-    
-    // Обновляем токен в cookie
-    Cookie tokenCookie = new Cookie("token", jwtResponse.accessToken());
-    tokenCookie.setHttpOnly(true);
-    tokenCookie.setPath("/");
-    tokenCookie.setMaxAge(3600); // 1 час
-    //tokenCookie.setSecure(true); // Раскомментировать для HTTPS
-    
-    response.addCookie(tokenCookie);
-    
-    // Обновляем refresh токен (по желанию можно сохранить в отдельную cookie)
-    Cookie refreshCookie = new Cookie("refresh_token", jwtResponse.refreshToken());
-    refreshCookie.setHttpOnly(true); 
-    refreshCookie.setPath("/");
-    refreshCookie.setMaxAge(259200); // 3 дня 
-    //refreshCookie.setSecure(true); // Раскомментировать для HTTPS
-    
-    response.addCookie(refreshCookie);
-    
-    return "tokens_refreshed";
-}
+    @PostMapping("refresh")
+    public String refreshToken(@CookieValue("refresh_token") String refreshToken,
+                               HttpServletResponse response) {
+        JwtResponse jwtResponse = userService.refresh(new RefreshRequest(refreshToken));
+
+        // Обновляем токен в cookie
+        Cookie tokenCookie = new Cookie("token", jwtResponse.accessToken());
+        tokenCookie.setHttpOnly(true);
+        tokenCookie.setPath("/");
+        tokenCookie.setMaxAge(3600); // 1 час
+        //tokenCookie.setSecure(true); // Раскомментировать для HTTPS
+
+        response.addCookie(tokenCookie);
+
+        // Обновляем refresh токен (по желанию можно сохранить в отдельную cookie)
+        Cookie refreshCookie = new Cookie("refresh_token", jwtResponse.refreshToken());
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(259200); // 3 дня
+        //refreshCookie.setSecure(true); // Раскомментировать для HTTPS
+
+        response.addCookie(refreshCookie);
+
+        return "tokens_refreshed";
+    }
 }

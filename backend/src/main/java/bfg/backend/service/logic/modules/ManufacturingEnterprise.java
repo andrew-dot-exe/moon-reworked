@@ -75,9 +75,9 @@ public class ManufacturingEnterprise extends Module implements Component {
 
     @Override
     public void getProduction(List<Module> modules, List<Long> production) {
-        production.set(TypeResources.H2O.ordinal(), production.get(TypeResources.H2O.ordinal()) + 4800L);
-        production.set(TypeResources.O2.ordinal(), production.get(TypeResources.O2.ordinal()) + 5550L);
-        production.set(TypeResources.MATERIAL.ordinal(), production.get(TypeResources.MATERIAL.ordinal()) + 6150L);
+        production.set(TypeResources.H2O.ordinal(), production.get(TypeResources.H2O.ordinal()) + 500L);
+        production.set(TypeResources.O2.ordinal(), production.get(TypeResources.O2.ordinal()) + 5200L);
+        production.set(TypeResources.MATERIAL.ordinal(), production.get(TypeResources.MATERIAL.ordinal()) + 12300L);
     }
 
     @Override
