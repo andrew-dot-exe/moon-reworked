@@ -140,7 +140,7 @@ public String login(@RequestBody UserIn user, HttpServletResponse response){
 
     /**
      * Обновление JWT токена.
-     * @param request объект с refresh токеном
+     * @param refreshToken строка с refresh токеном
      * @return новая пара access и refresh токенов
      * @see RefreshRequest
      * @see JwtResponse

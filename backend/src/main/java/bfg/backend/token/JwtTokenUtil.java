@@ -34,12 +34,14 @@ public class JwtTokenUtil {
     // Генерация access token
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("token_type", "access"); // Добавляем метку
         return createToken(claims, userDetails.getUsername(), expiration);
     }
 
     // Генерация refresh token
     public String generateRefreshToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("token_type", "refresh"); // Добавляем метку
         return createToken(claims, userDetails.getUsername(), refreshExpiration);
     }
 

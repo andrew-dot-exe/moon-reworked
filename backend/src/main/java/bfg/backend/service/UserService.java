@@ -140,16 +140,16 @@ public class UserService {
      */
     public JwtResponse refresh(RefreshRequest request){
         String refreshToken = request.refreshToken();
-
         // Проверяем, что токен валиден и не отозван
-        if (jwtTokenUtil.isTokenExpired(refreshToken)) {
+        if (!jwtTokenUtil.isTokenExpired(refreshToken)) {
             String username = jwtTokenUtil.extractUsername(refreshToken);
             Optional<User> optionalUser = userRepository.findByEmail(username);
             if(optionalUser.isEmpty()){
                 throw new UserNotFoundException();
             }
             String newAccessToken = jwtTokenUtil.generateToken(optionalUser.get());
-            return new JwtResponse(newAccessToken, refreshToken);
+            String newRefreshToken = jwtTokenUtil.generateRefreshToken(optionalUser.get());
+            return new JwtResponse(newAccessToken, newRefreshToken);
         } else {
             throw new NotRefreshTokenException();
         }
