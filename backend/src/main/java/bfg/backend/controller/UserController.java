@@ -70,7 +70,7 @@ public String login(@RequestBody UserIn user, HttpServletResponse response){
     
     // Cookie для refresh token
     Cookie refreshCookie = new Cookie("refresh_token", jwtResponse.refreshToken());
-    refreshCookie.setHttpOnly(true);
+    refreshCookie.setHttpOnly(false);
     refreshCookie.setPath("/");
     refreshCookie.setMaxAge(259200); // 3 дня
     //refreshCookie.setSecure(true); // Раскомментировать для HTTPS
@@ -102,7 +102,7 @@ public String login(@RequestBody UserIn user, HttpServletResponse response){
         
         // Cookie для refresh token
         Cookie refreshCookie = new Cookie("refresh_token", JwtResponse.refreshToken());
-        refreshCookie.setHttpOnly(true);
+        refreshCookie.setHttpOnly(false);
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(259200); // 3 дня
         //refreshCookie.setSecure(true); // Раскомментировать для HTTPS
@@ -127,7 +127,7 @@ public String login(@RequestBody UserIn user, HttpServletResponse response){
         
         // Удаляем cookie с refresh токеном
         Cookie refreshCookie = new Cookie("refresh_token", null);
-        refreshCookie.setHttpOnly(true);
+        refreshCookie.setHttpOnly(false);
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(0);
         response.addCookie(refreshCookie);
@@ -161,7 +161,7 @@ public String login(@RequestBody UserIn user, HttpServletResponse response){
 
         // Обновляем refresh токен (по желанию можно сохранить в отдельную cookie)
         Cookie refreshCookie = new Cookie("refresh_token", jwtResponse.refreshToken());
-        refreshCookie.setHttpOnly(true);
+        refreshCookie.setHttpOnly(false);
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(259200); // 3 дня
         //refreshCookie.setSecure(true); // Раскомментировать для HTTPS
