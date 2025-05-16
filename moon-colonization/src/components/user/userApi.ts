@@ -34,6 +34,19 @@ export const userApi = {
     }
     return response.headers
   },
+
+  get_info: async () => {
+    // Получаем информацию о текущем пользователе (относится к этапу 3)
+    // Необходимо сохранить данные в стор
+    const response = await axiosInstance.get(`${API_URL}/info`)
+
+    return response.data // map later
+  },
+
+  refresh: async () => {
+    const response = await axiosInstance.post(`${API_URL}/refresh`)
+    return response.data
+  },
 }
 
 export default userApi
