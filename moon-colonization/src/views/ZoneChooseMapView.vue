@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Header from '@/components/ui/Header.vue';
+import UIHeader from '@/components/ui/UIHeader.vue';
 import { ImagePoint } from '@/components/utils/fitElements';
 import { useComponentStore } from '@/stores/componentStore';
 import { onMounted, ref, watch } from 'vue';
@@ -30,8 +30,8 @@ const isDragging = ref(false)
 const startPos = ref({ x: 0, y: 0 })
 const translatePos = ref({ x: 0, y: 0 })
 const scale = ref(1)
-const imgWidth = 2696 
-const imgHeight = 2360 
+const imgWidth = 2696
+const imgHeight = 2360
 
 const originalPositions = [
   new ZonePosition("Низина 1", new ImagePoint(1479, 1449), `${markerPaths}/lowlands-default.svg`),
@@ -51,31 +51,31 @@ onMounted(() => {
 
 const checkBoundaries = () => {
   if (!mapContainer.value) return;
-  
+
   const containerWidth = mapContainer.value.clientWidth;
   const containerHeight = mapContainer.value.clientHeight;
-  
+
   // Рассчитываем минимальные и максимальные допустимые позиции
   const minX = containerWidth - imgWidth * scale.value;
   const minY = containerHeight - imgHeight * scale.value;
-  
+
   // Ограничиваем позицию по X
   translatePos.value.x = Math.max(
     minX,
     Math.min(0, translatePos.value.x)
   );
-  
+
   // Ограничиваем позицию по Y
   translatePos.value.y = Math.max(
     minY,
     Math.min(0, translatePos.value.y)
   );
-  
+
   // Если карта меньше контейнера, центрируем ее
   if (imgWidth * scale.value < containerWidth) {
     translatePos.value.x = (containerWidth - imgWidth * scale.value) / 2;
   }
-  
+
   if (imgHeight * scale.value < containerHeight) {
     translatePos.value.y = (containerHeight - imgHeight * scale.value) / 2;
   }
@@ -85,13 +85,13 @@ const centerMap = () => {
   if (mapContainer.value) {
     const containerWidth = mapContainer.value.clientWidth
     const containerHeight = mapContainer.value.clientHeight
-    
+
     // Масштаб для полного отображения по ширине или высоте
     const scaleWidth = containerWidth / imgWidth * 5
     const scaleHeight = containerHeight / imgHeight * 5
-    
+
     scale.value = Math.min(scaleWidth, scaleHeight)
-    
+
     // Устанавливаем начальные координаты для центрирования карты
     translatePos.value = {
       x: (containerWidth - imgWidth * scale.value) / 2 - 300,
@@ -113,12 +113,12 @@ const handleMouseDown = (e: MouseEvent) => {
 
 const handleMouseMove = (e: MouseEvent) => {
   if (!isDragging.value) return
-  
+
   translatePos.value = {
     x: e.clientX - startPos.value.x,
     y: e.clientY - startPos.value.y
   }
-  
+
   checkBoundaries()
 }
 
@@ -129,31 +129,31 @@ const handleMouseUp = () => {
 
 const handleWheel = (e: WheelEvent) => {
   e.preventDefault()
-  
+
   const rect = mapContainer.value?.getBoundingClientRect()
   if (!rect) return
-  
+
   const mouseX = e.clientX - rect.left
   const mouseY = e.clientY - rect.top
-  
+
   const mapX = (mouseX - translatePos.value.x) / scale.value
   const mapY = (mouseY - translatePos.value.y) / scale.value
-  
+
   const delta = -e.deltaY
   const zoomFactor = 0.08
-  const newScale = delta > 0 
-    ? scale.value * (1 + zoomFactor) 
+  const newScale = delta > 0
+    ? scale.value * (1 + zoomFactor)
     : scale.value / (1 + zoomFactor)
-  
+
   // Ограничиваем масштаб
   scale.value = Math.min(Math.max(1.2, newScale), 4)
-  
+
   // Корректируем позицию для zoom относительно курсора
   translatePos.value = {
     x: mouseX - mapX * scale.value,
     y: mouseY - mapY * scale.value
   }
-  
+
   checkBoundaries()
 }
 
@@ -169,42 +169,20 @@ watch([scale, translatePos], () => {
 
 <template>
   <div class="main-container">
-    <Header class="header" />
-    
-    <div 
-      class="map-container"
-      ref="mapContainer"
-      @mousedown="handleMouseDown"
-      @mousemove="handleMouseMove"
-      @mouseup="handleMouseUp"
-      @mouseleave="handleMouseUp"
-      @wheel="handleWheel"
-    >
-      <div 
-        class="map-transform"
-        :style="{
-          transform: `translate(${translatePos.x}px, ${translatePos.y}px) scale(${scale})`,
-          cursor: isDragging ? 'grabbing' : 'grab'
-        }"
-      >
-        <img 
-          ref="mapImage"
-          class="map-image" 
-          :src="imgSrc" 
-          alt="Moon Map" 
-          draggable="false"
-        />
-        
-        <div
-          v-for="position in originalPositions"
-          :key="position.name"
-          class="zone-marker"
-          :style="{
-            left: `calc(${(position.point.x / imgWidth) * 100}%)`,
-            top: `calc(${(position.point.y / imgHeight) * 100}%)`
-          }"
-          @click="handleZoneClick(position)"
-        >
+    <UIHeader class="header" />
+
+    <div class="map-container" ref="mapContainer" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
+      @mouseup="handleMouseUp" @mouseleave="handleMouseUp" @wheel="handleWheel">
+      <div class="map-transform" :style="{
+        transform: `translate(${translatePos.x}px, ${translatePos.y}px) scale(${scale})`,
+        cursor: isDragging ? 'grabbing' : 'grab'
+      }">
+        <img ref="mapImage" class="map-image" :src="imgSrc" alt="Moon Map" draggable="false" />
+
+        <div v-for="position in originalPositions" :key="position.name" class="zone-marker" :style="{
+          left: `${(position.point.x / imgWidth) * 100}%`,
+          top: `${(position.point.y / imgHeight) * 100}%`,
+        }" @click="handleZoneClick(position)">
           <div class="marker-icon" :style="{ backgroundImage: `url(${position.icon})` }"></div>
         </div>
       </div>
