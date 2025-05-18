@@ -70,28 +70,30 @@ const handleZoneClick = async (zone: ZonePosition) => {
   console.log(zone.name);
   // map and colonization start
   // save to state
-  componentStore.setComponent('login')
-  //componentStore.setComponent('colonization')
+  //componentStore.setComponent('login')
+  componentStore.setComponent('colonization')
 
 }
 
 </script>
 
 <template>
-  <Header/>
+
   <div class="map-container">
+
     <div class="map-aspect-ratio">
+
       <div class="map-content">
         <img class="map-image" :src="imgSrc" alt="Moon Map" ref="mapBackground" />
-        
-        <div 
-          v-for="position in originalPositions" 
-          :key="position.name" 
-          class="zone-marker" 
+
+        <div
+          v-for="position in originalPositions"
+          :key="position.name"
+          class="zone-marker"
           :style="{
             left: `${(position.point.x / 2880) * 100}%`,
             top: `${(position.point.y / 2048) * 100}%`,
-          }" 
+          }"
           @click="handleZoneClick(position)"
         >
           <div class="marker-icon" :style="{ backgroundImage: `url(${position.icon})` }"></div>
