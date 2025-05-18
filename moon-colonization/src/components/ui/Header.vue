@@ -318,10 +318,12 @@ p {
 }
 .master-resource {
     display: flex;
-    padding: 5px;
+    padding-right: 5px;
+    padding-left: 5px;
     align-items: flex-start;
     align-self: stretch;
     background: #464646;
+    max-height: 25px;
 }
 .information {
     display: flex;
