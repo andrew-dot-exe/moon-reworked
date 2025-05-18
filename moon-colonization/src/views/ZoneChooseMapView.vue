@@ -200,8 +200,8 @@ watch([scale, translatePos], () => {
           :key="position.name"
           class="zone-marker"
           :style="{
-            left: `${(position.point.x / imgWidth) * 100}%`,
-            top: `${(position.point.y / imgHeight) * 100}%`,
+            left: `calc(${(position.point.x / imgWidth) * 100}%)`,
+            top: `calc(${(position.point.y / imgHeight) * 100}%)`
           }"
           @click="handleZoneClick(position)"
         >
@@ -249,18 +249,21 @@ watch([scale, translatePos], () => {
 
 .zone-marker {
   position: absolute;
-  transform: translate(-50%, -50%);
   z-index: 1;
   cursor: pointer;
   pointer-events: auto;
+  width: 0;
+  height: 0;
 }
 
 .marker-icon {
-  width: clamp(60px, 10vw, 180px);
-  height: clamp(60px, 10vw, 180px);
+  width: 60px;
+  height: 60px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.7));
+  transform: translate(-10px, -40px);
+  transition: transform 0.2s ease;
 }
 </style>
