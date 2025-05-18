@@ -18,7 +18,7 @@ const checkTokenFromCookie = (): boolean => {
 onMounted(() => {
   const isLogged: boolean = checkTokenFromCookie();
   if (isLogged) {
-    componentStore.setComponent('zoneChooser');
+    componentStore.setComponent('zoneChooserMap');
   }
 })
 </script>

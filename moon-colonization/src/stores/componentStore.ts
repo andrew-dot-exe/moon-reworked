@@ -5,10 +5,12 @@ import { defineStore } from 'pinia'
 import { markRaw, type Component } from 'vue'
 import LoginView from '@/views/LoginView.vue'
 import ZoneChooserView from '@/views/ZoneChooserView.vue'
+import ZoneChooserMapView from '@/views/ZoneChooseMapView.vue'
 
 type Views = {
   login: typeof LoginView
   zoneChooser: typeof ZoneChooserView
+  zoneChooserMap: typeof ZoneChooserMapView
 }
 export const useComponentStore = defineStore('component', {
   state: () => ({
@@ -16,6 +18,7 @@ export const useComponentStore = defineStore('component', {
     views: {
       login: markRaw(LoginView),
       zoneChooser: markRaw(ZoneChooserView),
+      zoneChooserMap: markRaw(ZoneChooserMapView),
     },
   }),
   actions: {

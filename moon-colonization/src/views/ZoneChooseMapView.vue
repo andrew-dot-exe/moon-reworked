@@ -69,22 +69,29 @@ const handleZoneClick = async (zone: ZonePosition) => {
   console.log(zone.name);
   // map and colonization start
   // save to state
-  componentStore.setComponent('colonization')
+  componentStore.setComponent('login')
+  //componentStore.setComponent('colonization')
+
 }
 
 </script>
 
-
 <template>
   <div class="map-container">
     <div class="map-aspect-ratio">
-      <div class="map-content">s
+      <div class="map-content">
         <img class="map-image" :src="imgSrc" alt="Moon Map" ref="mapBackground" />
-
-        <div v-for="position in originalPositions" :key="position.name" class="zone-marker" :style="{
-          left: `${(position.point.x / 2048) * 100}%`,
-          top: `${(position.point.y / 1080) * 100}%`,
-        }" @click="handleZoneClick(position)" style="cursor: pointer;">
+        
+        <div 
+          v-for="position in originalPositions" 
+          :key="position.name" 
+          class="zone-marker" 
+          :style="{
+            left: `${(position.point.x / 2880) * 100}%`,
+            top: `${(position.point.y / 2048) * 100}%`,
+          }" 
+          @click="handleZoneClick(position)"
+        >
           <div class="marker-icon" :style="{ backgroundImage: `url(${position.icon})` }"></div>
         </div>
       </div>
@@ -92,24 +99,38 @@ const handleZoneClick = async (zone: ZonePosition) => {
   </div>
 </template>
 
-<style>
-.map-container {
+
+<style scoped>
+/* Глобальные стили для отключения скролла */
+html, body {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
   width: 100%;
   height: 100%;
-  position: relative;
+}
+
+.map-container {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
   background: black;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
+  touch-action: none; /* Отключает зум на мобильных устройствах */
 }
 
 .map-aspect-ratio {
   width: 100%;
   height: 0;
-  padding-bottom: 56.25%;
-  /* 1080/1920 = 0.5625 */
+  padding-bottom: 71.11%; /* 2048/2880 ≈ 0.7111 */
   position: relative;
+  max-width: 100vw;
+  max-height: 100vh;
 }
 
 .map-content {
@@ -118,6 +139,7 @@ const handleZoneClick = async (zone: ZonePosition) => {
   left: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 .map-image {
@@ -127,6 +149,8 @@ const handleZoneClick = async (zone: ZonePosition) => {
   position: absolute;
   top: 0;
   left: 0;
+  user-select: none; /* Запрещает выделение изображения */
+  -webkit-user-drag: none; /* Запрещает перетаскивание в WebKit */
 }
 
 .zone-marker {
@@ -136,17 +160,18 @@ const handleZoneClick = async (zone: ZonePosition) => {
   gap: clamp(5px, 1vw, 10px);
   transform: translate(-50%, -50%);
   z-index: 1;
+  cursor: pointer;
 }
 
 .marker-icon {
-  width: 180px;
-  height: 180px;
+  width: clamp(60px, 10vw, 180px);
+  height: clamp(60px, 10vw, 180px);
   position: relative;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+  pointer-events: auto; /* Обеспечивает кликабельность */
 }
-
 .zone-name {
   color: white;
   font-family: 'Feature Mono', monospace;
