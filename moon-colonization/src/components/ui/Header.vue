@@ -225,12 +225,6 @@
 </div>
 </template>
 
-<script setup lang="ts">
-
-</script>
-
-
-
 <style scoped>
 p {
     margin: 0px;
@@ -360,7 +354,7 @@ p {
     font-style: normal;
     font-weight: 400;
     line-height: normal;
-}
+} 
 .new-resource {
     display: flex;
     padding: 5px;
