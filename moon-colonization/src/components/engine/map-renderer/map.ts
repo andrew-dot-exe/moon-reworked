@@ -11,15 +11,16 @@ import {
   WebGLRenderer,
   Raycaster,
   Vector2,
+  Texture,
 } from 'three'
 
-class MoonCell {
+export class MoonCell {
   x: number
   y: number
   mesh: Mesh
   material: Material
 
-  constructor(x: number, y: number) {
+  constructor(x: number, y: number, texture?: Texture) {
     this.x = x
     this.y = y
 
@@ -35,6 +36,7 @@ class MoonCell {
       color: color,
       roughness: 0.8,
       metalness: 0.1,
+      map: texture ?? undefined,
     })
 
     this.mesh = new Mesh(geometry, this.material)
@@ -71,10 +73,13 @@ export class MoonMap {
       .fill(null)
       .map(() => Array(10).fill(null))
 
+    const textureLoader = new TextureLoader()
+    const cellTexture = textureLoader.load('/textures/moon-texture.png')
+
     // Генерация карты
     for (let i: number = 0; i < 10; i++) {
       for (let j: number = 0; j < 10; j++) {
-        this.map[i][j] = new MoonCell(i, j)
+        this.map[i][j] = new MoonCell(i, j, cellTexture)
       }
     }
   }
