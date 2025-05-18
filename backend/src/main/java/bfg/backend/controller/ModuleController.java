@@ -1,9 +1,11 @@
 package bfg.backend.controller;
 
 import bfg.backend.dto.request.module.CreatedModule;
+import bfg.backend.dto.responce.moduleType.ModuleType;
 import bfg.backend.dto.responce.optimality.Optimality;
 import bfg.backend.repository.module.Module;
 import bfg.backend.service.ModuleService;
+import bfg.backend.service.logic.TypeModule;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,5 +45,16 @@ public class ModuleController {
     @PostMapping
     public Long create(@RequestBody Module module) {
         return moduleService.create(module);
+    }
+
+    /**
+     * Возвращает все типы модулей с их характеристиками.
+     *
+     * @return Список типов модулей
+     * @see ModuleType
+     */
+    @GetMapping(path = "types")
+    public List<ModuleType> getModuleTypes(){
+        return TypeModule.getTypes();
     }
 }
