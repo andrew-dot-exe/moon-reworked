@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import type { ZoneModel } from '@/components/colony/zones';
+//import type { ZoneModel } from '@/components/colony/zones';
+import Header from '@/components/ui/Header.vue';
 import { ImagePoint, ImageResizer } from '@/components/utils/fitElements';
 import { useComponentStore } from '@/stores/componentStore';
-import { useZoneStore } from '@/stores/zoneStore';
+//import { useZoneStore } from '@/stores/zoneStore';
 import { onMounted, ref } from 'vue';
 
-const zonesStore = useZoneStore()
+//const zonesStore = useZoneStore()
 const componentStore = useComponentStore()
 
 // низина 1 - (1251, 1658)
@@ -77,6 +78,7 @@ const handleZoneClick = async (zone: ZonePosition) => {
 </script>
 
 <template>
+  <Header/>
   <div class="map-container">
     <div class="map-aspect-ratio">
       <div class="map-content">

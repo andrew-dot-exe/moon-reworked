@@ -6,3 +6,9 @@ export interface Module {
   x: number
   y: number
 }
+export interface EngineModuleModel {
+  // Модель данных для информации модуля для отрисовки
+  x: number
+  y: number
+  // ссылка на тип модуля
+}

@@ -39,7 +39,6 @@ export const userApi = {
     // Получаем информацию о текущем пользователе (относится к этапу 3)
     // Необходимо сохранить данные в стор
     const response = await axiosInstance.get(`${API_URL}/info`)
-
     return response.data // map later
   },
 
