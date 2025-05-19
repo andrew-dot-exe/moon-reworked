@@ -1,9 +1,6 @@
 <template>
 
-  <div class="empty" v-if="isLoading">
-    <p>loading resources</p>
-  </div>
-  <div class="Header" v-else>
+  <div class="Header">
     <div class="master-header">
       <div class="Main-container">
         <div class="Logo-container">
@@ -44,7 +41,7 @@
                       </svg>
                     </div>
                     <div class="value">
-                      <p class="text-value">{{ resourceStore.resources[0].count }}</p>
+                      <p class="text-value">{{ isLoading ? 0 : resourceStore.resources[0].count }}</p>
                       <p class="unit">кг</p>
                     </div>
                   </div>
@@ -64,7 +61,7 @@
                       </svg>
                     </div>
                     <div class="value">
-                      <p class="text-value">{{ resourceStore.resources[1].count }}</p>
+                      <p class="text-value">{{ isLoading ? -0 : resourceStore.resources[1].count }}</p>
                       <p class="unit">кг</p>
                     </div>
                   </div>
@@ -82,7 +79,7 @@
                       </svg>
                     </div>
                     <div class="value">
-                      <p class="text-value">{{ resourceStore.resources[2].count }}</p>
+                      <p class="text-value">{{ isLoading ? -0 : resourceStore.resources[2].count }}</p>
                       <p class="unit">кг</p>
                     </div>
                   </div>
@@ -102,7 +99,7 @@
                       </svg>
                     </div>
                     <div class="value">
-                      <p class="text-value">{{ resourceStore.resources[3].count }}</p>
+                      <p class="text-value">{{ isLoading ? -0 : resourceStore.resources[3].count }}</p>
                       <p class="unit">кг</p>
                     </div>
                   </div>
@@ -126,7 +123,7 @@
                       </svg>
                     </div>
                     <div class="value">
-                      <p class="text-value">{{ resourceStore.resources[4].count }}</p>
+                      <p class="text-value">{{ isLoading ? -0 : resourceStore.resources[4].count }}</p>
                       <p class="unit">кг</p>
                     </div>
                   </div>
@@ -153,7 +150,7 @@
                       </svg>
                     </div>
                     <div class="value">
-                      <p class="text-value">{{ resourceStore.resources[5].count }}</p>
+                      <p class="text-value">{{ isLoading ? -0 : resourceStore.resources[5].count }}</p>
                       <p class="unit">кг</p>
                     </div>
                   </div>
@@ -173,7 +170,7 @@
                       </svg>
                     </div>
                     <div class="value">
-                      <p class="text-value">{{ resourceStore.resources[6].count }}</p>
+                      <p class="text-value">{{ isLoading ? -0 : resourceStore.resources[6].count }}</p>
                       <p class="unit">кг</p>
                     </div>
                   </div>
@@ -193,7 +190,7 @@
                       </svg>
                     </div>
                     <div class="value">
-                      <p class="text-value">{{ resourceStore.resources[7].count }}</p>
+                      <p class="text-value">{{ isLoading ? -0 : resourceStore.resources[7].count }}</p>
                       <p class="unit">кг</p>
                     </div>
                   </div>
@@ -232,7 +229,7 @@
           </div>
         </div>
         <div class="Add-functions">
-          <div class="Button-statistic">
+          <div class="Button-statistic" @click="toggleStatistics">
             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
               <g clip-path="url(#clip0_115_667)">
                 <path
@@ -246,7 +243,7 @@
               </defs>
             </svg>
           </div>
-          <div class="Button-menu">
+          <div class="Button-menu" @click="toggleMenu">
             <div class="burger">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="6" viewBox="0 0 12 6" fill="none">
                 <path d="M1 1L11 1" stroke="black" stroke-linecap="square" />
@@ -261,11 +258,21 @@
       </div>
     </div>
   </div>
+  <div v-if="isStatisticsVisible" class="statistics-overlay">
+    <StatisticWindow @toggle="toggleStatistics"/>
+  </div>
+  <div v-if="isMenuVisible" class="statistics-overlay" @click.self="toggleMenu">
+    <MenuWindow @toggle="toggleMenu"/>
+  </div>
+  
+
 </template>
 
 <script setup lang="ts">
 import { useResourceStore } from '@/stores/resourceStore';
 import { onMounted, ref } from 'vue';
+import StatisticWindow from '@/components/ui/StatisticWindow.vue';
+import MenuWindow from '@/components/ui/MenuWindow.vue';
 
 const resourceStore = useResourceStore();
 const isLoading = ref(true)
@@ -277,13 +284,36 @@ onMounted(async () => {
   isLoading.value = false
 });
 
+const isStatisticsVisible = ref(false);
+
+const toggleStatistics = () => {
+  isStatisticsVisible.value = !isStatisticsVisible.value;
+};
+
+const isMenuVisible = ref(false);
+
+const toggleMenu = () => {
+  isMenuVisible.value = !isMenuVisible.value;
+};
+
 
 </script>
 
 <style scoped>
-p {
-  margin: 0px;
+.statistics-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
+
 
 .Header {
   display: flex;
@@ -545,6 +575,9 @@ p {
   gap: 10px;
   flex-shrink: 0;
   background: #BCFE37;
+
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
 .Button-statistic svg {
