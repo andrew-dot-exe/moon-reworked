@@ -8,26 +8,26 @@
             </div>
             <div class="information-container">
                 <div class="Heading">
-                    <h1>Жилой комплекс</h1>
+                    <h1>{{ data.name }}</h1>
                     <div class="line"></div>
                 </div>
                 <div class="Paragraph">
                     <div class="Built-all">
-                        <p class="Built">0</p>
-                        <p class="All">/</p>
-                        <p class="All">0</p>
+                        <p class="Built">{{ data.people }}</p>
+                        <!--<p class="All">/</p>
+                        <p class="All">0</p>-->
                     </div>
                     <div class="Cost-container">
                         <div class="Text">
                             <div class="Number">
-                                <p class="number">9 500</p>
+                                <p class="number">{{ data.cost }}</p>
                                 <div class="Unit">
-                                    <p class="unit"></p>
+                                    <p class="unit">кг</p>
                                 </div>
                             </div>
                             <div class="Icon">
                                 <div class="icon-material">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="16" viewBox="0 0 22 16" fill="none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="15" viewBox="0 0 22 15" fill="none">
                                         <path d="M14.497 0.5L2.10545 7.0862L7.76632 10.0746L20.1207 3.54988L14.497 0.5H14.497ZM16.721 2.8186L18.0526 3.49468L7.78744 8.88775L4.30828 7.03603L5.6268 6.34039L7.78749 7.49175L16.7212 2.81865L16.721 2.8186ZM20.6961 4.34276L8.14683 10.9712L7.84602 15.2973L22 7.7835L20.6961 4.34276ZM1.49894 7.8646L0 11.8599L6.85916 15.5L7.17937 10.8627L1.49889 7.86465L1.49894 7.8646Z" fill="white"/>
                                     </svg>
                                 </div>
@@ -46,8 +46,21 @@
         </div>
     </div>
 
-    
 </template>
+<script>
+import { TypeModule } from '@/components/typeModules/typeModules';
+import { damp } from 'three/src/math/MathUtils.js';
+export default {
+  name: 'ModuleComponent',
+  props: {
+    data: {  // Имя должно соответствовать тому, что вы передаете (:data="item")
+      type: TypeModule,  // Указываем тип данных
+      required: true  // Обязательный параметр
+    }
+  }
+  // Дополнительная логика компонента...
+}
+</script>
 
 <style scoped>
 .object {
@@ -142,11 +155,9 @@ letter-spacing: 0.8px;
     font-weight: 400;
     line-height: normal;
     letter-spacing: 1.5px;
-}
+}/*
 .All {
     color: #9C9C9C;
-    /* leading-trim: both;
-    text-edge: cap; */
     font-feature-settings: 'dlig' on;
     font-family: "Feature Mono";
     font-size: 30px;
@@ -154,7 +165,7 @@ letter-spacing: 0.8px;
     font-weight: 400;
     line-height: normal;
     letter-spacing: 1.5px;
-}
+}*/
 .Cost-container {
     border: 1px solid #FFF;
     display: flex;
@@ -204,6 +215,8 @@ letter-spacing: 0.8px;
     letter-spacing: 0.75px;
 }
 .Icon {
+    position: relative;
+    top: -10px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -216,8 +229,8 @@ letter-spacing: 0.8px;
     align-items: center;
 }
 .icon-material svg {
-    width: 22px;
-    height: 15px;
+    width: 26px;
+    height: 18px;
     fill: #FFF;
 }
 .Docs {

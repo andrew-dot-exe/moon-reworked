@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ModuleComponent from '@/components/ui/ModuleComponent.vue';
 import { typeModulesStore } from '@/stores/typeModulesStore';
-import { TypeModule } from '@/components/typeModules/typeModules'
+import { TypeModule } from '@/components/typeModules/typeModules';
 import { onMounted, ref } from 'vue';
 
 const typeStore = typeModulesStore();
@@ -14,20 +14,31 @@ const totalPages = ref(1);
 
 onMounted(async () => {
   await typeStore.getTypeModules();
-  isLoaded.value = true
+  isLoaded.value = true;
   couningVisible();
 });
 
 const couningVisible = () => {
-
+  const count = Math.floor((screen.width - 110) / 400);
+  const l = typeStore.typeModules.length;
+  totalPages.value = Math.ceil(l / count);
+  if(currentPage.value > totalPages.value) currentPage.value = totalPages.value;
+  visibleItems.value.length = 0;
+  for(let i = (currentPage.value - 1) * count; i < currentPage.value * count; i++){
+    if(i < l){
+        visibleItems.value.push(typeStore.typeModules[i]);
+    }
+  }
 }
 
 const prevPage = () => {
   currentPage.value = currentPage.value > 1 ? currentPage.value - 1 : 1;
+  couningVisible();
 };
 
 const nextPage = () => {
   currentPage.value = currentPage.value < totalPages.value ? currentPage.value + 1 : totalPages.value;
+  couningVisible();
 };
 
 
@@ -73,9 +84,9 @@ const nextPage = () => {
                         </div>
                     </div>
                 </div>
-                <div class="object-container" v-if="{ isLoaded }">
+                <div class="object-container" v-if="{ isLoaded }" >
                     <div class="object-container-container">
-                        <div class="object-object">
+                        <div class="object-object" id="cont">
                             <ModuleComponent 
                             v-for="(item, index) in visibleItems" 
                             :key="index"
@@ -84,15 +95,15 @@ const nextPage = () => {
                         </div>
                     </div>
                     <div class="pages" v-if="totalPages > 1">
-                    <div class="pages-pages">
-                        <p class="pp-left" @click="prevPage" :class="{ disabled: currentPage === 1 }"><</p>
-                        <div class="pages-container">
-                        <p>{{ currentPage }}</p>
-                        <p>/</p>
-                        <p>{{ totalPages }}</p>
+                        <div class="pages-pages">
+                            <p class="pp-left" @click="prevPage" :class="{ disabled: currentPage === 1 }"><</p>
+                            <div class="pages-container">
+                                <p>{{ currentPage }}</p>
+                                <p>/</p>
+                                <p>{{ totalPages }}</p>
+                            </div>
+                            <p class="pp-rigth" @click="nextPage" :class="{ disabled: currentPage === totalPages }">></p>
                         </div>
-                        <p class="pp-rigth" @click="nextPage" :class="{ disabled: currentPage === totalPages }">></p>
-                    </div>
                     </div>
                 </div>
             </div>
@@ -231,19 +242,6 @@ fill: #464646;
     color: #464646;;
 }
 
-/* .object-container {
-    display: flex;
-    padding: 10px 20px;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 10px;
-    align-self: stretch; */
-    /* box-sizing: border-box;
-    border: 1px solid #BCFE37; */
-    /* outline: 1px solid #BCFE37;
-    background: rgba(0, 0, 0, 0.80);
-} */
 .object-container {
     position: relative; /* нужно для псевдоэлемента */
     display: flex;
@@ -279,9 +277,12 @@ height: 120px;
 align-items: center;
 gap: 35px;
 flex: 1 0 0;
+    width: 90vw;
 }
 
 .pages {
+    position: relative;
+    top: -10px;
     display: flex;
     flex-direction: column;
     justify-content: center;

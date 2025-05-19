@@ -17,32 +17,32 @@ import java.util.List;
  * - Конструктор соответствующего компонента
  */
 public enum TypeModule {
-    LIVE_MODULE_X("Жилой модуль", 0, 9500, true, LiveModuleX::new),
-    LIVE_MODULE_Y("Жилой модуль", 0, 9500, true, LiveModuleY::new),
-    LIVE_ADMINISTRATIVE_MODULE("Административный модуль", 2, 16000, true, LiveAdministrativeModule::new),
+    LIVE_MODULE_X("Жилой модуль(x)", 0, 9500, true, LiveModuleX::new),
+    LIVE_MODULE_Y("Жилой модуль(y)", 0, 9500, true, LiveModuleY::new),
+    LIVE_ADMINISTRATIVE_MODULE("Административный модуль(жилой)", 2, 16000, true, LiveAdministrativeModule::new),
     SPORT_MODULE("Спортивный модуль", 0, 5000, true, SportModule::new),
     MEDICAL_MODULE("Медицинский модуль", 1, 5000, true, MedicalModule::new),
     PLANTATION("Плантация", 3, 42000, true, Plantation::new),
-    RESEARCH_MODULE_PLANTATION("Исследовательский модуль", 1, 5000, true, ResearchModulePlantation::new),
-    RESEARCH_MODULE_MINE("Исследовательский модуль", 1, 5000, true, ResearchModuleMine::new),
-    RESEARCH_MODULE_TELESCOPE("Исследовательский модуль", 1, 5000, true, ResearchModuleTelescope::new),
-    RESEARCH_MODULE_TERRITORY("Исследовательский модуль", 1, 5000, true, ResearchModuleTerritory::new),
+    RESEARCH_MODULE_PLANTATION("Исследовательский модуль(плантация)", 1, 5000, true, ResearchModulePlantation::new),
+    RESEARCH_MODULE_MINE("Исследовательский модуль(шахта)", 1, 5000, true, ResearchModuleMine::new),
+    RESEARCH_MODULE_TELESCOPE("Исследовательский модуль(телескоп)", 1, 5000, true, ResearchModuleTelescope::new),
+    RESEARCH_MODULE_TERRITORY("Исследовательский модуль(территория)", 1, 5000, true, ResearchModuleTerritory::new),
     HALLWAY("Коридор", 0, 3500, true, Hallway::new),
-    ADMINISTRATIVE_MODULE("Административный модуль", 2, 16000, false, AdministrativeModule::new),
+    ADMINISTRATIVE_MODULE("Административный модуль(технический)", 2, 16000, false, AdministrativeModule::new),
     SOLAR_POWER_PLANT("Солнечная электростанция", 0, 1800, false, SolarPowerPlant::new),
     REPAIR_MODULE("Ремонтный модуль", 2, 15000, false, RepairModule::new),
     COSMODROME("Космодром", 2, 900, false, Cosmodrome::new),
     COMMUNICATION_TOWER("Вышка связи", 0, 1000, false, CommunicationTower::new),
-    LANDFILL("Мусорный полигон", 1, 15000, false, Landfill::new),
-    LANDFILL_BIO("Мусорный полигон", 1, 15000, false, LandfillBio::new),
-    MANUFACTURING_ENTERPRISE("Производственное предприятие", 1, 4200, false, ManufacturingEnterprise::new),
-    MANUFACTURING_ENTERPRISE_FUEL("Производственное предприятие", 1, 4200, false, ManufacturingEnterpriseFuel::new),
+    LANDFILL("Мусорный полигон(технический", 1, 15000, false, Landfill::new),
+    LANDFILL_BIO("Мусорный полигон(органический)", 1, 15000, false, LandfillBio::new),
+    MANUFACTURING_ENTERPRISE("Производственное предприятие(переработка)", 1, 4200, false, ManufacturingEnterprise::new),
+    MANUFACTURING_ENTERPRISE_FUEL("Производственное предприятие(топливо)", 1, 4200, false, ManufacturingEnterpriseFuel::new),
     ASTRONOMICAL_SITE("Астрономическая площадка", 0, 30000, false, AstronomicalSite::new),
     MINE_BASE("База шахты", 1, 20000, false, MineBase::new),
-    WAREHOUSE_FOOD("Склад", 0, 14000, false, WarehouseFood::new),
-    WAREHOUSE_GASES("Склад", 0, 14000, false, WarehouseGases::new),
-    WAREHOUSE_FUEL("Склад", 0, 14000, false, WarehouseFuel::new),
-    WAREHOUSE_MATERIAL("Склад", 0, 14000, false, WarehouseMaterial::new);
+    WAREHOUSE_FOOD("Склад(еда)", 0, 14000, false, WarehouseFood::new),
+    WAREHOUSE_GASES("Склад(газы)", 0, 14000, false, WarehouseGases::new),
+    WAREHOUSE_FUEL("Склад(топливо)", 0, 14000, false, WarehouseFuel::new),
+    WAREHOUSE_MATERIAL("Склад(материалы)", 0, 14000, false, WarehouseMaterial::new);
 
     private final String name;
     private final int cost;

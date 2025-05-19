@@ -1,5 +1,5 @@
-import type { ModuleModel } from '@/components/typeModules/modules'
-import { Module } from '@/components/typeModules/modules'
+import type { ModuleModel } from '@/components/modules/modules'
+import { Module } from '@/components/modules/modules'
 import * as THREE from 'three'
 
 export class BaseModule {
