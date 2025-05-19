@@ -8,25 +8,42 @@ const typeStore = typeModulesStore();
 const isLoaded = ref(false)
 
 const visibleItems = ref([] as TypeModule[]);
+const liveItems = ref([] as TypeModule[]);
+const techItems = ref([] as TypeModule[]);
 
 const currentPage = ref(1);
 const totalPages = ref(1);
+const activeHabitable = ref(true); // По умолчанию активна первая вкладка
 
 onMounted(async () => {
   await typeStore.getTypeModules();
   isLoaded.value = true;
+  liveItems.value.length = 0;
+  techItems.value.length = 0;
+  for(let i = 0; i < typeStore.typeModules.length; i++){
+    if(typeStore.typeModules[i].live){
+        liveItems.value.push(typeStore.typeModules[i]);
+    }
+    else{
+        techItems.value.push(typeStore.typeModules[i]);
+    }
+  }
   couningVisible();
 });
 
 const couningVisible = () => {
+  
   const count = Math.floor((screen.width - 110) / 400);
-  const l = typeStore.typeModules.length;
+
+  const typeModules = activeHabitable.value ? liveItems : techItems;
+
+  const l = typeModules.value.length;
   totalPages.value = Math.ceil(l / count);
   if(currentPage.value > totalPages.value) currentPage.value = totalPages.value;
   visibleItems.value.length = 0;
   for(let i = (currentPage.value - 1) * count; i < currentPage.value * count; i++){
     if(i < l){
-        visibleItems.value.push(typeStore.typeModules[i]);
+        visibleItems.value.push(typeModules.value[i]);
     }
   }
 }
@@ -39,6 +56,14 @@ const prevPage = () => {
 const nextPage = () => {
   currentPage.value = currentPage.value < totalPages.value ? currentPage.value + 1 : totalPages.value;
   couningVisible();
+};
+
+const setActiveTab = (flag : boolean) => {
+    if(activeHabitable.value != flag){
+        activeHabitable.value = flag;
+        currentPage.value = 1;
+        couningVisible();
+    }
 };
 
 
@@ -63,22 +88,22 @@ const nextPage = () => {
                 <div class="section">
                     <div class="section-section">
                         <div class="section-section">
-                            <div class="habitable-modules">
-                                <p class="ss-p" id="select">Обитаемые модули</p>
+                            <div 
+                            :class="{ 'select': activeHabitable == true, 'default': activeHabitable == false }"
+                            @click="setActiveTab(true)"
+                            >
+                                <p class="ss-p">Обитаемые модули</p>
                             </div>
                             <svg xmlns="http://www.w3.org/2000/svg" width="2" height="30" viewBox="0 0 2 30" fill="none">
                                 <path d="M0 30V0H2V30H0Z" fill="#464646"/>
                             </svg>
-                            <div class="technological-modules">
-                                <p class="ss-p" id="default">Технологические модули</p>
+                            <div 
+                            :class="{ 'select': activeHabitable == false, 'default': activeHabitable == true }"
+                            @click="setActiveTab(false)"
+                            >
+                                <p class="ss-p">Технологические модули</p>
                             </div>
                             <svg xmlns="http://www.w3.org/2000/svg" width="2" height="30" viewBox="0 0 2 30" fill="none">
-                                <path d="M0 30V0H2V30H0Z" fill="#464646"/>
-                            </svg>
-                            <div class="connection">
-                                <p class="ss-p" id="default">Связь</p>
-                            </div>
-                            <svg  xmlns="http://www.w3.org/2000/svg" width="2" height="30" viewBox="0 0 2 30" fill="none">
                                 <path d="M0 30V0H2V30H0Z" fill="#464646"/>
                             </svg>
                         </div>
@@ -200,32 +225,26 @@ p {
 align-self: stretch;
 fill: #464646;
 }
-.habitable-modules {
+
+.select {
     background: #BCFE37;
     display: flex;
-    width: 251px;
     padding: 7px 22px;
     justify-content: center;
     align-items: center;
     gap: 10px;
+    color: #000;
 }
-.technological-modules {
+.default {
     background: rgba(0, 0, 0, 0.80);
     display: flex;
     padding: 7px 22px;
     justify-content: center;
     align-items: center;
     gap: 10px;
+    color: #464646;
 }
-.connection {
-    background: rgba(0, 0, 0, 0.80);
-    display: flex;
-    padding: 7px 22px;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    align-self: stretch;
-}
+
 .ss-p {
     font-feature-settings: 'dlig' on;
     font-family: "Feature Mono";
@@ -234,12 +253,6 @@ fill: #464646;
     font-weight: 750;
     line-height: normal;
     letter-spacing: 0.75px;
-}
-#select {
-    color: #000;
-}
-#default {
-    color: #464646;;
 }
 
 .object-container {

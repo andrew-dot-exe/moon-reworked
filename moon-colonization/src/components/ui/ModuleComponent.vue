@@ -3,7 +3,7 @@
         <div class="master-object-block">
             <div class="icon">
                 <div class="icon-object">
-                    <img src="../img/Vector.png" alt="">
+                    <img :src="moduleImage" alt="">
                 </div>
             </div>
             <div class="information-container">
@@ -49,7 +49,8 @@
 </template>
 <script>
 import { TypeModule } from '@/components/typeModules/typeModules';
-import { damp } from 'three/src/math/MathUtils.js';
+import { computed } from 'vue';
+
 export default {
   name: 'ModuleComponent',
   props: {
@@ -60,6 +61,14 @@ export default {
   }
   // Дополнительная логика компонента...
 }
+const moduleImage = computed(() => {
+  const baseName = props.data.name.split('(')[0].trim().toLowerCase();
+  try {
+    return new URL(`/textures/modules/${baseName}.png`, import.meta.url).href;
+  } catch {
+    return '/textures/modules/default.png';
+  }
+});
 </script>
 
 <style scoped>
@@ -124,7 +133,7 @@ font-feature-settings: 'dlig' on;
 font-family: "Feature Mono";
 font-size: 16px;
 font-style: normal;
-font-weight: 400;
+font-weight: 200;
 line-height: normal;
 letter-spacing: 0.8px;
 }
