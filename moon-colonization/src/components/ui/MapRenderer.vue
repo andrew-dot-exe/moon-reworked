@@ -19,6 +19,13 @@ let gridHelper: THREE.GridHelper
 let axesHelper: THREE.AxesHelper
 let directionalLight: THREE.DirectionalLight
 
+
+function placeModule() {
+  // Функция размещения модуля на карту
+  // и добавления информации о нем в стор
+
+}
+
 function placeMeshOnCell(mesh: THREE.Mesh, x: number, z: number) {
   // Получаем высоту ячейки (если нужно разместить объект на поверхности)
   const cell = map.map[x][z]
@@ -32,10 +39,11 @@ function placeMeshOnCell(mesh: THREE.Mesh, x: number, z: number) {
   // Смещаем mesh в нужную позицию
   mesh.position.x = x - 4.5
   mesh.position.z = z - 4.5
-  mesh.position.y = cellHeight - meshBaseY
+  mesh.position.y = 0.11 // настройка для каждого плоского мэша (plane, etc)
 
-  mesh.castShadow = true
-  mesh.receiveShadow = true
+  console.log(mesh.position.y)
+
+
 
   scene.add(mesh)
 }

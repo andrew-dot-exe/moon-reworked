@@ -1,20 +1,26 @@
 import type { ModuleModel } from '@/components/modules/modules'
 import { Module } from '@/components/modules/modules'
 import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/Addons.js'
 
-export class BaseModule {
+const basePath = '/textures/modules/'
+
+export class ModuleMesh {
+  module_name: string
   mesh: THREE.Mesh
-  moduleInfo: ModuleModel
 
-  constructor(
-    geometry: THREE.BufferGeometry = new THREE.BoxGeometry(1, 1, 1),
-    material: THREE.Material = new THREE.MeshStandardMaterial({ color: 0x00ff00 }),
-    module: Module = new Module(0, 0, 0, 0, 0),
-  ) {
+  constructor(module_name: string) {
+    this.module_name = module_name
+    // Создаём геометрию плейна
+    const geometry = new THREE.PlaneGeometry(1, 1)
+    // Загружаем текстуру
+    const texture = new THREE.TextureLoader().load(basePath + module_name + '.png')
+    // Создаём материал с текстурой
+    const material = new THREE.MeshStandardMaterial({ map: texture, side: THREE.DoubleSide })
+    // Создаём меш
     this.mesh = new THREE.Mesh(geometry, material)
-    this.mesh.castShadow = true
-    this.mesh.receiveShadow = true
-    this.moduleInfo = module
+    this.mesh.position.y = 0
+    this.mesh.rotation.x = -Math.PI / 2
   }
 
   getMesh() {
