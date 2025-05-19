@@ -1,8 +1,6 @@
 
 <script setup lang="ts">
-defineProps<{
-  toggle?: () => void
-}>();
+const emit = defineEmits(['toggle']); 
 </script>
 
 <template>
@@ -11,7 +9,7 @@ defineProps<{
       <h3>Статистика</h3>
       <button @click="$emit('toggle')" class="close-button">×</button>
     </div>
-    <div class="menu-body">
+    <div >
         <!-- Ваш контент статистики здесь -->
         <p>Общая площадь: 1000 км²</p>
         <p>Застроено: 300 км²</p>
@@ -56,7 +54,4 @@ defineProps<{
   color: #000;
 }
 
-.menu-body {
-  /* Стили для содержимого статистики */
-}
 </style>

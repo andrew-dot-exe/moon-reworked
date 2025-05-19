@@ -169,7 +169,9 @@ watch([scale, translatePos], () => {
 
 <template>
   <div class="main-container">
-    <UIHeader class="header" />
+    <div class="header">
+      <UIHeader />
+    </div>
 
     <div class="map-container" ref="mapContainer" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
       @mouseup="handleMouseUp" @mouseleave="handleMouseUp" @wheel="handleWheel">

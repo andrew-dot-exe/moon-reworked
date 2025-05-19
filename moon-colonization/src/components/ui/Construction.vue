@@ -15,7 +15,16 @@ const currentPage = ref(1);
 const totalPages = ref(1);
 const activeHabitable = ref(true); // По умолчанию активна первая вкладка
 
+const screenWidth = ref(window.innerWidth)
+
+const handleResize = () => {
+  screenWidth.value = window.innerWidth
+  // Ваша логика при изменении размера
+  couningVisible();
+}
+
 onMounted(async () => {
+  window.addEventListener('resize', handleResize)
   await typeStore.getTypeModules();
   isLoaded.value = true;
   liveItems.value.length = 0;
@@ -33,7 +42,7 @@ onMounted(async () => {
 
 const couningVisible = () => {
   
-  const count = Math.floor((screen.width - 110) / 400);
+  const count = Math.floor((screenWidth.value - 110) / 400);
 
   const typeModules = activeHabitable.value ? liveItems : techItems;
 

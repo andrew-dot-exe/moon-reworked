@@ -261,7 +261,7 @@
   <div v-if="isStatisticsVisible" class="statistics-overlay">
     <StatisticWindow @toggle="toggleStatistics"/>
   </div>
-  <div v-if="isMenuVisible" class="statistics-overlay" @click.self="toggleMenu">
+  <div v-if="isMenuVisible" class="menu-overlay">
     <MenuWindow @toggle="toggleMenu"/>
   </div>
   
@@ -281,7 +281,7 @@ const isLoading = ref(true)
 // Lifecycle hooks
 onMounted(async () => {
   await resourceStore.getResources();
-  isLoading.value = false
+  if(resourceStore != null && resourceStore != undefined && resourceStore.resources.length > 0) isLoading.value = false;
 });
 
 const isStatisticsVisible = ref(false);
@@ -294,12 +294,24 @@ const isMenuVisible = ref(false);
 
 const toggleMenu = () => {
   isMenuVisible.value = !isMenuVisible.value;
+  console.log('isMenuVisible:', isMenuVisible.value);
 };
 
 
 </script>
 
 <style scoped>
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end; /* Меню выезжает справа, поэтому выравниваем по правому краю */
+}
 .statistics-overlay {
   position: fixed;
   top: 0;
@@ -594,6 +606,7 @@ const toggleMenu = () => {
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .burger {
