@@ -43,6 +43,10 @@ body {
   height: 100%;
   width: 100%;
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none; /* Для Safari */
+  -moz-user-select: none; /* Для Firefox */
+  -ms-user-select: none; /* Для IE/Edge */
 }
 
 #app {
