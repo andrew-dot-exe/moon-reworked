@@ -4,22 +4,32 @@
 
     <!-- UI оверлей -->
     <div class="ui-overlay">
-      <!-- Верхняя панель информации -->
-      <UIHeader />
-      <BuildButton />
+      <div style="pointer-events: auto;">
+        <UIHeader />
+      </div>
+      <div style="pointer-events: auto;">
+        <BuildButton />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import MapRenderer from '@/components/ui/MapRenderer.vue'
 import UIHeader from '@/components/ui/UIHeader.vue'
 import BuildButton from '@/components/ui/BuildButton.vue'
 import type { MoonCell } from '@/components/engine/map-renderer/map'
+import { useMapStore } from '@/stores/mapStore'
 
-const mapRendererRef = ref<InstanceType<typeof MapRenderer> | null>(null)
+const mapRendererRef = ref(null)
+const mapStore = useMapStore()
 
+onMounted(async () => {
+  await nextTick()
+  console.log('mapRendererRef after nextTick:', mapRendererRef.value)
+  mapStore.setRender(mapRendererRef)
+})
 
 // Обработчик выбора клетки
 function onCellSelected(x: number, z: number, cellData: MoonCell) {
@@ -44,7 +54,8 @@ function onCellSelected(x: number, z: number, cellData: MoonCell) {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  /* Позволяет кликам проходить сквозь UI на карту */
+  /* клики проходят сквозь overlay */
+  z-index: 2;
 }
 
 .info-panel {

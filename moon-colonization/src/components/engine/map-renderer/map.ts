@@ -1,11 +1,8 @@
 import {
   Material,
   Mesh,
-  MeshBasicMaterial,
   MeshStandardMaterial,
-  PlaneGeometry,
   BoxGeometry,
-  Scene,
   TextureLoader,
   Camera,
   WebGLRenderer,
@@ -24,13 +21,8 @@ export class MoonCell {
     this.x = x
     this.y = y
 
-    // Генерация случайной высоты для ячейки
     const height = 0.1
-
-    // Создаем геометрию блока с полученной высотой
     const geometry = new BoxGeometry(1, height, 1)
-
-    // Генерация случайного оттенка серого для лунной поверхности
     const color = this.getLunarColor()
     this.material = new MeshStandardMaterial({
       color: color,
@@ -38,7 +30,6 @@ export class MoonCell {
       metalness: 0.1,
       map: texture ?? undefined,
     })
-
     this.mesh = new Mesh(geometry, this.material)
 
     // Поднимаем блок так, чтобы его нижняя грань была на уровне y=0
@@ -239,23 +230,6 @@ export class MoonMap {
         cell.mesh.position.y = (originalHeight * heightScale) / 2
       }
     }
-  }
-
-  // Метод для добавления структуры на карту
-  addStructure(x: number, z: number, structureMesh: Mesh): boolean {
-    if (!this.isValidCoord(x, z)) {
-      return false
-    }
-
-    const cell = this.map[x][z]
-    // if (cell.data.hasStructure) {
-    //   return false // На клетке уже есть структура
-    // }
-
-    // Устанавливаем флаг наличия структуры
-    // cell.updateData({ hasStructure: true })
-
-    return true
   }
 
   // Получение всей карты

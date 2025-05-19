@@ -1,4 +1,4 @@
-export interface Module {
+export interface ModuleModel {
   id: number
   idZone: number
   moduleType: number
@@ -11,4 +11,20 @@ export interface EngineModuleModel {
   x: number
   y: number
   // ссылка на тип модуля
+}
+
+export class Module implements ModuleModel {
+  id: number
+  idZone: number
+  moduleType: number
+  x: number
+  y: number
+
+  constructor(id: number, idZone: number, moduleType: number, x: number, y: number) {
+    this.id = id
+    this.idZone = idZone
+    this.moduleType = moduleType
+    this.x = x
+    this.y = y
+  }
 }
