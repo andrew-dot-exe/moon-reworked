@@ -10,6 +10,10 @@
       <div style="pointer-events: auto;">
         <BuildButton />
       </div>
+
+      <div class="construction-block">
+        <Construction/>
+      </div>
     </div>
   </div>
 </template>
@@ -21,6 +25,7 @@ import UIHeader from '@/components/ui/UIHeader.vue'
 import BuildButton from '@/components/ui/BuildButton.vue'
 import type { MoonCell } from '@/components/engine/map-renderer/map'
 import { useMapStore } from '@/stores/mapStore'
+import Construction from '@/components/ui/Construction.vue'
 
 const mapRendererRef = ref(null)
 const mapStore = useMapStore()
@@ -40,6 +45,16 @@ function onCellSelected(x: number, z: number, cellData: MoonCell) {
 </script>
 
 <style scoped>
+.construction-block{
+  pointer-events: auto;
+  display: flex;
+  position: absolute;
+  margin-left: 20px;
+  margin-right: 20px;
+  bottom: 20px;
+
+}
+
 .map-view {
   position: relative;
   width: 100%;

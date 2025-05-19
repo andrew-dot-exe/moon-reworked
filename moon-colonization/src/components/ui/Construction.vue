@@ -1,0 +1,378 @@
+<script setup lang="ts">
+import ModuleComponent from '@/components/ui/ModuleComponent.vue';
+import { typeModulesStore } from '@/stores/typeModulesStore';
+import { TypeModule } from '@/components/typeModules/typeModules'
+import { onMounted, ref } from 'vue';
+
+const typeStore = typeModulesStore();
+const isLoaded = ref(false)
+
+const visibleItems = ref([] as TypeModule[]);
+
+const currentPage = ref(1);
+const totalPages = ref(1);
+
+onMounted(async () => {
+  await typeStore.getTypeModules();
+  isLoaded.value = true
+  couningVisible();
+});
+
+const couningVisible = () => {
+
+}
+
+const prevPage = () => {
+  currentPage.value = currentPage.value > 1 ? currentPage.value - 1 : 1;
+};
+
+const nextPage = () => {
+  currentPage.value = currentPage.value < totalPages.value ? currentPage.value + 1 : totalPages.value;
+};
+
+
+</script>
+
+<template>
+    <div class="Construction">
+        <div class="master-construction">
+            <div class="button">
+                <div class="Arrows"> 
+                    <div class="arrow-left">
+                        <svg class="-" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none">
+                            <path d="M5.73166 8L2.12522 4.48157V3.51843L5.73166 0H6.44007V0.648649L3.45617 3.4398V3.55774H12V4.44226H3.45617V4.54054L6.44007 7.3317V8H5.73166ZM0 8V0H0.880143V8H0Z" fill="#A3A3A3"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="build">
+                    <p>Построить</p>
+                </div>
+            </div>
+            <div class="main-container">
+                <div class="section">
+                    <div class="section-section">
+                        <div class="section-section">
+                            <div class="habitable-modules">
+                                <p class="ss-p" id="select">Обитаемые модули</p>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="2" height="30" viewBox="0 0 2 30" fill="none">
+                                <path d="M0 30V0H2V30H0Z" fill="#464646"/>
+                            </svg>
+                            <div class="technological-modules">
+                                <p class="ss-p" id="default">Технологические модули</p>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="2" height="30" viewBox="0 0 2 30" fill="none">
+                                <path d="M0 30V0H2V30H0Z" fill="#464646"/>
+                            </svg>
+                            <div class="connection">
+                                <p class="ss-p" id="default">Связь</p>
+                            </div>
+                            <svg  xmlns="http://www.w3.org/2000/svg" width="2" height="30" viewBox="0 0 2 30" fill="none">
+                                <path d="M0 30V0H2V30H0Z" fill="#464646"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="object-container" v-if="{ isLoaded }">
+                    <div class="object-container-container">
+                        <div class="object-object">
+                            <ModuleComponent 
+                            v-for="(item, index) in visibleItems" 
+                            :key="index"
+                            :data="item"
+                            />
+                        </div>
+                    </div>
+                    <div class="pages" v-if="totalPages > 1">
+                    <div class="pages-pages">
+                        <p class="pp-left" @click="prevPage" :class="{ disabled: currentPage === 1 }"><</p>
+                        <div class="pages-container">
+                        <p>{{ currentPage }}</p>
+                        <p>/</p>
+                        <p>{{ totalPages }}</p>
+                        </div>
+                        <p class="pp-rigth" @click="nextPage" :class="{ disabled: currentPage === totalPages }">></p>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped>
+p {
+    margin: 0px;
+}
+.Construction {
+    display: flex;
+    flex-shrink: 1;
+    align-items: flex-start;
+    gap: 10px;
+}
+.master-construction {
+    display: flex;
+    align-items: center;
+    flex: 1 0 0;
+}
+.button {
+    display: flex;
+    width: 30px;
+    height: 196px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.Arrows {
+    display: flex;
+    padding: 8px;
+    align-items: center;
+    gap: 10px;
+    background: #464646;
+}
+.arrow-left {
+    display: flex;
+    padding: 3px 1px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.arrow-left svg {
+    width: 12px;
+    height: 8px;
+    flex-shrink: 0;
+    aspect-ratio: 3/2;
+    fill: #A3A3A3;
+}
+.build {
+    background: rgba(0, 0, 0, 0.80);
+    display: flex;
+    padding: 9px 13px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex: 1 0 0;
+    align-self: stretch;
+}
+.build p {
+    transform: rotate(-90deg);
+    color: #A3A3A3;
+    /* leading-trim: both;
+    text-edge: cap; */
+    font-feature-settings: 'dlig' on;
+    font-family: "Feature Mono";
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: 0.75px;
+}
+.main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    flex: 1 0 0;
+}
+.section {
+    display: flex;
+    align-items: center;
+    gap: 150px;
+    align-self: stretch;
+}
+.section-section {
+    display: flex;
+    align-items: center;
+}
+.section-section svg {
+        width: 2px;
+align-self: stretch;
+fill: #464646;
+}
+.habitable-modules {
+    background: #BCFE37;
+    display: flex;
+    width: 251px;
+    padding: 7px 22px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.technological-modules {
+    background: rgba(0, 0, 0, 0.80);
+    display: flex;
+    padding: 7px 22px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.connection {
+    background: rgba(0, 0, 0, 0.80);
+    display: flex;
+    padding: 7px 22px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    align-self: stretch;
+}
+.ss-p {
+    font-feature-settings: 'dlig' on;
+    font-family: "Feature Mono";
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 750;
+    line-height: normal;
+    letter-spacing: 0.75px;
+}
+#select {
+    color: #000;
+}
+#default {
+    color: #464646;;
+}
+
+/* .object-container {
+    display: flex;
+    padding: 10px 20px;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    align-self: stretch; */
+    /* box-sizing: border-box;
+    border: 1px solid #BCFE37; */
+    /* outline: 1px solid #BCFE37;
+    background: rgba(0, 0, 0, 0.80);
+} */
+.object-container {
+    position: relative; /* нужно для псевдоэлемента */
+    display: flex;
+    padding: 10px 20px;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    align-self: stretch;
+    background: rgba(0, 0, 0, 0.80);
+    /* убираем outline или border */
+}
+
+.object-container::before {
+    content: "";
+    position: absolute;
+    inset: 0; /* растягивается на весь элемент */
+    border: 1px solid #BCFE37; /* внутренняя обводка */
+    pointer-events: none; /* чтобы не мешала взаимодействию */
+    box-sizing: border-box;
+    z-index: 1; /* поверх фона, но ниже контента */
+    border-radius: inherit; /* если вдруг контейнер скругляется */
+}
+.object-container-container {
+    display: flex;
+align-items: center;
+gap: 35px;
+align-self: stretch;
+}
+.object-object {
+    display: flex;
+height: 120px;
+align-items: center;
+gap: 35px;
+flex: 1 0 0;
+}
+
+.pages {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 10px;
+    align-self: stretch;
+}
+.pages-pages {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 15px;
+}
+.pages-pages p {
+    color: #464646;
+    /* leading-trim: both;
+    text-edge: cap; */
+    font-feature-settings: 'dlig' on;
+    font-family: "Feature Mono";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 127;
+    line-height: normal;
+    letter-spacing: 1.2px;
+    height: 16px;
+}
+.pp-left {
+    color: #464646;
+    /* leading-trim: both;
+    text-edge: cap; */
+    font-feature-settings: 'dlig' on;
+    font-family: "Feature Mono";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 127;
+    line-height: normal;
+    letter-spacing: 1.2px;
+}
+.pp-rigth {
+    color: #BCFE37;
+    /* leading-trim: both;
+    text-edge: cap; */
+    font-feature-settings: 'dlig' on;
+    font-family: "Feature Mono";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 127;
+    line-height: normal;
+    letter-spacing: 1.2px;
+}
+.pages-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.pages-container p {
+    color: #BCFE37;
+    /* leading-trim: both;
+    text-edge: cap; */
+    font-feature-settings: 'dlig' on;
+    font-family: "Feature Mono";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 95;
+    line-height: normal;
+    letter-spacing: 1.2px;
+}
+
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.object-object {
+  display: flex;
+  height: 120px;
+  align-items: center;
+  gap: 35px;
+  flex: 1 0 0;
+  overflow: hidden; /* Скрываем элементы, которые не помещаются */
+}
+
+.pp-left, .pp-rigth {
+  cursor: pointer;
+  user-select: none;
+}
+
+.pp-left:hover:not(.disabled), 
+.pp-rigth:hover:not(.disabled) {
+  opacity: 0.8;
+}
+</style>
