@@ -23,6 +23,13 @@ export const userApi = {
   },
 
   // logoff?
+  logout: async () => {
+    const response = await axiosInstance.post(`${API_URL}/logout`)
+    if (response.status != 200) {
+      console.error(`Error at /api/login. The data is ${response.data}`)
+    }
+    return response.status
+  },
 
   register: async (email: string, password: string) => {
     const response = await axiosInstance.post(`${API_URL}/create`, {

@@ -12,7 +12,7 @@ export const userInfoStore = defineStore('userInfoStore', {
       if (response !== undefined) {
         this.userInfo = new User(
           response.name,
-          response.curDay,
+          response.currentDay,
           response.dayBeforeDelivery,
           response.live,
           response.links,
