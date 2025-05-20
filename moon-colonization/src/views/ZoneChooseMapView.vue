@@ -4,6 +4,7 @@ import { ImagePoint } from '@/components/utils/fitElements';
 import { useComponentStore } from '@/stores/componentStore';
 import { onMounted, ref, watch } from 'vue';
 import ConstructionLink from '@/components/ui/ConstructionLink.vue'
+import Success from '@/components/ui/Success.vue';
 
 interface PositionByName {
   name: string,
@@ -190,6 +191,9 @@ watch([scale, translatePos], () => {
         </div>
       </div>
     </div>
+    <div class="success-block">
+      <Success />
+    </div>
     <div class="construction-block">
         <ConstructionLink/>
     </div>
@@ -204,6 +208,14 @@ watch([scale, translatePos], () => {
   margin-left: 20px;
   margin-right: 20px;
   bottom: 20px;
+
+}
+.success-block{
+  pointer-events: auto;
+  position: absolute;
+  display: flex;
+  top: 92px;
+  right: 20px;
 
 }
 

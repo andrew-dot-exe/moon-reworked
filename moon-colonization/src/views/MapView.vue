@@ -10,7 +10,9 @@
       <div style="pointer-events: auto;">
         <BuildButton />
       </div>
-
+      <div class="success-block">
+        <Success />
+      </div>
       <div v-if="selectedCell && selectedModule" class="optimality-block">
         <Optimality :opt="9" :rel="49" :rat="83" />
       </div>
@@ -31,6 +33,7 @@ import type { MoonCell } from '@/components/engine/map-renderer/map'
 import { useMapStore } from '@/stores/mapStore'
 import Construction from '@/components/ui/Construction.vue'
 import Optimality from '@/components/ui/Optimality.vue'
+import Success from '@/components/ui/Success.vue';
 
 const mapRendererRef = ref(null)
 const mapStore = useMapStore()
@@ -75,6 +78,15 @@ const selectedModule = ref(true)
   position: absolute;
   margin: 20px;
   bottom: 230px;
+}
+
+.success-block{
+  pointer-events: auto;
+  position: absolute;
+  display: flex;
+  top: 92px;
+  right: 20px;
+
 }
 
 .map-view {
