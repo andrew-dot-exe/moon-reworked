@@ -63,6 +63,7 @@ const hasProductionData = computed(() => {
                     <ResourceProduction
                         v-for="(item, index) in productionData"
                         :key="index"
+                        :id="index"
                         :prod="item"
                         :cons="consumptionData[index]"
                     />
@@ -188,12 +189,22 @@ p {
     letter-spacing: 1px;
 }
 .resource-container-container {
-    display: flex;
+    /* display: flex;
     align-items: center;
     align-content: center;
     gap: 15px 24px;
     align-self: stretch;
-    flex-wrap: wrap;
+    flex-wrap: wrap; */
+    margin: auto;
+    display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 колонки */
+  gap: 16px; /* Отступ между элементами */
+}
+.replinishment-consuption{
+    margin: auto;
+    display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 колонки */
+  gap: 16px; /* Отступ между элементами */
 }
 .Area-all-container {
     display: flex;

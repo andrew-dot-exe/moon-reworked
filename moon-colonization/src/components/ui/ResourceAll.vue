@@ -30,7 +30,7 @@ const name = ["Вода", "Топливо", "Электроэнергия", "П�
     display: flex;
     align-items: center;
     align-content: center;
-    gap: 15px 24px;
+    gap: 15px 14px;
     align-self: stretch;
     flex-wrap: wrap;
 }

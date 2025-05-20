@@ -40,10 +40,11 @@ const name = ["Равнина 1", "Равнина 2", "Высота 1", "Выс�
         </div>
         <div v-if="open" class="information-container-specific">
             <p>Всего потребление и воспалнение ресурсов в области:</p>
-            <div class="replinishment-consuption" id="area-replinishment-consuption">
+            <div class="replinishment-consuption">
                 <ResourceProduction
                     v-for="(item, index) in data.production"
                     :key="index"
+                    :id="index"
                     :prod="item"
                     :cons="data.consumption[index]"
                 />
@@ -133,20 +134,9 @@ const name = ["Равнина 1", "Равнина 2", "Высота 1", "Выс�
     letter-spacing: 1px;
 }
 .replinishment-consuption {
-    display: flex;
-    align-items: center;
-    align-content: center;
-    gap: 15px 24px;
-    align-self: stretch;
-    flex-wrap: wrap;
-}
-
-#area-replinishment-consuption {
-    display: flex;
-    align-items: center;
-    align-content: center;
-    gap: 15px 24px;
-    align-self: stretch;
-    flex-wrap: wrap;
+    margin: auto;
+    display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 колонки */
+  gap: 16px; /* Отступ между элементами */
 }
 </style>

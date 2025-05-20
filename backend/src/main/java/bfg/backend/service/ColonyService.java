@@ -73,7 +73,6 @@ public class ColonyService {
     @Transactional
     public void create(){
         User user = validateUserAndColony();
-        System.out.println(user.getId());
 
         user.setLive(true);
         user.setCurrent_day(0);

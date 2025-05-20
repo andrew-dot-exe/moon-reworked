@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps({
-  key: {type: Number, required: true },
+  id: {type: Number, required: true },
   prod: { type: Number, required: true },
   cons: { type: Number, required: true }
 });
@@ -21,7 +21,7 @@ const name = ["Вода", "Топливо", "Электроэнергия", "П�
                 </div>
             </div>
             <div class="heading">
-                <p>{{ name[key] }}</p>
+                <p>{{ name[id] }}</p>
             </div>
         </div>
         <div class="counter">
