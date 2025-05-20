@@ -1,79 +1,5 @@
 <script setup lang="ts">
-import ModuleComponent from '@/components/ui/ModuleComponent.vue';
-import { typeModulesStore } from '@/stores/typeModulesStore';
-import { TypeModule } from '@/components/typeModules/typeModules';
-import { onMounted, ref } from 'vue';
-
-const typeStore = typeModulesStore();
-const isLoaded = ref(false)
-
-const visibleItems = ref([] as TypeModule[]);
-const liveItems = ref([] as TypeModule[]);
-const techItems = ref([] as TypeModule[]);
-
-const currentPage = ref(1);
-const totalPages = ref(1);
-const activeHabitable = ref(true); // По умолчанию активна первая вкладка
-
-const screenWidth = ref(window.innerWidth)
-
-const handleResize = () => {
-  screenWidth.value = window.innerWidth
-  // Ваша логика при изменении размера
-  couningVisible();
-}
-
-onMounted(async () => {
-  window.addEventListener('resize', handleResize)
-  await typeStore.getTypeModules();
-  isLoaded.value = true;
-  liveItems.value.length = 0;
-  techItems.value.length = 0;
-  for(let i = 0; i < typeStore.typeModules.length; i++){
-    if(typeStore.typeModules[i].live){
-        liveItems.value.push(typeStore.typeModules[i]);
-    }
-    else{
-        techItems.value.push(typeStore.typeModules[i]);
-    }
-  }
-  couningVisible();
-});
-
-const couningVisible = () => {
-  
-  const count = Math.floor((screenWidth.value - 110) / 400);
-
-  const typeModules = activeHabitable.value ? liveItems : techItems;
-
-  const l = typeModules.value.length;
-  totalPages.value = Math.ceil(l / count);
-  if(currentPage.value > totalPages.value) currentPage.value = totalPages.value;
-  visibleItems.value.length = 0;
-  for(let i = (currentPage.value - 1) * count; i < currentPage.value * count; i++){
-    if(i < l){
-        visibleItems.value.push(typeModules.value[i]);
-    }
-  }
-}
-
-const prevPage = () => {
-  currentPage.value = currentPage.value > 1 ? currentPage.value - 1 : 1;
-  couningVisible();
-};
-
-const nextPage = () => {
-  currentPage.value = currentPage.value < totalPages.value ? currentPage.value + 1 : totalPages.value;
-  couningVisible();
-};
-
-const setActiveTab = (flag : boolean) => {
-    if(activeHabitable.value != flag){
-        activeHabitable.value = flag;
-        currentPage.value = 1;
-        couningVisible();
-    }
-};
+import { ref } from 'vue';
 
 const direction = ref("left")
 
@@ -117,7 +43,7 @@ opening();
                         </div>
                     </div>
                 </div>
-                <div class="object-container" v-if="{ isLoaded }" >
+                <div class="object-container" >
                     <div class="object-container-container">
                         <div class="object-object" id="cont">
                             <!--<ModuleComponent 

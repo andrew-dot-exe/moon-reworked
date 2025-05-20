@@ -11,9 +11,13 @@
         <BuildButton />
       </div>
 
+      <div v-if="selectedCell && selectedModule" class="optimality-block">
+        <Optimality :opt="9" :rel="49" :rat="83" />
+      </div>
       <div class="construction-block">
         <Construction/>
       </div>
+      
     </div>
   </div>
 </template>
@@ -26,6 +30,7 @@ import BuildButton from '@/components/ui/BuildButton.vue'
 import type { MoonCell } from '@/components/engine/map-renderer/map'
 import { useMapStore } from '@/stores/mapStore'
 import Construction from '@/components/ui/Construction.vue'
+import Optimality from '@/components/ui/Optimality.vue'
 
 const mapRendererRef = ref(null)
 const mapStore = useMapStore()
@@ -39,8 +44,11 @@ onMounted(async () => {
 // Обработчик выбора клетки
 function onCellSelected(x: number, z: number, cellData: MoonCell) {
   console.log(`${x},${z}, on canvas, ${cellData.x};${cellData.y} on cellData`)
+  selectedCell.value = true
 }
 
+const selectedCell = ref(false)
+const selectedModule = ref(true)
 
 </script>
 
@@ -58,10 +66,15 @@ function onCellSelected(x: number, z: number, cellData: MoonCell) {
   pointer-events: auto;
   display: flex;
   position: absolute;
-  margin-left: 20px;
-  margin-right: 20px;
-  bottom: 20px;
-
+  margin: 20px;
+  bottom: 0;
+}
+.optimality-block{
+  pointer-events: auto;
+  display: flex;
+  position: absolute;
+  margin: 20px;
+  bottom: 230px;
 }
 
 .map-view {
