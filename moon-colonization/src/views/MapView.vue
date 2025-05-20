@@ -17,9 +17,12 @@
         <Optimality :opt="9" :rel="49" :rat="83" />
       </div>
       <div class="construction-block">
-        <Construction/>
+        <Construction />
       </div>
-      
+      <div style="pointer-events: auto; margin-top: 20px;">
+        <SelectedModuleInfo />
+      </div>
+
     </div>
   </div>
 </template>
@@ -34,6 +37,7 @@ import { useMapStore } from '@/stores/mapStore'
 import Construction from '@/components/ui/Construction.vue'
 import Optimality from '@/components/ui/Optimality.vue'
 import Success from '@/components/ui/Success.vue';
+import SelectedModuleInfo from '@/components/ui/SelectedModuleInfo.vue'
 
 const mapRendererRef = ref(null)
 const mapStore = useMapStore()
@@ -46,33 +50,32 @@ onMounted(async () => {
 
 // Обработчик выбора клетки
 function onCellSelected(x: number, z: number, cellData: MoonCell) {
-  console.log(`${x},${z}, on canvas, ${cellData.x};${cellData.y} on cellData`)
-  selectedCell.value = true
+  console.log('NOT WORKING')
 }
-
-const selectedCell = ref(false)
-const selectedModule = ref(true)
 
 </script>
 
 <style scoped>
-
 .header {
   pointer-events: auto;
   flex-shrink: 0;
   z-index: 10;
-    overflow: auto;   
-    overflow-x: auto;  /* Включаем прокрутку */
-    scrollbar-width: none; /* Firefox */
+  overflow: auto;
+  overflow-x: auto;
+  /* Включаем прокрутку */
+  scrollbar-width: none;
+  /* Firefox */
 }
-.construction-block{
+
+.construction-block {
   pointer-events: auto;
   display: flex;
   position: absolute;
   margin: 20px;
   bottom: 0;
 }
-.optimality-block{
+
+.optimality-block {
   pointer-events: auto;
   display: flex;
   position: absolute;
@@ -80,7 +83,7 @@ const selectedModule = ref(true)
   bottom: 230px;
 }
 
-.success-block{
+.success-block {
   pointer-events: auto;
   position: absolute;
   display: flex;

@@ -7,6 +7,8 @@ import { Mesh } from 'three'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 import { BaseModule } from '../engine/map-renderer/baseModule'
 import { useCellStore } from '@/stores/cellStore'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import type { TypeModule } from '@/components/typeModules/typeModules'
 
 const cellStore = useCellStore()
 const mapRef = ref<HTMLElement | null>(null)
@@ -93,6 +95,33 @@ function placeMultiCellMeshOnGrid(mesh: THREE.Mesh, x: number, z: number, width:
   scene.add(mesh)
 }
 
+function placeManufactureModule(x: number, z: number, moduleData: TypeModule, width = 1, height = 1) {
+  const loader = new GLTFLoader()
+  loader.load('/models/manufacture.glb', (gltf) => {
+    gltf.scene.userData.module = moduleData
+    // Вычисляем bounding box всей сцены
+    const box = new THREE.Box3().setFromObject(gltf.scene)
+    const size = new THREE.Vector3()
+    box.getSize(size)
+    // Коэффициенты для подгонки под нужное количество ячеек
+    const scaleX = width / (size.x || 1)
+    const scaleZ = height / (size.z || 1)
+    // Масштаб по Y сохраняет пропорцию исходной модели
+    gltf.scene.scale.set(scaleX, scaleX, scaleZ)
+    // Центрируем относительно области
+    gltf.scene.position.x = x + (width - 1) / 2 - 4.5
+    gltf.scene.position.z = z + (height - 1) / 2 - 4.5
+    gltf.scene.position.y = 0.11
+    gltf.scene.traverse((obj) => {
+      if (obj instanceof THREE.Mesh) {
+        obj.castShadow = true
+        obj.receiveShadow = true
+        obj.userData.module = moduleData
+      }
+    })
+    scene.add(gltf.scene)
+  })
+}
 
 onMounted(() => {
   if (!mapRef.value) {
@@ -184,13 +213,21 @@ onMounted(() => {
     }
   }
 
+  map.setupClickHandler(camera, renderer, (x, z) => {
+    // Например, выбранный модуль 2x2
+    const width = 2, height = 2
+    if (canPlaceMultiCellModule(x, z, width, height)) {
+      cellStore.selectCell(x, z) // сохранить координаты
+      return true
+    }
+    return false
+  })
+
   // Обработчик клика
   map.setupClickHandler(camera, renderer, (x: number, z: number) => {
-    // console.log(x, z)
-    // const sampleCell = new BaseModule()
-    // placeMeshOnCell(sampleCell.getMesh(), x, z)
+    // кастомные методы
     cellStore.selectCell(x, z);
-    //emit('cell-selected', x, z)
+    return false
   })
 
   window.addEventListener('resize', onWindowResize)
@@ -210,9 +247,11 @@ function animate() {
   renderer.render(scene, camera)
 }
 
+
 // импорт внешних методов проходил так, скорее всего, больше не нужно
 defineExpose({
   placeMeshOnCell,
+  placeManufactureModule,
   placeMultiCellMeshOnGrid
 })
 </script>

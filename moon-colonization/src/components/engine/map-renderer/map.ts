@@ -10,6 +10,8 @@ import {
   Vector2,
   Texture,
 } from 'three'
+import { mul } from 'three/tsl'
+import { useModuleInfoStore } from '@/stores/moduleInfoStore'
 
 export class MoonCell {
   x: number
@@ -57,6 +59,7 @@ export class MoonMap {
   name: string
   map: MoonCell[][]
   selectedCell: MoonCell | null = null
+  selectedMesh: Mesh | null = null // Для хранения выделенного модуля
 
   constructor(name: string = 'Test') {
     this.name = name
@@ -105,10 +108,11 @@ export class MoonMap {
   setupClickHandler(
     camera: Camera,
     renderer: WebGLRenderer,
-    callback?: (x: number, z: number) => void,
+    multiCell?: (x: number, z: number) => boolean,
   ) {
     const raycaster = new Raycaster()
     const mouse = new Vector2()
+    const moduleInfoStore = useModuleInfoStore()
 
     // Обработчик клика
     const onClick = (event: MouseEvent) => {
@@ -129,23 +133,60 @@ export class MoonMap {
       const intersects = raycaster.intersectObjects(meshes)
 
       if (intersects.length > 0) {
-        // Найдена ячейка, на которую кликнули
         const clickedMesh = intersects[0].object as Mesh
+
+        // --- Если клик по модульному мэшу ---
+        if (clickedMesh.userData && clickedMesh.userData.module) {
+          // Снимаем подсветку с предыдущего выделенного модуля
+          if (this.selectedMesh) {
+            this.unhighlightCell(this.selectedMesh)
+            this.selectedMesh = null
+          }
+          // Подсвечиваем новый мэш
+          this.highlightCell(clickedMesh)
+          this.selectedMesh = clickedMesh
+          // Передаём данные модуля в стор
+          moduleInfoStore.setSelectedModule(clickedMesh.userData.module)
+          return // Не продолжаем обработку как обычную ячейку
+        }
+
+        // Найдена ячейка, на которую кликнули
         const cell = this.findCellByMesh(clickedMesh)
 
-        if (cell) {
-          // Снимаем выделение с предыдущей выбранной ячейки
-          if (this.selectedCell && this.selectedCell !== cell) {
-            this.unhighlightCell(this.selectedCell)
+        // Снимаем выделение с предыдущей выбранной области (если была)
+        if (this.selectedCell) {
+          // Снимаем подсветку со всех ячеек 2x2 вокруг предыдущей выбранной
+          for (let dx = 0; dx < 2; dx++) {
+            for (let dz = 0; dz < 2; dz++) {
+              const prevX = this.selectedCell.x + dx
+              const prevZ = this.selectedCell.y + dz
+              if (this.isValidCoord(prevX, prevZ)) {
+                this.unhighlightCell(this.map[prevX][prevZ])
+              }
+            }
           }
+          this.selectedCell = null
+        }
 
-          // Устанавливаем новую выбранную ячейку и подсвечиваем её
-          this.selectedCell = cell
-          this.highlightCell(cell)
-
-          // Вызов колбэка для обновления UI
-          if (callback) {
-            callback(cell.x, cell.y)
+        // Вызов колбэка для обновления UI
+        if (multiCell) {
+          if (multiCell(cell.x, cell.y)) {
+            // Подсвечиваем новую область 2x2
+            for (let dx = 0; dx < 2; dx++) {
+              for (let dz = 0; dz < 2; dz++) {
+                const nx = cell.x + dx
+                const nz = cell.y + dz
+                if (this.isValidCoord(nx, nz)) {
+                  this.highlightCell(this.map[nx][nz])
+                }
+              }
+            }
+            // Сохраняем левый верхний угол выделения
+            this.selectedCell = cell
+          } else {
+            // Если колбэк не передан, выделяем только одну ячейку
+            this.highlightCell(cell)
+            this.selectedCell = cell
           }
         }
       }
@@ -183,16 +224,24 @@ export class MoonMap {
     return null
   }
 
-  // Подсветка выбранной ячейки
-  highlightCell(cell: MoonCell): void {
-    ;(cell.material as MeshStandardMaterial).emissive.set(0x333333)
-    cell.material.needsUpdate = true
+  // Подсветка выбранной ячейки или мэша
+  highlightCell(cellOrMesh: MoonCell | Mesh): void {
+    const mat =
+      cellOrMesh instanceof Mesh
+        ? (cellOrMesh.material as MeshStandardMaterial)
+        : (cellOrMesh.material as MeshStandardMaterial)
+    mat.emissive.set(0x333333)
+    mat.needsUpdate = true
   }
 
-  // Снятие подсветки с ячейки
-  unhighlightCell(cell: MoonCell): void {
-    ;(cell.material as MeshStandardMaterial).emissive.set(0x000000)
-    cell.material.needsUpdate = true
+  // Снятие подсветки с ячейки или мэша
+  unhighlightCell(cellOrMesh: MoonCell | Mesh): void {
+    const mat =
+      cellOrMesh instanceof Mesh
+        ? (cellOrMesh.material as MeshStandardMaterial)
+        : (cellOrMesh.material as MeshStandardMaterial)
+    mat.emissive.set(0x000000)
+    mat.needsUpdate = true
   }
 
   // Обработка клика по ячейке (для обратной совместимости)
