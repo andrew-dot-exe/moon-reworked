@@ -9,6 +9,7 @@ import { BaseModule } from '../engine/map-renderer/baseModule'
 import { useCellStore } from '@/stores/cellStore'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { TypeModule } from '@/components/typeModules/typeModules'
+import { useModuleInfoStore } from '@/stores/moduleInfoStore'
 
 const cellStore = useCellStore()
 const mapRef = ref<HTMLElement | null>(null)
@@ -20,7 +21,7 @@ let map: MoonMap
 let gridHelper: THREE.GridHelper
 let axesHelper: THREE.AxesHelper
 let directionalLight: THREE.DirectionalLight
-
+let selectedMesh: THREE.Object3D | null = null
 
 function placeModule() {
   // Функция размещения модуля на карту
@@ -121,6 +122,46 @@ function placeManufactureModule(x: number, z: number, moduleData: TypeModule, wi
     })
     scene.add(gltf.scene)
   })
+}
+
+function handleMeshClick(event: MouseEvent) {
+  if (!renderer || !camera) return
+  const rect = renderer.domElement.getBoundingClientRect()
+  const mouse = new THREE.Vector2(
+    ((event.clientX - rect.left) / rect.width) * 2 - 1,
+    -((event.clientY - rect.top) / rect.height) * 2 + 1
+  )
+  const raycaster = new THREE.Raycaster()
+  raycaster.setFromCamera(mouse, camera)
+  const intersects = raycaster.intersectObjects(scene.children, true)
+  if (intersects.length > 0) {
+    const obj = intersects[0].object
+    // Снимаем выделение с предыдущего
+    if (selectedMesh) {
+      selectedMesh.traverse((o: THREE.Object3D) => {
+        if (o instanceof THREE.Mesh && o.material && 'emissive' in o.material) {
+          (o.material as THREE.MeshStandardMaterial).emissive.set(0x000000)
+        }
+      })
+    }
+    // Если клик по модулю
+    if (obj.userData && obj.userData.module) {
+      obj.traverse((o: THREE.Object3D) => {
+        if (o instanceof THREE.Mesh && o.material && 'emissive' in o.material) {
+          (o.material as THREE.MeshStandardMaterial).emissive.set(0x333333)
+        }
+      })
+      selectedMesh = obj
+      // Сохраняем в стор
+      const moduleInfoStore = useModuleInfoStore()
+      moduleInfoStore.setSelectedModule(obj.userData.module)
+    } else {
+      selectedMesh = null
+      // Если клик не по модулю — снять выделение
+      const moduleInfoStore = useModuleInfoStore()
+      moduleInfoStore.clearSelectedModule()
+    }
+  }
 }
 
 onMounted(() => {
@@ -229,6 +270,8 @@ onMounted(() => {
     cellStore.selectCell(x, z);
     return false
   })
+
+  renderer.domElement.addEventListener('click', handleMeshClick)
 
   window.addEventListener('resize', onWindowResize)
   animate()
