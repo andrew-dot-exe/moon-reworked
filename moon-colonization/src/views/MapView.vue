@@ -13,7 +13,7 @@
       <div class="success-block">
         <Success />
       </div>
-      <div v-if="selectedCell && selectedModule" class="optimality-block">
+      <div v-if="selectedModule" class="optimality-block">
         <Optimality :opt="9" :rel="49" :rat="83" />
       </div>
       <div class="construction-block">
@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref, computed } from 'vue'
 import MapRenderer from '@/components/ui/MapRenderer.vue'
 import UIHeader from '@/components/ui/UIHeader.vue'
 import BuildButton from '@/components/ui/BuildButton.vue'
@@ -42,11 +42,19 @@ import Optimality from '@/components/ui/Optimality.vue'
 import Success from '@/components/ui/Success.vue';
 import SelectedModuleInfo from '@/components/ui/SelectedModuleInfo.vue'
 import EndColonyWindow from '@/components/ui/EndColonyWindow.vue';
-
+import { useSelectedCellStore } from '@/stores/selectedCellStore'
+import { useModuleInfoStore } from '@/stores/moduleInfoStore'
 const end = ref(false)
+
 
 const mapRendererRef = ref(null)
 const mapStore = useMapStore()
+const selectedCellStore = useSelectedCellStore()
+// ячейку выбрал, надо будет сделать запрос
+// потом надо сделать выбор из
+
+const moduleInfoStore = useModuleInfoStore()
+const selectedModule = computed(() => moduleInfoStore.selectedModule)
 
 onMounted(async () => {
   await nextTick()
@@ -58,9 +66,8 @@ const selectedCell = ref(false)
 const selectedModule = ref(true)
 
 // Обработчик выбора клетки
-function onCellSelected(x: number, z: number) {
-  console.log('NOT WORKING')
-  selectedCell.value = true
+function onCellSelected(x: number, z: number, cellData: MoonCell) {
+  selectedCellStore.setSelectedCell(cellData)
 }
 
 </script>

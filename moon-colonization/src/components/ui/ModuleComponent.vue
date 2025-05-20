@@ -1,5 +1,35 @@
+<script setup lang="ts">
+import { TypeModule } from '@/components/typeModules/typeModules';
+import { computed } from 'vue';
+import { useBuildModuleStore } from '@/stores/buildModuleStore'
+
+const buildModuleStore = useBuildModuleStore()
+
+function selectForBuild() {
+  const baseName = props.data.name.split('(')[0].trim().toLowerCase()
+  buildModuleStore.setBuildModule(props.data, baseName + '.gltf')
+  console.log('Выбран модуль для постройки:', props.data, 'GLTF:', baseName + '.gltf')
+}
+
+const props = defineProps({
+  data: {
+    type: TypeModule,
+    required: true
+  }
+});
+
+const moduleImage = computed(() => {
+  const baseName = props.data.name.split('(')[0].trim().toLowerCase();
+  try {
+    return new URL(`/textures/modules/${baseName}.png`, import.meta.url).href;
+  } catch {
+    return '/textures/modules/default.png';
+  }
+});
+</script>
+
 <template>
-  <div class="object">
+  <div class="object" @click="selectForBuild">
     <div class="master-object-block">
       <div class="icon">
         <div class="icon-object">
@@ -51,26 +81,6 @@
   </div>
 
 </template>
-<script setup lang="ts">
-import { TypeModule } from '@/components/typeModules/typeModules';
-import { computed } from 'vue';
-
-const props = defineProps({
-  data: {
-    type: TypeModule,
-    required: true
-  }
-});
-
-const moduleImage = computed(() => {
-  const baseName = props.data.name.split('(')[0].trim().toLowerCase();
-  try {
-    return new URL(`/textures/modules/${baseName}.png`, import.meta.url).href;
-  } catch {
-    return '/textures/modules/default.png';
-  }
-});
-</script>
 
 <style scoped>
 .object {

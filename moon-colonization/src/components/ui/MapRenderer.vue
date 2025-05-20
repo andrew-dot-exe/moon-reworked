@@ -11,6 +11,7 @@ import { useCellStore } from '@/stores/cellStore'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { TypeModule } from '@/components/typeModules/typeModules'
 import { useModuleInfoStore } from '@/stores/moduleInfoStore'
+import { useSelectedCellStore } from '@/stores/selectedCellStore'
 
 const cellStore = useCellStore()
 const mapRef = ref<HTMLElement | null>(null)
@@ -23,6 +24,7 @@ let gridHelper: THREE.GridHelper
 let axesHelper: THREE.AxesHelper
 let directionalLight: THREE.DirectionalLight
 let selectedMesh: THREE.Object3D | null = null
+const selectedCellStore = useSelectedCellStore()
 
 function placeModule() {
   // Функция размещения модуля на карту
@@ -101,6 +103,8 @@ function placeManufactureModule(x: number, z: number, moduleData: TypeModule, wi
   const loader = new GLTFLoader()
   loader.load('/models/manufacture.glb', (gltf) => {
     gltf.scene.userData.module = moduleData
+    gltf.scene.userData.cellX = x
+    gltf.scene.userData.cellZ = z
     // Вычисляем bounding box всей сцены
     const box = new THREE.Box3().setFromObject(gltf.scene)
     const size = new THREE.Vector3()
@@ -156,11 +160,19 @@ function handleMeshClick(event: MouseEvent) {
       // Сохраняем в стор
       const moduleInfoStore = useModuleInfoStore()
       moduleInfoStore.setSelectedModule(obj.userData.module)
+      // Если есть координаты ячейки — выбрать ячейку
+      if (typeof obj.userData.cellX === 'number' && typeof obj.userData.cellZ === 'number' && map) {
+        const cell = map.map[obj.userData.cellX]?.[obj.userData.cellZ]
+        if (cell) {
+          selectedCellStore.setSelectedCell(cell)
+        }
+      }
     } else {
       selectedMesh = null
       // Если клик не по модулю — снять выделение
       const moduleInfoStore = useModuleInfoStore()
       moduleInfoStore.clearSelectedModule()
+      selectedCellStore.clearSelectedCell()
     }
   }
 }
