@@ -84,9 +84,7 @@ public class UserService {
         ResourceData resourceData = extractResourceData(resources);
         List<ZoneProduction> zoneProductions = calculateZoneProductions(modules);
 
-        Statistics t = buildStatistics(user, resourceData, zoneProductions);
-
-        return t;
+        return buildStatistics(user, resourceData, zoneProductions);
     }
 
     /**

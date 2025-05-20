@@ -1,7 +1,7 @@
 
 <script setup lang="ts">
 defineProps({
-  key: {type: Number, required: true },
+  id: {type: Number, required: true },
   data: { type: Number, required: true }
 });
 const name = ["Вода", "Топливо", "Электроэнергия", "Провизия", 
@@ -14,7 +14,7 @@ const name = ["Вода", "Топливо", "Электроэнергия", "П�
             <path d="M31.607 25.5C33.6864 33.5369 27.2439 40.5 18.6704 40.5C10.0969 40.5 3.62905 33.635 5.73384 25.5C7.0275 20.5 13.4958 13 18.6704 0.5C23.8451 13 30.3134 20.5 31.607 25.5Z" fill="#A3A3A3"/>
         </svg>
         <div class="information">
-            <p>{{ name[key] }}</p>
+            <p>{{ name[id] }}</p>
             <div class="value-container">
                 <p>{{ data }}</p>
                 <p>кг</p>
