@@ -2,15 +2,14 @@
 const emit = defineEmits(['toggle']); 
 import { statisticStore } from '@/stores/StatisticStore';
 import { onMounted, ref } from 'vue';
+import ResourceAll from './ResourceAll.vue';
 
 const statistic = statisticStore();
-const isLoading = ref(true)
 
 
 // Lifecycle hooks
 onMounted(async () => {
   await statistic.getStatistic();
-  if(statistic != null && statistic != undefined && statistic.statistic.length == 1) isLoading.value = false;
 });
 </script>
 
@@ -32,19 +31,14 @@ onMounted(async () => {
         <div class="information-container">
             <div class="Resource-container">
                 <p>Всего у вас ресурсов:</p>
-                <div class="resource-container-container">
-                    <div class="resource">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="41" viewBox="0 0 40 41" fill="none">
-                            <path d="M31.607 25.5C33.6864 33.5369 27.2439 40.5 18.6704 40.5C10.0969 40.5 3.62905 33.635 5.73384 25.5C7.0275 20.5 13.4958 13 18.6704 0.5C23.8451 13 30.3134 20.5 31.607 25.5Z" fill="#A3A3A3"/>
-                        </svg>
-                        <div class="information">
-                            <p>Воздух</p>
-                            <div class="value-container">
-                                <p>100</p>
-                                <p>кг</p>
-                            </div>
-                        </div>
-                    </div>
+                <div v-if="statistic" class="resource-container-container">
+                    <ResourceAll v-for="(item, index) in statistic?.statistic?.countResources || []"
+                            :key="index"
+                            :data="item"
+                            />
+                </div>
+                <div v-else>
+                    Данные загружаются...
                 </div>
             </div>
             <div class="Area-all-container">
@@ -761,6 +755,7 @@ p {
     align-items: center;
     gap: 10px;
     align-self: stretch;
+    cursor: pointer;
 }
 .close {
     display: flex;
@@ -830,51 +825,6 @@ p {
     gap: 15px 24px;
     align-self: stretch;
     flex-wrap: wrap;
-}
-.resource {
-    display: flex;
-    align-items: center;
-    align-content: center;
-    gap: 15px 24px;
-    align-self: stretch;
-    flex-wrap: wrap;
-}
-.resource svg {
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    aspect-ratio: 1/1;
-}
-.information {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-}
-.information p {
-    color: #A3A3A3;
-    font-feature-settings: 'dlig' on;
-    font-family: "Feature Mono";
-    font-size: 10px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    letter-spacing: 0.5px;
-} 
-.value-container {
-    display: flex;
-    align-items: flex-start;
-    gap: 5px;
-}
-.value-container p {
-    color: #FFF;
-    font-feature-settings: 'dlig' on;
-    font-family: "Feature Mono";
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    letter-spacing: 1px;
 }
 .Area-all-container {
     display: flex;
