@@ -200,15 +200,13 @@
             </div>
             <div class="new-resource">
               <div class="time">
-                <p>До прибытия ресурсов</p>
+                <p>Дней до прибытия ресурсов</p>
                 <div class="time-value">
-                  <p>10</p>
-                  <p class="separator">:</p>
-                  <p>24</p>
+                  <p>{{ dayBefor }}</p>
                 </div>
               </div>
               <div class="visual-path">
-                <div class="the-suttle"></div>
+                <div class="the-suttle" :style="{ left: position.left + 'px' }"></div>
                 <div class="way">
                   <svg class="point" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"
                     fill="none">
@@ -270,23 +268,47 @@
 </template>
 
 <script setup lang="ts">
+import { userInfoStore } from '@/stores/userInfoStore';
 import { useResourceStore } from '@/stores/resourceStore';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch, onUnmounted } from 'vue';
 import StatisticWindow from '@/components/ui/StatisticWindow.vue';
 import MenuWindow from '@/components/ui/MenuWindow.vue';
 
 defineProps({
-  name: {type: String, required: true }
+  name: { type: String, required: true }
 });
 
+const uInfo = userInfoStore();
 const resourceStore = useResourceStore();
-const isLoading = ref(true)
+const isLoading = ref(true);
+const dayBefor = ref(0);
 
+// Функция для отслеживания изменений
+const setupWatchers = () => {
+  const unwatch = watch(
+    () => uInfo.userInfo.dayBeforeDelivery,
+    (newDayBefore) => {
+      dayBefor.value = newDayBefore;
+      moveSuttle();
+    }
+  );
+  
+  onUnmounted(() => unwatch());
+};
 
-// Lifecycle hooks
 onMounted(async () => {
-  await resourceStore.getResources();
-  if(resourceStore != null && resourceStore != undefined && resourceStore.resources.length > 0) isLoading.value = false;
+  try {
+    await resourceStore.getResources();
+    isLoading.value = resourceStore.resources.length === 0;
+    
+    await uInfo.fetchUserInfo();
+    dayBefor.value = uInfo.userInfo.dayBeforeDelivery;
+    moveSuttle();
+    
+    setupWatchers(); // Инициализируем отслеживание изменений
+  } catch (error) {
+    console.error('Initialization error:', error);
+  }
 });
 
 const isStatisticsVisible = ref(false);
@@ -301,6 +323,16 @@ const toggleMenu = () => {
   isMenuVisible.value = !isMenuVisible.value;
   console.log('isMenuVisible:', isMenuVisible.value);
 };
+
+const position = ref({
+  left: 10 // Начальное значение
+});
+
+// Функция для изменения положения
+const moveSuttle = () => {
+  position.value.left = (1 - 31 / (dayBefor.value + 1)) * 540 + 10;
+};
+
 
 
 </script>
@@ -507,17 +539,6 @@ const toggleMenu = () => {
   align-items: center;
 }
 
-.separator {
-  width: 4px;
-  color: #A3A3A3;
-  font-feature-settings: 'dlig' on;
-  font-family: "Feature Mono";
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-}
-
 /* .visual-path {
     display: flex;
     height: 10px;
@@ -546,13 +567,12 @@ const toggleMenu = () => {
 }
 
 .the-suttle {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   aspect-ratio: 1/1;
   position: absolute;
-  left: 149px;
-  top: 2px;
-  background: #464646;
+  top: 1px;
+  background: #505050;
 }
 
 .way {

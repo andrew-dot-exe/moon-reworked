@@ -9,9 +9,11 @@ export const useZoneStore = defineStore('zoneStore', {
   }),
   actions: {
     async fetchAllZones() {
-      const response = await zoneApi.getAllZones()
-      if (response !== undefined) {
-        this.zones = response
+      if(this.zones === null || this.zones === undefined || this.zones.length == 0){
+        const response = await zoneApi.getAllZones()
+        if (response !== undefined) {
+          this.zones = response
+        }
       }
     },
     selectZone(id: number) {

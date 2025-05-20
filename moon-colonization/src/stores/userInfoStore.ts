@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { User } from '../components/user/userInfo'
 import userApi from '@/components/user/userApi'
 
-const userInfoStore = defineStore('userInfoStore', {
+export const userInfoStore = defineStore('userInfoStore', {
   state: () => ({
     userInfo: {} as User,
   }),
@@ -11,12 +11,12 @@ const userInfoStore = defineStore('userInfoStore', {
       const response = await userApi.get_info()
       if (response !== undefined) {
         this.userInfo = new User(
-          response.data.name,
-          response.data.curDay,
-          response.data.dayBeforeDelivery,
-          response.data.live,
-          response.data.links,
-          response.data.modules,
+          response.name,
+          response.curDay,
+          response.dayBeforeDelivery,
+          response.live,
+          response.links,
+          response.modules,
         )
       }
     },

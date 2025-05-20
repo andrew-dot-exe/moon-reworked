@@ -38,11 +38,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         
         // Пробуем получить токен из cookie
         String token = extractTokenFromCookie(request);
-        logger.info("token from cookie: " + token);
         
         // Если токена нет в cookie, пробуем получить из заголовка Authorization
         if (token == null) {
-            logger.info("cookie not found, checking Bearer");
             final String header = request.getHeader("Authorization");
             if (header != null && header.startsWith("Bearer ")) {
                 token = header.substring(7);
@@ -51,7 +49,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         
         // Если токен найден, проверяем его
         if (token != null) {
-            logger.info(token);
             final String username = jwtTokenUtil.extractUsername(token); // email here
             
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

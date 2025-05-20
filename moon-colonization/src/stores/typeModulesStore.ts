@@ -8,12 +8,14 @@ export const typeModulesStore = defineStore('typeModulesStore', {
   }),
   actions: {
     async getTypeModules() {
-      const response = await typeModulesApi.getResources()
-      if (response !== undefined) {
-        // map
-        response.forEach((item: TypeModule) => {
-          this.typeModules.push(new TypeModule(item.type, item.name, item.people, item.cost, item.live))
-        })
+      if(this.typeModules === null || this.typeModules === undefined || this.typeModules.length == 0){
+        const response = await typeModulesApi.getTypeModulesApi()
+        if (response !== undefined) {
+          // map
+          response.forEach((item: TypeModule) => {
+            this.typeModules.push(new TypeModule(item.type, item.name, item.people, item.cost, item.live))
+          })
+        }
       }
     },
   },

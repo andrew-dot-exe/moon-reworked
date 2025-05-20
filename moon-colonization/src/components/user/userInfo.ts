@@ -1,5 +1,5 @@
 import type { ZoneLink } from '../colony/zones'
-import type { Module } from '../typeModules/modules'
+import type { Module } from '../modules/modules'
 
 export interface UserInfo {
   name: string
