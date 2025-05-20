@@ -111,46 +111,20 @@ opening();
                 <div class="section">
                     <div class="section-section">
                         <div class="section-section">
-                            <div 
-                            :class="{ 'select': activeHabitable == true, 'default': activeHabitable == false }"
-                            @click="setActiveTab(true)"
-                            >
-                                <p class="ss-p">Обитаемые модули</p>
+                            <div class="select">
+                                <p class="ss-p">Связи</p>
                             </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="2" height="30" viewBox="0 0 2 30" fill="none">
-                                <path d="M0 30V0H2V30H0Z" fill="#464646"/>
-                            </svg>
-                            <div 
-                            :class="{ 'select': activeHabitable == false, 'default': activeHabitable == true }"
-                            @click="setActiveTab(false)"
-                            >
-                                <p class="ss-p">Технологические модули</p>
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="2" height="30" viewBox="0 0 2 30" fill="none">
-                                <path d="M0 30V0H2V30H0Z" fill="#464646"/>
-                            </svg>
                         </div>
                     </div>
                 </div>
                 <div class="object-container" v-if="{ isLoaded }" >
                     <div class="object-container-container">
                         <div class="object-object" id="cont">
-                            <ModuleComponent 
+                            <!--<ModuleComponent 
                             v-for="(item, index) in visibleItems" 
                             :key="index"
                             :data="item"
-                            />
-                        </div>
-                    </div>
-                    <div class="pages" v-if="totalPages > 1">
-                        <div class="pages-pages">
-                            <p class="pp-left" @click="prevPage" :class="{ disabled: currentPage === 1 }" ><</p>
-                            <div class="pages-container">
-                                <p>{{ currentPage }}</p>
-                                <p>/</p>
-                                <p>{{ totalPages }}</p>
-                            </div>
-                            <p class="pp-rigth" @click="nextPage" :class="{ disabled: currentPage === totalPages }">></p>
+                            />-->
                         </div>
                     </div>
                 </div>

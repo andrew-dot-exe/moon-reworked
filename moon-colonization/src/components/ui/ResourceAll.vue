@@ -1,17 +1,25 @@
 
 <script setup lang="ts">
-defineProps({
-  id: {type: Number, required: true },
+import { computed } from 'vue'
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true
+  },
   data: { type: Number, required: true }
 });
 const name = ["Вода", "Топливо", "Электроэнергия", "Провизия", 
 "Кислород", "Углекислый газ", "Мусор", "Материалы"];
+
+const iconPath = computed(() => {
+  return `textures/icons/sprite.svg#icon-${name[props.id]}`;
+});
 </script>
 
 <template>
     <div class="resource">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="41" viewBox="0 0 40 41" fill="none">
-            <path d="M31.607 25.5C33.6864 33.5369 27.2439 40.5 18.6704 40.5C10.0969 40.5 3.62905 33.635 5.73384 25.5C7.0275 20.5 13.4958 13 18.6704 0.5C23.8451 13 30.3134 20.5 31.607 25.5Z" fill="#A3A3A3"/>
+        <svg xmlns="http://www.w3.org/2000/svg">
+            <use :xlink:href="iconPath"  width="148%" height="148%"/>
         </svg>
         <div class="information">
             <p>{{ name[id] }}</p>
@@ -35,7 +43,7 @@ const name = ["Вода", "Топливо", "Электроэнергия", "П�
     flex-wrap: nowrap;
 }
 .resource svg {
-    width: 40px;
+    width: 45px;
     height: 40px;
     flex-shrink: 0;
     aspect-ratio: 1/1;

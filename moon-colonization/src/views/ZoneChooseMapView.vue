@@ -3,6 +3,7 @@ import UIHeader from '@/components/ui/UIHeader.vue';
 import { ImagePoint } from '@/components/utils/fitElements';
 import { useComponentStore } from '@/stores/componentStore';
 import { onMounted, ref, watch } from 'vue';
+import ConstructionLink from '@/components/ui/ConstructionLink.vue'
 
 interface PositionByName {
   name: string,
@@ -189,10 +190,23 @@ watch([scale, translatePos], () => {
         </div>
       </div>
     </div>
+    <div class="construction-block">
+        <ConstructionLink/>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.construction-block{
+  pointer-events: auto;
+  display: flex;
+  position: absolute;
+  margin-left: 20px;
+  margin-right: 20px;
+  bottom: 20px;
+
+}
+
 .main-container {
   max-width: 100vw;
   height: 100vh;

@@ -26,8 +26,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Сервис для работы с пользователями и их данными.
@@ -181,8 +184,8 @@ public class UserService {
     }
 
     private ZoneProduction calculateZoneProduction(List<Module> modules, int zoneId) {
-        List<Long> production = new ArrayList<>(TypeResources.values().length);
-        List<Long> consumption = new ArrayList<>(TypeResources.values().length);
+        List<Long> production = new ArrayList<Long>(Collections.nCopies(TypeResources.values().length, 0L));
+        List<Long> consumption = new ArrayList<Long>(Collections.nCopies(TypeResources.values().length, 0L));
 
         modules.stream()
                 .filter(module -> module.getId_zone() == zoneId)

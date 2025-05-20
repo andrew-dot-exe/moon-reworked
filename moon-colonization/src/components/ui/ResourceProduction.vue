@@ -1,11 +1,22 @@
 <script setup lang="ts">
-defineProps({
-  id: {type: Number, required: true },
+import { computed } from 'vue'
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true
+  },
   prod: { type: Number, required: true },
   cons: { type: Number, required: true }
 });
-const name = ["Вода", "Топливо", "Электроэнергия", "Провизия", 
-"Кислород", "Углекислый газ", "Мусор", "Материалы"];
+
+const name = [
+  "Вода", "Топливо", "Электроэнергия", "Провизия",
+  "Кислород", "Углекислый газ", "Мусор", "Материалы"
+] as const; // Фиксируем типы
+
+const iconPath = computed(() => {
+  return `textures/icons/sprite.svg#icon-${name[props.id]}`;
+});
 </script>
 
 <template>
@@ -14,8 +25,11 @@ const name = ["Вода", "Топливо", "Электроэнергия", "П�
             <div class="icon-container">
                 <div class="icon">
                     <div class="icon-s">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="11" viewBox="0 0 8 11" fill="none">
-                            <path d="M7.23504 6.75C7.75488 8.75923 6.14427 10.5 4.00089 10.5C1.85751 10.5 0.240545 8.78375 0.766741 6.75C1.09016 5.5 2.70723 3.625 4.00089 0.5C5.29455 3.625 6.91163 5.5 7.23504 6.75Z" fill="white"/>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                width="15"
+                                height="15"
+                                fill="none">
+                            <use :xlink:href="iconPath" width="148%" height="148%"/>
                         </svg>
                     </div>
                 </div>
@@ -27,7 +41,7 @@ const name = ["Вода", "Топливо", "Электроэнергия", "П�
         <div class="counter">
             <div class="replinishment-container">
                 <div class="icon-value-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="5" height="6" viewBox="0 0 5 6" fill="none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="8" height="9" viewBox="0 0 5 6" fill="none">
                         <path d="M2.91667 5.5H2.08333V3.41667H0V2.58333H2.08333V0.5H2.91667V2.58333H5V3.41667H2.91667V5.5Z" fill="#BCFE37"/>
                     </svg>
                 </div>
@@ -38,7 +52,7 @@ const name = ["Вода", "Топливо", "Электроэнергия", "П�
             </div>
             <div class="consuption-container">
                 <div class="icon-value-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="5" height="2" viewBox="0 0 5 2" fill="none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="8" height="4" viewBox="0 0 5 2" fill="none">
                         <path d="M5 1.59375H0V0.40625H5V1.59375Z" fill="#FF2C2C"/>
                     </svg>
                 </div>
@@ -73,32 +87,21 @@ const name = ["Вода", "Топливо", "Электроэнергия", "П�
     display: flex;
     width: 20px;
     height: 20px;
-    padding: 5px 0px;
     justify-content: center;
     align-items: center;
-    gap: 10px;
     background: #A3A3A3;
 }
 .icon {
     display: flex;
-    height: 10px;
     justify-content: center;
     align-items: center;
 }
 .icon-s {
-    display: flex;
-    width: 7px;
-    height: 10px;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-}
-.icon-s svg {
-    width: 6.667px;
-    height: 10px;
-    flex-shrink: 0;
-    aspect-ratio: 6.67/10.00;
+  display: flex;
+  width: 22px;
+  height: 20px;
+  justify-content: center;
+  align-items: center;
 }
 .heading {
     display: flex;
@@ -136,21 +139,15 @@ const name = ["Вода", "Топливо", "Электроэнергия", "П�
     align-self: stretch;
 }
 .icon-value-container {
-    display: flex;
     width: 15px;
     height: 15px;
-    padding: 5px;
-    flex-direction: column;
+    display: flex;
     justify-content: center;
-    align-items: center;
-    gap: 10px;
-    aspect-ratio: 1/1;
+    align-content: center;
     border: 1px solid #BCFE37;
 }
 .icon-value-container svg {
-    width: 5px;
-    flex: 1 0 0;
-    aspect-ratio: 1/1;
+    margin: auto;
     fill: #BCFE37;
 }
 .text-value-container {
@@ -184,6 +181,10 @@ const name = ["Вода", "Топливо", "Электроэнергия", "П�
     justify-content: space-between;
     align-items: center;
     align-self: stretch;
+}
+
+.consuption-container .icon-value-container{
+    border: 1px solid #FF2C2C;
 }
 #red-value {
     color: #FF2C2C;
