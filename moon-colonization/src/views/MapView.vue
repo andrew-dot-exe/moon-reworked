@@ -4,7 +4,7 @@
 
     <!-- UI оверлей -->
     <div class="ui-overlay">
-      <div style="pointer-events: auto;">
+      <div class="header">
         <UIHeader name="Режим строительства" />
       </div>
       <div style="pointer-events: auto;">
@@ -45,6 +45,15 @@ function onCellSelected(x: number, z: number, cellData: MoonCell) {
 </script>
 
 <style scoped>
+
+.header {
+  pointer-events: auto;
+  flex-shrink: 0;
+  z-index: 10;
+    overflow: auto;   
+    overflow-x: auto;  /* Включаем прокрутку */
+    scrollbar-width: none; /* Firefox */
+}
 .construction-block{
   pointer-events: auto;
   display: flex;

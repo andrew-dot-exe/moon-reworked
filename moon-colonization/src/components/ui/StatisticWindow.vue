@@ -31,8 +31,8 @@ const hasProductionData = computed(() => {
 <template>
     <div class="statistic">
         <div class="header-block-container">
-            <div class="Close-container" @click="$emit('toggle')">
-                <div class="close">
+            <div class="Close-container">
+                <div class="close" @click="$emit('toggle')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                         <path d="M1.43869 16H0V14.5574L6.7139 8.13115L0 1.44262V0H1.43869L7.93461 6.73224H8.10899L14.6049 0H16V1.44262L9.3297 8.13115L16 14.5574V16H14.6049L8.10899 9.61749H7.93461L1.43869 16Z" fill="black"/>
                     </svg>
@@ -93,7 +93,8 @@ p {
 }
 .statistic {
     display: flex;
-    width: 868px;
+    max-width: 868px; 
+    width: 98vw;
     height: 98vh;
     padding-bottom: 24px;
     flex-direction: column;
@@ -125,7 +126,6 @@ p {
     align-items: center;
     gap: 10px;
     align-self: stretch;
-    cursor: pointer;
 }
 .close {
     display: flex;
@@ -137,6 +137,7 @@ p {
     align-items: center;
     gap: 10px;
     background: #BCFE37;
+    cursor: pointer;
 }
 .close svg {
     width: 16px;
@@ -151,7 +152,7 @@ p {
     align-self: stretch;
 }
 .line {
-    width: 818px;
+    width: 100%;
     height: 1px;
     background: #A3A3A3;
 }

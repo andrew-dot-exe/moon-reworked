@@ -32,7 +32,7 @@ const name = ["Вода", "Топливо", "Электроэнергия", "П�
     align-content: center;
     gap: 15px 14px;
     align-self: stretch;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 .resource svg {
     width: 40px;
