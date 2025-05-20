@@ -5,7 +5,7 @@
     <!-- UI оверлей -->
     <div class="ui-overlay">
       <div style="pointer-events: auto;">
-        <UIHeader />
+        <UIHeader name="Режим строительства" />
       </div>
       <div style="pointer-events: auto;">
         <BuildButton />

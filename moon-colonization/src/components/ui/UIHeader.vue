@@ -254,16 +254,17 @@
         </div>
       </div>
       <div class="Mode-container">
-        <p>Режим выбора области</p>
+        <p>{{ name }}</p>
       </div>
     </div>
-  </div>
-  <div v-if="isStatisticsVisible" class="statistics-overlay">
+    <div v-if="isStatisticsVisible" class="statistics-overlay">
     <StatisticWindow @toggle="toggleStatistics"/>
   </div>
   <div v-if="isMenuVisible" class="menu-overlay">
     <MenuWindow @toggle="toggleMenu"/>
   </div>
+  </div>
+  
   
 
 </template>
@@ -273,6 +274,10 @@ import { useResourceStore } from '@/stores/resourceStore';
 import { onMounted, ref } from 'vue';
 import StatisticWindow from '@/components/ui/StatisticWindow.vue';
 import MenuWindow from '@/components/ui/MenuWindow.vue';
+
+defineProps({
+  name: {type: String, required: true }
+});
 
 const resourceStore = useResourceStore();
 const isLoading = ref(true)

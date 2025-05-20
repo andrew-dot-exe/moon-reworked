@@ -170,7 +170,7 @@ watch([scale, translatePos], () => {
 <template>
   <div class="main-container">
     <div class="header">
-      <UIHeader />
+      <UIHeader name="Режим выбор области"/>
     </div>
 
     <div class="map-container" ref="mapContainer" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
@@ -194,16 +194,21 @@ watch([scale, translatePos], () => {
 
 <style scoped>
 .main-container {
-  width: 100vw;
+  max-width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: hidden;  
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE и Edge */
 }
 
 .header {
   flex-shrink: 0;
   z-index: 10;
+    overflow: auto;   
+    overflow-x: auto;  /* Включаем прокрутку */
+    scrollbar-width: none; /* Firefox */
 }
 
 .map-container {

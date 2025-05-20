@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ResourceProduction from './ResourceProduction.vue';
 import {ZoneProduction} from '@/components/statistic/ZoneProduction.ts';
-import { onMounted, ref, watch } from 'vue';
+import { ref } from 'vue';
 defineProps({
   data: {type: ZoneProduction, required: true }
 });
