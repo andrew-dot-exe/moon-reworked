@@ -2,27 +2,36 @@ import type { TypeModule, TypeModuleModel } from '../typeModules/typeModules'
 import { ModuleMesh } from '../engine/map-renderer/baseModule'
 
 export interface ModuleModel {
-  id: number
   idZone: number
-  moduleType: number
+  typeModule: number
   // координаты относительно канваса
   x: number
   y: number
 }
 
 export class Module implements ModuleModel {
-  id: number
   idZone: number
-  moduleType: number
+  typeModule: number
   x: number
   y: number
 
-  constructor(id: number, idZone: number, moduleType: number, x: number, y: number) {
-    this.id = id
+  constructor(idZone: number, typeModule: number, x: number, y: number) {
     this.idZone = idZone
-    this.moduleType = moduleType
+    this.typeModule = typeModule
     this.x = x
     this.y = y
+  }
+}
+
+export class ModulePlacePosibillity {
+  possible: boolean
+  relief: number
+  rationality: number | undefined
+
+  constructor(possible: boolean, relief: number, rationality?: number) {
+    this.possible = possible
+    this.relief = relief
+    this.rationality = rationality
   }
 }
 

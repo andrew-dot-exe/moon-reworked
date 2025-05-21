@@ -6,8 +6,10 @@ import { onMounted, ref, watch } from 'vue';
 import ConstructionLink from '@/components/ui/ConstructionLink.vue'
 import Success from '@/components/ui/Success.vue';
 import EndColonyWindow from '@/components/ui/EndColonyWindow.vue';
-
+import { useZoneStore } from '@/stores/zoneStore';
 const end = ref(false)
+
+
 
 interface PositionByName {
   name: string,
@@ -48,9 +50,11 @@ const originalPositions = [
 ]
 
 const componentStore = useComponentStore()
+const zoneStore = useZoneStore()
 
 onMounted(() => {
   centerMap()
+  zoneStore.fetchAllZones()
   window.addEventListener('resize', centerMap)
 })
 
@@ -164,6 +168,7 @@ const handleWheel = (e: WheelEvent) => {
 
 const handleZoneClick = async (zone: ZonePosition) => {
   console.log(zone.name)
+  zoneStore.selectZoneByName(zone.name)
   componentStore.setComponent('colonization')
 }
 
@@ -175,7 +180,7 @@ watch([scale, translatePos], () => {
 <template>
   <div class="main-container">
     <div class="header">
-      <UIHeader name="Режим выбор области"/>
+      <UIHeader name="Режим выбор области" />
     </div>
 
     <div class="map-container" ref="mapContainer" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
@@ -198,7 +203,7 @@ watch([scale, translatePos], () => {
       <Success />
     </div>
     <div class="construction-block">
-        <ConstructionLink/>
+      <ConstructionLink />
     </div>
     <div v-if="end" class="stat-overlay">
       <EndColonyWindow />
@@ -219,7 +224,8 @@ watch([scale, translatePos], () => {
   justify-content: center;
   align-items: center;
 }
-.construction-block{
+
+.construction-block {
   pointer-events: auto;
   display: flex;
   position: absolute;
@@ -228,7 +234,8 @@ watch([scale, translatePos], () => {
   bottom: 20px;
 
 }
-.success-block{
+
+.success-block {
   pointer-events: auto;
   position: absolute;
   display: flex;
@@ -242,17 +249,21 @@ watch([scale, translatePos], () => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;  
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* IE и Edge */
+  overflow: hidden;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE и Edge */
 }
 
 .header {
   flex-shrink: 0;
   z-index: 10;
-    overflow: auto;   
-    overflow-x: auto;  /* Включаем прокрутку */
-    scrollbar-width: none; /* Firefox */
+  overflow: auto;
+  overflow-x: auto;
+  /* Включаем прокрутку */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .map-container {

@@ -1,8 +1,6 @@
 <template>
   <div class="map-view">
-    <MapRenderer ref="mapRendererRef" @cell-selected="onCellSelected" />
-
-    <!-- UI оверлей -->
+    <MapRenderer ref="mapRendererRef" />
     <div class="ui-overlay">
       <div class="header">
         <UIHeader name="Режим строительства" />
@@ -13,16 +11,16 @@
       <div class="success-block">
         <Success />
       </div>
-      <div v-if="selectedModule" class="optimality-block">
-        <Optimality :opt="9" :rel="49" :rat="83" />
+      <div v-if="optimalityResult" class="optimality-block">
+        <Optimality :opt="optimalityResult.opt" :rel="optimalityResult.rel" :rat="optimalityResult.rat" />
       </div>
       <div class="construction-block">
         <Construction />
       </div>
       <div style="pointer-events: auto; margin-top: 20px;">
-        <SelectedModuleInfo />
+        <SelectedModuleInfo
+          @optimality="e => { console.log('MapView.vue got optimality', e); optimalityResult.value = e }" />
       </div>
-
     </div>
     <div v-if="end" class="stat-overlay">
       <EndColonyWindow />
@@ -55,6 +53,7 @@ const selectedCellStore = useSelectedCellStore()
 
 const moduleInfoStore = useModuleInfoStore()
 const selectedModule = computed(() => moduleInfoStore.selectedModule)
+const optimalityResult = ref<null | { opt: number, rel: number, rat: number }>(null)
 
 onMounted(async () => {
   await nextTick()

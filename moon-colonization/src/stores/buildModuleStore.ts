@@ -4,7 +4,7 @@ import type { TypeModule } from '@/components/typeModules/typeModules'
 export const useBuildModuleStore = defineStore('buildModule', {
   state: () => ({
     selectedBuildModule: null as TypeModule | null,
-    selectedBuildModelFile: null as string | null
+    selectedBuildModelFile: null as string | null,
   }),
   actions: {
     setBuildModule(module: TypeModule, modelFile?: string) {
@@ -14,6 +14,6 @@ export const useBuildModuleStore = defineStore('buildModule', {
     clearBuildModule() {
       this.selectedBuildModule = null
       this.selectedBuildModelFile = null
-    }
-  }
+    },
+  },
 })

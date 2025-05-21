@@ -9,7 +9,7 @@ export const useZoneStore = defineStore('zoneStore', {
   }),
   actions: {
     async fetchAllZones() {
-      if(this.zones === null || this.zones === undefined || this.zones.length == 0){
+      if (this.zones === null || this.zones === undefined || this.zones.length == 0) {
         const response = await zoneApi.getAllZones()
         if (response !== undefined) {
           this.zones = response
@@ -18,6 +18,12 @@ export const useZoneStore = defineStore('zoneStore', {
     },
     selectZone(id: number) {
       this.current_zone = this.zones[id]
+    },
+    selectZoneByName(name: string) {
+      const zone = this.zones.find((z) => z.name === name)
+      if (zone) {
+        this.current_zone = zone
+      }
     },
   },
 })

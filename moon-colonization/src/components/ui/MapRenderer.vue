@@ -26,10 +26,34 @@ let directionalLight: THREE.DirectionalLight
 let selectedMesh: THREE.Object3D | null = null
 const selectedCellStore = useSelectedCellStore()
 
-function placeModule() {
-  // Функция размещения модуля на карту
-  // и добавления информации о нем в стор
-
+function placeModule(x: number, z: number, moduleData: TypeModule, gltfFile: string, width = 1, height = 1) {
+  const loader = new GLTFLoader()
+  loader.load(`/models/${gltfFile}`, (gltf) => {
+    gltf.scene.userData.module = moduleData
+    gltf.scene.userData.cellX = x
+    gltf.scene.userData.cellZ = z
+    // Вычисляем bounding box всей сцены
+    const box = new THREE.Box3().setFromObject(gltf.scene)
+    const size = new THREE.Vector3()
+    box.getSize(size)
+    // Коэффициенты для подгонки под нужное количество ячеек
+    const scaleX = width / (size.x || 1)
+    const scaleZ = height / (size.z || 1)
+    // Масштаб по Y сохраняет пропорцию исходной модели
+    gltf.scene.scale.set(scaleX, scaleX, scaleZ)
+    // Центрируем относительно области
+    gltf.scene.position.x = x + (width - 1) / 2 - 4.5
+    gltf.scene.position.z = z + (height - 1) / 2 - 4.5
+    gltf.scene.position.y = 0.11
+    gltf.scene.traverse((obj) => {
+      if (obj instanceof THREE.Mesh) {
+        obj.castShadow = true
+        obj.receiveShadow = true
+        obj.userData.module = moduleData
+      }
+    })
+    scene.add(gltf.scene)
+  })
 }
 
 function placeMeshOnCell(mesh: THREE.Mesh, x: number, z: number) {
@@ -309,7 +333,8 @@ function animate() {
 defineExpose({
   placeMeshOnCell,
   placeManufactureModule,
-  placeMultiCellMeshOnGrid
+  placeMultiCellMeshOnGrid,
+  placeModule
 })
 </script>
 

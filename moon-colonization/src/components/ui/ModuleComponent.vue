@@ -2,13 +2,43 @@
 import { TypeModule } from '@/components/typeModules/typeModules';
 import { computed } from 'vue';
 import { useBuildModuleStore } from '@/stores/buildModuleStore'
+import { modulesApi } from '@/components/modules/modulesApi'
+import { Module } from '../modules/modules';
+import { useZoneStore } from '@/stores/zoneStore';
+import { defineEmits } from 'vue';
+import { useCellStore } from '@/stores/cellStore';
 
 const buildModuleStore = useBuildModuleStore()
+const zoneStore = useZoneStore()
+// const selectedCellStore = useSelectedCellStore() // not works
+const cellStore = useCellStore()
+const emit = defineEmits(['optimality']);
 
-function selectForBuild() {
+async function selectForBuild() {
   const baseName = props.data.name.split('(')[0].trim().toLowerCase()
   buildModuleStore.setBuildModule(props.data, baseName + '.gltf')
   console.log('Выбран модуль для постройки:', props.data, 'GLTF:', baseName + '.gltf')
+  // Пример объекта типа Module для API
+  const moduleToCheck = new Module(
+    zoneStore.current_zone.id ?? 0, // null?
+    props.data.type ?? 0, // null?
+    cellStore.selectedCellCoords.x ?? 0,
+    cellStore.selectedCellCoords.z ?? 0
+  )
+  // Проверка и вывод всех полей объекта moduleToCheck
+  Object.entries(moduleToCheck).forEach(([key, value]) => {
+    console.log(`moduleToCheck.${key}:`, value)
+  })
+  console.log('Module для API:', moduleToCheck)
+  // Вызов проверки эффективности
+  try {
+    const result = await modulesApi.checkModule(moduleToCheck)
+    console.log('Эффективность модуля (ответ API):', result)
+    emit('optimality', result)
+  } catch (e) {
+    console.error('Ошибка при вычислении эффективности:', e)
+    emit('optimality', null)
+  }
 }
 
 const props = defineProps({
