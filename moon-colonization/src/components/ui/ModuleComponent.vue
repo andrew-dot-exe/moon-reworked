@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const emit = defineEmits(['select-module']);
 import { TypeModule } from '@/components/typeModules/typeModules';
 import { computed } from 'vue';
 import { useBuildModuleStore } from '@/stores/buildModuleStore'
@@ -12,7 +13,7 @@ const buildModuleStore = useBuildModuleStore()
 const zoneStore = useZoneStore()
 // const selectedCellStore = useSelectedCellStore() // not works
 const cellStore = useCellStore()
-const emit = defineEmits(['optimality']);
+//const emit = defineEmits(['optimality']);
 
 async function selectForBuild() {
   const baseName = props.data.name.split('(')[0].trim().toLowerCase()
@@ -25,20 +26,7 @@ async function selectForBuild() {
     cellStore.selectedCellCoords.x ?? 0,
     cellStore.selectedCellCoords.z ?? 0
   )
-  // Проверка и вывод всех полей объекта moduleToCheck
-  Object.entries(moduleToCheck).forEach(([key, value]) => {
-    console.log(`moduleToCheck.${key}:`, value)
-  })
-  console.log('Module для API:', moduleToCheck)
-  // Вызов проверки эффективности
-  try {
-    const result = await modulesApi.checkModule(moduleToCheck)
-    console.log('Эффективность модуля (ответ API):', result)
-    emit('optimality', result)
-  } catch (e) {
-    console.error('Ошибка при вычислении эффективности:', e)
-    emit('optimality', null)
-  }
+  emit("select-module", moduleToCheck)
 }
 
 const props = defineProps({

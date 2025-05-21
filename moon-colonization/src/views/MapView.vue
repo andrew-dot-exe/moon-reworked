@@ -1,25 +1,21 @@
 <template>
   <div class="map-view">
-    <MapRenderer ref="mapRendererRef" />
+    <MapRenderer ref="mapRendererRef" @cell-selected="onCellSelected"/>
     <div class="ui-overlay">
       <div class="header">
         <UIHeader name="Режим строительства" />
       </div>
       <div style="pointer-events: auto;">
-        <BuildButton />
+        <BuildButton @close-opt="offModuleSelect"/>
       </div>
       <div class="success-block">
         <Success />
       </div>
-      <div v-if="optimalityResult" class="optimality-block">
+      <div v-if="selectedCell && selectedModule" class="optimality-block">
         <Optimality :opt="optimalityResult.opt" :rel="optimalityResult.rel" :rat="optimalityResult.rat" />
       </div>
       <div class="construction-block">
-        <Construction />
-      </div>
-      <div style="pointer-events: auto; margin-top: 20px;">
-        <SelectedModuleInfo
-          @optimality="e => { console.log('MapView.vue got optimality', e); optimalityResult.value = e }" />
+        <Construction @select-module="onModuleSelect"/>
       </div>
     </div>
     <div v-if="end" class="stat-overlay">
@@ -29,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref, computed } from 'vue'
+import { nextTick, onMounted, ref, reactive } from 'vue'
 import MapRenderer from '@/components/ui/MapRenderer.vue'
 import UIHeader from '@/components/ui/UIHeader.vue'
 import BuildButton from '@/components/ui/BuildButton.vue'
@@ -38,22 +34,24 @@ import { useMapStore } from '@/stores/mapStore'
 import Construction from '@/components/ui/Construction.vue'
 import Optimality from '@/components/ui/Optimality.vue'
 import Success from '@/components/ui/Success.vue';
-import SelectedModuleInfo from '@/components/ui/SelectedModuleInfo.vue'
 import EndColonyWindow from '@/components/ui/EndColonyWindow.vue';
 import { useSelectedCellStore } from '@/stores/selectedCellStore'
 import { useModuleInfoStore } from '@/stores/moduleInfoStore'
+import { Module } from '@/components/modules/modules'
+import { modulesApi } from '@/components/modules/modulesApi'
 const end = ref(false)
 
 
 const mapRendererRef = ref(null)
 const mapStore = useMapStore()
-const selectedCellStore = useSelectedCellStore()
+
+const optimalityResult = reactive({
+  opt: 0,
+  rel: 0,
+  rat: 0
+});
 // ячейку выбрал, надо будет сделать запрос
 // потом надо сделать выбор из
-
-const moduleInfoStore = useModuleInfoStore()
-const selectedModule = computed(() => moduleInfoStore.selectedModule)
-const optimalityResult = ref<null | { opt: number, rel: number, rat: number }>(null)
 
 onMounted(async () => {
   await nextTick()
@@ -62,11 +60,56 @@ onMounted(async () => {
 })
 
 const selectedCell = ref(false)
-const selectedModule = ref(true)
+const selectedModule = ref(false)
 
 // Обработчик выбора клетки
-function onCellSelected(x: number, z: number, cellData: MoonCell) {
-  selectedCellStore.setSelectedCell(cellData)
+async function onCellSelected(x: number, z: number) {
+  selectedCell.value = true
+  if(selectedModule.value && currentModule.value != undefined
+    && currentModule.value?.x != undefined && currentModule.value?.y != undefined){
+    currentModule.value.x = x
+    currentModule.value.y = z
+    await onModuleSelect(undefined)
+  }
+}
+
+function offModuleSelect(){
+  selectedModule.value = false
+}
+
+const currentModule = ref<null | Module>(null)
+
+async function onModuleSelect(module: Module | undefined){
+  
+  // Вызов проверки эффективности
+  if(selectedCell.value){
+    selectedModule.value = true
+    Object.assign(optimalityResult, { opt: 0, rel: 0, rat: 0 });
+    if(module !== undefined){
+      currentModule.value = module
+    }
+    // Проверка и вывод всех полей объекта moduleToCheck
+    /*Object.entries(module).forEach(([key, value]) => {
+      console.log(`moduleToCheck.${key}:`, value)
+    })
+    console.log('Module для API:', module)*/
+    try {
+      if(currentModule.value != undefined){
+        const result = await modulesApi.checkModule(currentModule.value)
+        //console.log('Эффективность модуля (ответ API):', result)
+        if(result && result.rationality && result.relief){
+          // Принудительное обновление через новое присваивание
+          optimalityResult.rat = result.rationality ?? 0;
+          optimalityResult.rel = result.relief ?? 0;
+          optimalityResult.opt = (optimalityResult.rat * 0.7 + optimalityResult.rel * 0.3) || 0;
+        }
+      }
+      //emit('optimality', result)
+    } catch (e) {
+      console.error('Ошибка при вычислении эффективности:', e)
+      //emit('optimality', null)
+    }
+  }
 }
 
 </script>

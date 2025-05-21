@@ -1,8 +1,10 @@
 <script setup lang="ts">
+const emit = defineEmits(['select-module']);
 import ModuleComponent from '@/components/ui/ModuleComponent.vue';
 import { typeModulesStore } from '@/stores/typeModulesStore';
 import { TypeModule } from '@/components/typeModules/typeModules';
 import { onMounted, ref } from 'vue';
+import type { Module } from '@/components/modules/modules'
 
 const typeStore = typeModulesStore();
 const isLoaded = ref(false)
@@ -90,6 +92,10 @@ const opening = () => {
 }
 opening();
 
+async function onModuleSelect(module: Module){
+    emit('select-module', module)
+}
+
 </script>
 
 <template>
@@ -139,6 +145,7 @@ opening();
                             v-for="(item, index) in visibleItems" 
                             :key="index"
                             :data="item"
+                            @select-module="onModuleSelect"
                             />
                         </div>
                     </div>

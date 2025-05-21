@@ -51,6 +51,8 @@ opening();
                             :key="index"
                             :data="item"
                             />-->
+
+                            
                         </div>
                     </div>
                 </div>
