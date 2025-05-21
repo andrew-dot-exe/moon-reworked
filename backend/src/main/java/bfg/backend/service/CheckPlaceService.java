@@ -96,10 +96,11 @@ public class CheckPlaceService {
         Integer relief = component.getRelief();
         Integer rationality = component.getRationality(data.modules, data.links, data.resources);
 
+        // TODO вернуть нормально
         return new CheckedPlace(
                 relief != null && rationality != null,
                 relief,
-                rationality
+                100
         );
     }
 
