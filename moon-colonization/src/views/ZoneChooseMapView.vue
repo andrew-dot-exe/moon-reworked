@@ -166,15 +166,53 @@ const handleWheel = (e: WheelEvent) => {
   checkBoundaries()
 }
 
-const handleZoneClick = async (zone: ZonePosition) => {
+const handleZoneClick = async (zone: ZonePosition, i: number) => {
+  console.log(open.value)
+  if(open.value){selectZone(i)}
+  else{
   console.log(zone.name)
   zoneStore.selectZoneByName(zone.name)
   componentStore.setComponent('colonization')
+  }
 }
 
 watch([scale, translatePos], () => {
   checkBoundaries()
 })
+
+const open = ref(true)
+const opening = () =>{
+  open.value = !open.value
+}
+
+const selectedLink = ref(0)
+const selectLink = (type: number) => {
+  if(selectedLink.value == type) selectedLink.value = 0
+  else selectedLink.value = type
+}
+
+const selectedZones = ref({zone1: -1, zone2: -1})
+const selectZone = (zone: number) => {
+  if(selectedZones.value !== undefined){
+    if(selectedZones.value.zone1 == -1) {
+      selectedZones.value.zone1 == zone
+    }
+    else if(selectedZones.value.zone2 == -1) {
+      selectedZones.value.zone2 == zone
+    }
+    else{
+      selectedZones.value.zone1 == -1
+      selectedZones.value.zone2 == -1
+    }
+  }
+}
+
+const buildLink = () => {
+  console.log(selectedZones.value, selectedLink.value)
+  if(selectedLink.value > 0 && selectedZones.value.zone1 > -1 && selectedZones.value.zone2 > -1 && selectedZones.value.zone2 != selectedZones.value.zone1){
+  console.log("build", selectedZones, selectedLink)
+  }
+}
 </script>
 
 <template>
@@ -191,11 +229,11 @@ watch([scale, translatePos], () => {
       }">
         <img ref="mapImage" class="map-image" :src="imgSrc" alt="Moon Map" draggable="false" />
 
-        <div v-for="position in originalPositions" :key="position.name" class="zone-marker" :style="{
+        <div v-for="(position, index) in originalPositions" :key="position.name" class="zone-marker" :style="{
           left: `${(position.point.x / imgWidth) * 100}%`,
           top: `${(position.point.y / imgHeight) * 100}%`,
-        }" @click="handleZoneClick(position)">
-          <div class="marker-icon" :style="{ backgroundImage: `url(${position.icon})` }"></div>
+        }" @click="handleZoneClick(position, index)" >
+          <div class="marker-icon" :style="{ backgroundImage: `url(${position.icon})` }" ></div>
         </div>
       </div>
     </div>
@@ -203,7 +241,7 @@ watch([scale, translatePos], () => {
       <Success />
     </div>
     <div class="construction-block">
-      <ConstructionLink />
+      <ConstructionLink @open-fun="opening" @select-link1="selectLink(1)" @select-link2="selectLink(2)" @build="buildLink"/>
     </div>
     <div v-if="end" class="stat-overlay">
       <EndColonyWindow />
@@ -294,6 +332,9 @@ watch([scale, translatePos], () => {
   pointer-events: auto;
   width: 0;
   height: 0;
+}
+.zone-marker .select{
+  background-color: #fff;
 }
 
 .marker-icon {

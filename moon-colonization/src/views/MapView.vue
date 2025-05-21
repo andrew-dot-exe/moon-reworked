@@ -6,7 +6,7 @@
         <UIHeader name="Режим строительства" />
       </div>
       <div style="pointer-events: auto;">
-        <BuildButton @close-opt="offModuleSelect"/>
+        <BuildButton @close-opt="offModuleSelect" @get-select="getSelect"/>
       </div>
       <div class="success-block">
         <Success />
@@ -78,6 +78,10 @@ function offModuleSelect(){
 }
 
 const currentModule = ref<null | Module>(null)
+
+function getSelect(): number{
+  return Number(currentModule.value?.typeModule)
+}
 
 async function onModuleSelect(module: Module | undefined){
   
