@@ -7,6 +7,8 @@ import ConstructionLink from '@/components/ui/ConstructionLink.vue'
 import Success from '@/components/ui/Success.vue';
 import EndColonyWindow from '@/components/ui/EndColonyWindow.vue';
 
+const end = ref(false)
+
 interface PositionByName {
   name: string,
   point: ImagePoint,
@@ -198,7 +200,7 @@ watch([scale, translatePos], () => {
     <div class="construction-block">
         <ConstructionLink/>
     </div>
-    <div class="stat-overlay">
+    <div v-if="end" class="stat-overlay">
       <EndColonyWindow />
     </div>
   </div>

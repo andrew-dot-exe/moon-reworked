@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const emit = defineEmits(['cell-selected']);
 import { ref, onMounted } from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -268,6 +269,7 @@ onMounted(() => {
   map.setupClickHandler(camera, renderer, (x: number, z: number) => {
     // кастомные методы
     cellStore.selectCell(x, z);
+    emit('cell-selected', x, z);
     return false
   })
 

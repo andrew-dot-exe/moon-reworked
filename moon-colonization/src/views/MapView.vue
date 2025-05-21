@@ -24,6 +24,9 @@
       </div>
 
     </div>
+    <div v-if="end" class="stat-overlay">
+      <EndColonyWindow />
+    </div>
   </div>
 </template>
 
@@ -38,6 +41,9 @@ import Construction from '@/components/ui/Construction.vue'
 import Optimality from '@/components/ui/Optimality.vue'
 import Success from '@/components/ui/Success.vue';
 import SelectedModuleInfo from '@/components/ui/SelectedModuleInfo.vue'
+import EndColonyWindow from '@/components/ui/EndColonyWindow.vue';
+
+const end = ref(false)
 
 const mapRendererRef = ref(null)
 const mapStore = useMapStore()
@@ -48,9 +54,13 @@ onMounted(async () => {
   mapStore.setRender(mapRendererRef)
 })
 
+const selectedCell = ref(false)
+const selectedModule = ref(true)
+
 // Обработчик выбора клетки
-function onCellSelected(x: number, z: number, cellData: MoonCell) {
+function onCellSelected(x: number, z: number) {
   console.log('NOT WORKING')
+  selectedCell.value = true
 }
 
 </script>
