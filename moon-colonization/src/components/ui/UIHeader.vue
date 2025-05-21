@@ -80,7 +80,7 @@
                     </div>
                     <div class="value">
                       <p class="text-value">{{ isLoading ? -0 : resourceStore.resources[2].count }}</p>
-                      <p class="unit">кг</p>
+                      <p class="unit">кВт*ч</p>
                     </div>
                   </div>
 
@@ -259,7 +259,7 @@
     <StatisticWindow @toggle="toggleStatistics"/>
   </div>
   <div v-if="isMenuVisible" class="menu-overlay">
-    <MenuWindow name="Имя" @toggle="toggleMenu"/>
+    <MenuWindow name="Имя" @toggle="toggleMenu" @end_col="endColonisation"/>
   </div>
   </div>
   
@@ -268,11 +268,16 @@
 </template>
 
 <script setup lang="ts">
+const emit = defineEmits(['end_col']);
 import { userInfoStore } from '@/stores/userInfoStore';
 import { useResourceStore } from '@/stores/resourceStore';
 import { onMounted, ref, watch, onUnmounted } from 'vue';
 import StatisticWindow from '@/components/ui/StatisticWindow.vue';
 import MenuWindow from '@/components/ui/MenuWindow.vue';
+
+const endColonisation = () => {
+   emit('end_col')
+}
 
 defineProps({
   name: { type: String, required: true }

@@ -1,3 +1,5 @@
+
+
 <template>
   <div class="map-view">
     <MapRenderer ref="mapRendererRef" @cell-selected="onCellSelected"/>
@@ -19,7 +21,7 @@
       </div>
     </div>
     <div v-if="end" class="stat-overlay">
-      <EndColonyWindow />
+      <EndColonyWindow/>
     </div>
   </div>
 </template>
@@ -39,8 +41,11 @@ import { useSelectedCellStore } from '@/stores/selectedCellStore'
 import { useModuleInfoStore } from '@/stores/moduleInfoStore'
 import { Module } from '@/components/modules/modules'
 import { modulesApi } from '@/components/modules/modulesApi'
+import { userInfoStore } from '@/stores/userInfoStore';
+
 const end = ref(false)
 
+const uInfo = userInfoStore();
 
 const mapRendererRef = ref(null)
 const mapStore = useMapStore()
@@ -57,6 +62,10 @@ onMounted(async () => {
   await nextTick()
   console.log('mapRendererRef after nextTick:', mapRendererRef.value)
   mapStore.setRender(mapRendererRef)
+  await uInfo.fetchUserInfo();
+  if(!uInfo.userInfo.live){
+    end.value = true
+  }
 })
 
 const selectedCell = ref(false)
@@ -116,9 +125,23 @@ async function onModuleSelect(module: Module | undefined){
   }
 }
 
+
 </script>
 
 <style scoped>
+.stat-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .header {
   pointer-events: auto;
   flex-shrink: 0;

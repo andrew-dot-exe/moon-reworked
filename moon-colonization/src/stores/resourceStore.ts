@@ -12,7 +12,7 @@ export const useResourceStore = defineStore('resourceStore', {
       if (response !== undefined) {
         // map
         response.forEach((item: ResourceModel) => {
-          this.resources.push(new ResourceModel(item.type, item.count, item.production))
+          this.resources.push(new ResourceModel(item.type, Math.floor(item.count / 1000), item.production))
         })
       }
     },

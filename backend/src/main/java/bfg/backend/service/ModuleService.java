@@ -142,7 +142,7 @@ public class ModuleService {
                 .orElseThrow(NotResourceException::new);
 
         long cost = TypeModule.values()[module.getModule_type()].getCost();
-        mat.setCount(mat.getCount() - cost);
+        mat.setCount(mat.getCount() - cost * 1000);
 
         if (mat.getCount() < 0) {
             user.setLive(false);

@@ -60,7 +60,7 @@ opening();
                     <div class="object-container-container">
                         <div class="object-object" id="cont">
 
-                            <div class="object" @click="pressL1" :class="{select: selectL == 1}">
+                            <div class="object" @click="pressL2" :class="{select: selectL == 2}">
                                 <div class="master-object-block">
                                 <div class="icon">
                                     <div class="icon-object">
@@ -111,7 +111,7 @@ opening();
                                 </div>
                             </div>
 
-                            <div class="object"  @click="pressL2" :class="{select: selectL == 2}">
+                            <div class="object"  @click="pressL1" :class="{select: selectL == 1}">
                                 <div class="master-object-block">
                                 <div class="icon">
                                     <div class="icon-object">
@@ -161,16 +161,38 @@ opening();
                                 </div>
                                 </div>
                             </div>
+                            
+                            <div class="build-button" @click="emit('build')"><div class="text-build"><p>Построить</p></div></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div @click="emit('build')">Построить</div>
     </div>
 </template>
 
 <style scoped>
+.build-button p {
+    flex-grow: 1;
+    
+    font-feature-settings: 'dlig' on;
+    font-family: "Feature Mono";
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 750;
+    line-height: normal;
+    letter-spacing: 0.75px;
+}
+.build-button{
+    display: flex;
+    flex-direction: column;
+  height: 40px;
+    justify-content: center;
+    align-items: center;
+    background-color: #BCFE37;
+    cursor: pointer;
+    border-radius: 5px;
+}
 .arrow-icon.left {
   transform: rotate(0deg);
 }

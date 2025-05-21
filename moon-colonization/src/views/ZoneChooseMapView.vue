@@ -7,6 +7,10 @@ import ConstructionLink from '@/components/ui/ConstructionLink.vue'
 import Success from '@/components/ui/Success.vue';
 import EndColonyWindow from '@/components/ui/EndColonyWindow.vue';
 import { useZoneStore } from '@/stores/zoneStore';
+import { linkApi } from '@/components/link/LinkApi';
+import { Link, PrimaryKey } from '@/components/link/Link';
+import { userInfoStore } from '@/stores/userInfoStore';
+import { colonyApi } from '@/components/colony/colony';
 const end = ref(false)
 
 
@@ -41,21 +45,26 @@ const imgWidth = 2696
 const imgHeight = 2360
 
 const originalPositions = [
-  new ZonePosition("Низина 1", new ImagePoint(1479, 1449), `${markerPaths}/lowlands-default.svg`),
-  new ZonePosition("Низина 2", new ImagePoint(1467, 1532), `${markerPaths}/lowlands-default.svg`),
-  new ZonePosition("Высота 1", new ImagePoint(1477, 1285), `${markerPaths}/lowlands-default.svg`),
-  new ZonePosition("Высота 2", new ImagePoint(1408, 1322), `${markerPaths}/lowlands-default.svg`),
   new ZonePosition("Равнина 1", new ImagePoint(1646, 1226), `${markerPaths}/lowlands-default.svg`),
   new ZonePosition("Равнина 2", new ImagePoint(1699, 1264), `${markerPaths}/lowlands-default.svg`),
+  new ZonePosition("Высота 1", new ImagePoint(1477, 1285), `${markerPaths}/lowlands-default.svg`),
+  new ZonePosition("Высота 2", new ImagePoint(1408, 1322), `${markerPaths}/lowlands-default.svg`),
+  new ZonePosition("Низина 1", new ImagePoint(1479, 1449), `${markerPaths}/lowlands-default.svg`),
+  new ZonePosition("Низина 2", new ImagePoint(1467, 1532), `${markerPaths}/lowlands-default.svg`),
 ]
 
 const componentStore = useComponentStore()
 const zoneStore = useZoneStore()
+const uInfo = userInfoStore();
 
-onMounted(() => {
+onMounted(async () => {
   centerMap()
   zoneStore.fetchAllZones()
   window.addEventListener('resize', centerMap)
+  await uInfo.fetchUserInfo();
+  if(!uInfo.userInfo.live){
+    end.value = true
+  }
 })
 
 const checkBoundaries = () => {
@@ -167,10 +176,8 @@ const handleWheel = (e: WheelEvent) => {
 }
 
 const handleZoneClick = async (zone: ZonePosition, i: number) => {
-  console.log(open.value)
   if(open.value){selectZone(i)}
   else{
-  console.log(zone.name)
   zoneStore.selectZoneByName(zone.name)
   componentStore.setComponent('colonization')
   }
@@ -187,6 +194,7 @@ const opening = () =>{
 
 const selectedLink = ref(0)
 const selectLink = (type: number) => {
+  console.log("link ", type)
   if(selectedLink.value == type) selectedLink.value = 0
   else selectedLink.value = type
 }
@@ -194,31 +202,34 @@ const selectLink = (type: number) => {
 const selectedZones = ref({zone1: -1, zone2: -1})
 const selectZone = (zone: number) => {
   if(selectedZones.value !== undefined){
-    if(selectedZones.value.zone1 == -1) {
-      selectedZones.value.zone1 == zone
+    if(selectedZones.value.zone1 < 0) {
+      selectedZones.value.zone1 = zone
     }
-    else if(selectedZones.value.zone2 == -1) {
-      selectedZones.value.zone2 == zone
+    else if(selectedZones.value.zone2 < 0) {
+      selectedZones.value.zone2 = zone
     }
     else{
-      selectedZones.value.zone1 == -1
-      selectedZones.value.zone2 == -1
+      selectedZones.value.zone1 = -1
+      selectedZones.value.zone2 = -1
     }
   }
 }
 
-const buildLink = () => {
-  console.log(selectedZones.value, selectedLink.value)
+const buildLink = async () => {
   if(selectedLink.value > 0 && selectedZones.value.zone1 > -1 && selectedZones.value.zone2 > -1 && selectedZones.value.zone2 != selectedZones.value.zone1){
-  console.log("build", selectedZones, selectedLink)
+    const response = await linkApi.createLink(new Link(new PrimaryKey(selectedLink.value - 1, selectedZones.value.zone1,selectedZones.value.zone2) ))
+    console.log(response)
   }
+}
+const endColonisation =  async () => {
+  end.value = true
 }
 </script>
 
 <template>
   <div class="main-container">
     <div class="header">
-      <UIHeader name="Режим выбор области" />
+      <UIHeader name="Режим выбор области" @end_col="endColonisation" />
     </div>
 
     <div class="map-container" ref="mapContainer" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
@@ -232,8 +243,12 @@ const buildLink = () => {
         <div v-for="(position, index) in originalPositions" :key="position.name" class="zone-marker" :style="{
           left: `${(position.point.x / imgWidth) * 100}%`,
           top: `${(position.point.y / imgHeight) * 100}%`,
-        }" @click="handleZoneClick(position, index)" >
-          <div class="marker-icon" :style="{ backgroundImage: `url(${position.icon})` }" ></div>
+        }" @click="handleZoneClick(position, index)" :class="{select: index == selectedZones.zone1 || index == selectedZones.zone2 }">
+          <div class="marker-icon" :style="{ backgroundImage: `url(${position.icon})` }" >
+            <!-- <svg>
+              <use xlink:h></use>
+            </svg> -->
+          </div>
         </div>
       </div>
     </div>
@@ -257,7 +272,7 @@ const buildLink = () => {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.7);
-  z-index: 100;
+  z-index: 1000;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -333,9 +348,7 @@ const buildLink = () => {
   width: 0;
   height: 0;
 }
-.zone-marker .select{
-  background-color: #fff;
-}
+
 
 .marker-icon {
   width: 60px;
@@ -343,8 +356,12 @@ const buildLink = () => {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.7));
+  /*filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.7));*/
   transform: translate(-10px, -40px);
   transition: transform 0.2s ease;
+}
+.select div{
+  /* filter: drop-shadow(0 0 8px #BCFE37); */
+  filter:brightness(2);
 }
 </style>

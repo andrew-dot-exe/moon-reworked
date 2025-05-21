@@ -29,6 +29,7 @@ public class DayController {
      */
     @GetMapping()
     public ChangeDay addDay() {
+        System.out.println("День изменен!------------------------------------");
         return dayService.addDay();
     }
 }

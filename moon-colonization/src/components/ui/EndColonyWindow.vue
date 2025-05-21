@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 import { statisticStore } from '@/stores/StatisticStore';
 import ResourceAll from '@/components/ui/ResourceAll.vue';
 import ResourceProduction from '@/components/ui/ResourceProduction.vue';
@@ -7,6 +8,7 @@ import { useSuccessStore } from '@/stores/SuccessStore'
 import { userInfoStore } from '@/stores/userInfoStore';
 import {generatePDF} from "@/components/pdf/generate"
 import { User } from '@/components/user/userInfo';
+import { colonyApi } from '../colony/colony';
 
 const statistic = statisticStore();
 const successStore = useSuccessStore()
@@ -23,6 +25,7 @@ onMounted(async () => {
         await successStore.getSuccess();
     
         await uInfo.fetchUserInfo();
+        await colonyApi.deleteColony();
   } catch (error) {
     console.error('Initialization error:', error);
   }
@@ -78,8 +81,8 @@ const pdf = async () => {
   }
 }
 
-const startAgain = () => {
-
+const startAgain = async () => {
+    await colonyApi.createColony();
 }
 </script>
 

@@ -1,3 +1,4 @@
+import { dayApi } from '@/components/day/dayApi'
 import { defineStore } from 'pinia'
 import { ref, computed, onUnmounted } from 'vue'
 // import { useResourcesStore } from './resourcesStore'
@@ -15,9 +16,9 @@ export const useDayStore = defineStore('dayStore', () => {
   // Интервалы для разных скоростей (в мс)
   const speedIntervals = {
     pause: null,
-    1: 5000,  // x1 - каждые 5 сек
-    2: 2500,  // x2 - каждые 2.5 сек
-    3: 1000   // x3 - каждые 1 сек
+    1: 180000,  // x1 - каждые 3 мин
+    2: 90000,  // x2 - каждые 1.5 
+    3: 60000   // x3 - каждые 1 мин
   }
 
   // Запуск/остановка автообновления
@@ -43,6 +44,7 @@ export const useDayStore = defineStore('dayStore', () => {
   // Обновление всех данных игры
   const updateGameData = async () => {
     // Изменение дня
+    await dayApi.nextDay()
   }
 
   // Изменение скорости

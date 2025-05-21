@@ -8,7 +8,7 @@ import { statisticStore } from '@/stores/StatisticStore';
 import { User } from '../user/userInfo';
 
 import {generatePDF} from "@/components/pdf/generate"
-const emit = defineEmits(['toggle']); 
+const emit = defineEmits(['toggle', 'end_col']); 
 const props = defineProps({
   name: { type: String, default: "Anonim" }
 });
@@ -51,9 +51,7 @@ const pdf = async () => {
   
 }
 
-const endColonisation = () => {
-// возможно стоит колбэк сделать
-}
+
 
 const exit = async () => {
   await userApi.logout()
@@ -74,7 +72,7 @@ const exit = async () => {
               </div>
               <div class="points-container">
               <div class="points">
-                  <div class="end" @click="endColonisation">
+                  <div class="end" @click="emit('end_col')">
                       <p>Завершить колонизацию</p>
                   </div>
                   <a class="text-points">Обучение</a>

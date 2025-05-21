@@ -104,7 +104,7 @@ public class LinkService {
                 ))
                 .orElseThrow(NotResourceException::new);
 
-        mat.setCount(mat.getCount() - way);
+        mat.setCount(mat.getCount() - way * 1000);
         if (mat.getCount() < 0) {
             user.setLive(false);
             userRepository.save(user);

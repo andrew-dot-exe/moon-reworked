@@ -14,6 +14,10 @@ const name = ["Вода", "Топливо", "Электроэнергия", "П�
 const iconPath = computed(() => {
   return `textures/icons/sprite.svg#icon-${name[props.id]}`;
 });
+const count = computed(() => {
+    if(props.id == 2) return 'кВт*ч'
+    return 'кг'
+});
 </script>
 
 <template>
@@ -25,7 +29,7 @@ const iconPath = computed(() => {
             <p>{{ name[id] }}</p>
             <div class="value-container">
                 <p>{{ data }}</p>
-                <p>кг</p>
+                <p>{{ count }}</p>
             </div>
         </div>
     </div>
