@@ -5,6 +5,7 @@ import { useComponentStore } from '@/stores/componentStore';
 import { onMounted, ref, watch } from 'vue';
 import ConstructionLink from '@/components/ui/ConstructionLink.vue'
 import Success from '@/components/ui/Success.vue';
+import EndColonyWindow from '@/components/ui/EndColonyWindow.vue';
 
 interface PositionByName {
   name: string,
@@ -197,10 +198,25 @@ watch([scale, translatePos], () => {
     <div class="construction-block">
         <ConstructionLink/>
     </div>
+    <div class="stat-overlay">
+      <EndColonyWindow />
+    </div>
   </div>
 </template>
 
 <style scoped>
+.stat-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .construction-block{
   pointer-events: auto;
   display: flex;

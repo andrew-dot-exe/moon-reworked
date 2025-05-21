@@ -26,7 +26,11 @@ onMounted(async () => {
     
 })
 
+const generating = ref(false);
+
 const pdf = async () => {
+  if(generating.value) return;
+  generating.value = true
   await successStore.getSuccess();
   await statistic.getStatistic();
   await uInfo.fetchUserInfo();
@@ -42,6 +46,7 @@ const pdf = async () => {
   );
   
       generatePDF(successStore.success, userData, statistic.statistic);
+      generating.value = false
   }
   
 }

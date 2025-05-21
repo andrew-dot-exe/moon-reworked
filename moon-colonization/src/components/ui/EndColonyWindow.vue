@@ -1,11 +1,12 @@
 <script setup lang="ts">
-const emit = defineEmits(['toggle']); 
 import { statisticStore } from '@/stores/StatisticStore';
-import ResourceAll from './ResourceAll.vue';
-import ResourceProduction from './ResourceProduction.vue';
+import ResourceAll from '@/components/ui/ResourceAll.vue';
+import ResourceProduction from '@/components/ui/ResourceProduction.vue';
 import { onMounted, ref, computed } from 'vue';
 import { useSuccessStore } from '@/stores/SuccessStore'
 import { userInfoStore } from '@/stores/userInfoStore';
+import {generatePDF} from "@/components/pdf/generate"
+import { User } from '@/components/user/userInfo';
 
 const statistic = statisticStore();
 const successStore = useSuccessStore()
@@ -49,21 +50,42 @@ const success = computed(() => {
     if(successful > 60) successColor.value = 2
     else if(successful > 20) successColor.value = 1
     else successColor.value = 0
-    progressbar.value = 274 - 274 * successful / 100
+    progressbar.value = 768 - 768 * successful / 100
   return `${successful}%`;
 });
+
+const generating = ref(false);
+
+const pdf = async () => {
+  if(generating.value) return;
+  generating.value = true
+  await successStore.getSuccess();
+  await statistic.getStatistic();
+  await uInfo.fetchUserInfo();
+  // Проверяем, что все данные загружены и определены
+  if (successStore?.success && uInfo?.userInfo && statistic?.statistic) {
+    const userData = new User(
+      uInfo.userInfo.name,
+       uInfo.userInfo.currentDay,
+       uInfo.userInfo.dayBeforeDelivery,
+      uInfo.userInfo.live,
+       uInfo.userInfo.links,
+       uInfo.userInfo.modules
+  );
+  
+      generatePDF(successStore.success, userData, statistic.statistic);
+      generating.value = false
+  }
+}
+
+const startAgain = () => {
+
+}
 </script>
 
 <template>
     <div class="statistic">
         <div class="header-block-container">
-            <div class="Close-container">
-                <div class="close" @click="$emit('toggle')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M1.43869 16H0V14.5574L6.7139 8.13115L0 1.44262V0H1.43869L7.93461 6.73224H8.10899L14.6049 0H16V1.44262L9.3297 8.13115L16 14.5574V16H14.6049L8.10899 9.61749H7.93461L1.43869 16Z" fill="black"/>
-                    </svg>
-                </div>
-            </div>
             <p>Вы завершили колонизацию</p>
         </div>
         <div class="Line-container">
@@ -73,7 +95,7 @@ const success = computed(() => {
         <!--Здесь полоска успешности-->
         <div class="info-container">
             <div class="text-value">
-                <p class="heading">Успешность вашей колонизации</p>
+                <p class="heading">Успешность вашей колонизации:</p>
                 <p class="proccent" :class="{good: successColor == 2, normal: successColor == 1, bad: successColor == 0 }">{{ success }}</p>
             </div>
             <div class="way" :style="{ 'padding-right': progressbar + 'px' }">
@@ -107,15 +129,54 @@ const success = computed(() => {
                     />
                 </div>
             </div>
-            <!--пдф + начать заново-->
         </div>
-        <div class="Line-container">
-            <div class="line"></div>
+        <div class="footer">
+            <div class="pdf" @click="pdf">Экспорт в PDF</div>
+            <div class="again" @click="startAgain">Начать заново</div>
         </div>
     </div>
 </template>
 
 <style scoped>
+.footer{
+    display: flex;
+    margin: 0 50px;
+    align-items: flex-start;
+    gap: 20px;
+    align-self: stretch;
+}
+.pdf{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: #A3A3A3 solid 1px;
+    color: #A3A3A3;
+    height: 60px;
+    flex-grow: 2;
+    font-feature-settings: 'dlig' on;
+    font-family: "Feature Mono";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    cursor: pointer;
+}
+.again{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #BCFE37;
+    color: #000;
+    height: 60px;
+    flex-grow: 3;
+    font-feature-settings: 'dlig' on;
+    font-family: "Feature Mono";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    cursor: pointer;
+}
 
 .good{
     color: #BCFE37;
@@ -129,6 +190,7 @@ const success = computed(() => {
 
 .info-container {
     display: flex;
+    margin: 0 50px;
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
@@ -141,24 +203,23 @@ const success = computed(() => {
     align-self: stretch;
 }
 .heading {
-    width: 90px;
+    width: 450px;
     flex-shrink: 0;
-    color: #FFF;
+    color: #BCFE37;
     font-feature-settings: 'dlig' on;
     font-family: "Feature Mono";
-    font-size: 15px;
+    font-size: 20px;
     font-style: normal;
     font-weight: 400;
     line-height: normal;
 }
 .proccent {
-    width: 27px;
+    width: 80px;
     flex-shrink: 0;
-    color: #BCFE37;
     text-align: right;
     font-feature-settings: 'dlig' on;
     font-family: "Feature Mono";
-    font-size: 15px;
+    font-size: 35px;
     font-style: normal;
     font-weight: 400;
     line-height: normal;
@@ -263,7 +324,7 @@ p {
     padding: 10px 50px 0px 50px;
     flex-direction: column;
     align-items: flex-start;
-    gap: 51px;
+    gap: 20px;
     flex: 1 0 0;
     align-self: stretch;
     overflow: auto;   
