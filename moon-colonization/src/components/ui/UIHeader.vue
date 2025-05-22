@@ -290,7 +290,7 @@ const dayBefor = ref(0);
 
 // Функция для отслеживания изменений
 const setupWatchers = () => {
-  const unwatch = watch(
+  const unwatchDayBefore = watch(
     () => uInfo.userInfo.dayBeforeDelivery,
     (newDayBefore) => {
       dayBefor.value = newDayBefore;
@@ -298,7 +298,19 @@ const setupWatchers = () => {
     }
   );
   
-  onUnmounted(() => unwatch());
+  // Добавляем вотчер для отслеживания изменений в resourceStore
+  const unwatchResources = watch(
+    () => resourceStore.resources, // отслеживаем массив ресурсов
+    (newResources, oldResources) => {
+      // Здесь можно добавить любую логику, которая должна выполняться при изменении ресурсов
+    },
+    { deep: true } // используем deep: true для отслеживания изменений внутри объектов массива
+  );
+  
+  onUnmounted(() => {
+    unwatchDayBefore();
+    //unwatchResources();
+  });
 };
 
 onMounted(async () => {

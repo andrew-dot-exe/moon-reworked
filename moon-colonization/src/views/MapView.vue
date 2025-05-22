@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref, reactive } from 'vue'
+import { nextTick, onMounted, ref, reactive, watch, onUnmounted } from 'vue'
 import MapRenderer from '@/components/ui/MapRenderer.vue'
 import UIHeader from '@/components/ui/UIHeader.vue'
 import type { MoonCell } from '@/components/engine/map-renderer/map'
@@ -64,7 +64,27 @@ onMounted(async () => {
   if (!uInfo.userInfo.live) {
     end.value = true
   }
+  setupWatchers(); 
 })
+
+// Функция для отслеживания изменений
+const setupWatchers = () => {  
+  // Добавляем вотчер для отслеживания изменений в resourceStore
+  const unwatchLive = watch(
+    () => uInfo.userInfo.live, // отслеживаем массив ресурсов
+    (newLive, oldLive) => {
+      console.log('Resources changed:', newLive);
+      // Здесь можно добавить любую логику, которая должна выполняться при изменении ресурсов
+      if(newLive == false){
+        end.value = true
+      }
+    },
+  );
+  
+  onUnmounted(() => {
+    unwatchLive();
+  });
+}
 
 const selectedCell = ref(false)
 const selectedModule = ref(false)

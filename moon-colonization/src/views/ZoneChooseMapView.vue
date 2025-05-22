@@ -2,7 +2,7 @@
 import UIHeader from '@/components/ui/UIHeader.vue';
 import { ImagePoint } from '@/components/utils/fitElements';
 import { useComponentStore } from '@/stores/componentStore';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, onUnmounted } from 'vue';
 import ConstructionLink from '@/components/ui/ConstructionLink.vue'
 import Success from '@/components/ui/Success.vue';
 import EndColonyWindow from '@/components/ui/EndColonyWindow.vue';
@@ -67,9 +67,10 @@ onMounted(async () => {
   if (linkStore.links) {
     redrawLines();
   }
-  if(!uInfo.userInfo.live){
+  if(!uInfo.userInfo?.live){
     end.value = true
   }
+  setupWatchers(); 
 })
 
 const checkBoundaries = () => {
@@ -193,6 +194,25 @@ watch([scale, translatePos], () => {
   //redrawLines()
 })
 
+// Функция для отслеживания изменений
+const setupWatchers = () => {  
+  // Добавляем вотчер для отслеживания изменений в resourceStore
+  const unwatchLive = watch(
+    () => uInfo.userInfo.live, // отслеживаем массив ресурсов
+    (newLive, oldLive) => {
+      console.log('Resources changed:', newLive);
+      // Здесь можно добавить любую логику, которая должна выполняться при изменении ресурсов
+      if(newLive == false){
+        end.value = true
+      }
+    },
+  );
+  
+  onUnmounted(() => {
+    unwatchLive();
+  });
+}
+
 const redrawLines = () => {
   if (!canvas.value || !linkStore.links){
     return;
@@ -221,11 +241,15 @@ const redrawLines = () => {
 const open = ref(true)
 const opening = () =>{
   open.value = !open.value
+  if(!open.value){
+    selectedZones.value.zone1 = -1
+    selectedZones.value.zone2 = -1
+    selectedLink.value = 0
+  }
 }
 
 const selectedLink = ref(0)
 const selectLink = (type: number) => {
-  console.log("link ", type)
   if(selectedLink.value == type) selectedLink.value = 0
   else selectedLink.value = type
 }
@@ -248,8 +272,15 @@ const selectZone = (zone: number) => {
 
 const buildLink = async () => {
   if(selectedLink.value > 0 && selectedZones.value.zone1 > -1 && selectedZones.value.zone2 > -1 && selectedZones.value.zone2 != selectedZones.value.zone1){
-    const response = await linkApi.createLink(new Link(new PrimaryKey(selectedLink.value - 1, selectedZones.value.zone1,selectedZones.value.zone2) ))
-    console.log(response)
+    try{
+      const response = await linkApi.createLink(new Link(new PrimaryKey(selectedLink.value - 1, selectedZones.value.zone1,selectedZones.value.zone2) ))
+      await linkStore.getLink()
+      redrawLines()
+      selectedZones.value.zone1 = -1
+      selectedZones.value.zone2 = -1
+    } catch (error) {
+      // console.error('BuildLink failed:', error);
+    }
   }
 }
 const endColonisation =  async () => {
@@ -308,7 +339,7 @@ function drawLine(x1: number, y1: number, x2: number, y2: number, type: number) 
       <Success />
     </div>
     <div class="construction-block">
-      <ConstructionLink @open-fun="opening" @select-link1="selectLink(1)" @select-link2="selectLink(2)" @build="buildLink"/>
+      <ConstructionLink @open-fun="opening" @select-link1="selectLink(1)" @select-link2="selectLink(2)" @build-b="buildLink"/>
     </div>
     <div v-if="end" class="stat-overlay">
       <EndColonyWindow />
@@ -402,7 +433,7 @@ function drawLine(x1: number, y1: number, x2: number, y2: number, type: number) 
 
 .zone-marker {
   position: absolute;
-  z-index: 1;
+  z-index: 3;
   cursor: pointer;
   pointer-events: auto;
   width: 0;
@@ -419,6 +450,7 @@ function drawLine(x1: number, y1: number, x2: number, y2: number, type: number) 
   /*filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.7));*/
   transform: translate(-10px, -40px);
   transition: transform 0.2s ease;
+  z-index: 3;
 }
 .select div{
   /* filter: drop-shadow(0 0 8px #BCFE37); */

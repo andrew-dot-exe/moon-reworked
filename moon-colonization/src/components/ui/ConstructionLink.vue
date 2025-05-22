@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-const emit = defineEmits(['select-link1', 'select-link2', 'open-fun', 'build']);
+const emit = defineEmits(['select-link1', 'select-link2', 'open-fun', 'build-b']);
 
 const direction = ref("left")
 
@@ -20,11 +20,13 @@ const opening = () => {
 
 const selectL = ref(0)
 const pressL1 = () => {
-    selectL.value = 1
+    if(selectL.value == 1) selectL.value = 0
+    else selectL.value = 1
     emit('select-link1')
 }
 const pressL2 = () => {
-    selectL.value = 2
+    if(selectL.value == 2) selectL.value = 0
+    else selectL.value = 2
     emit('select-link2')
 }
 opening();
@@ -162,7 +164,7 @@ opening();
                                 </div>
                             </div>
                             
-                            <div class="build-button" @click="emit('build')"><div class="text-build"><p>Построить</p></div></div>
+                            <div class="build-button" @click="emit('build-b')"><div class="text-build"><p>Построить</p></div></div>
                         </div>
                     </div>
                 </div>
