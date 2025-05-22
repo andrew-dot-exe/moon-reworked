@@ -6,11 +6,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { MoonMap } from '../engine/map-renderer/map'
 import { Mesh } from 'three'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
-import { useCellStore } from '@/stores/cellStore'
-import { useSelectedCellStore } from '@/stores/selectedCellStore'
+
 import { useZoneStore } from '@/stores/zoneStore';
 
-const cellStore = useCellStore()
 const mapRef = ref<HTMLElement | null>(null)
 let renderer: THREE.WebGLRenderer
 let scene: THREE.Scene
@@ -20,10 +18,8 @@ let map: MoonMap
 let gridHelper: THREE.GridHelper
 let axesHelper: THREE.AxesHelper
 let directionalLight: THREE.DirectionalLight
-const selectedCellStore = useSelectedCellStore()
 const zoneStore = useZoneStore()
 
-const multipleView = false
 
 let hoveredMesh: Mesh | null = null;
 let selectedMesh: Mesh | null = null;
@@ -227,7 +223,7 @@ function handleMeshClick(event: MouseEvent) {
     (mesh.material as THREE.MeshStandardMaterial).color.set(0xbcfe37); // выделение
     emit('cell-selected', mesh.userData.i, mesh.userData.j);
     // Подсветка границ вокруг выбранной ячейки (пример: 3x3)
-    highlightBorderMeshes(mesh, 3, 3, 0xbcfe37); // цвет для границы при клике
+    //highlightBorderMeshes(mesh, 3, 3, 0xbcfe37); // цвет для границы при клике
   } else {
     if (selectedMesh && selectedMesh.userData.originalColor) {
       (selectedMesh.material as THREE.MeshStandardMaterial).color.copy(selectedMesh.userData.originalColor);
