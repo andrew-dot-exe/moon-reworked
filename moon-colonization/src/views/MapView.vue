@@ -1,6 +1,6 @@
 <template>
   <div class="map-view">
-    <MapRenderer ref="mapRendererRef" @cell-selected="onCellSelected" />
+    <MapRenderer ref="mapRendererRef" />
     <div class="ui-overlay">
       <div class="header">
         <UIHeader name="Режим строительства" @end_col="endColonisation" />
@@ -53,8 +53,6 @@ const optimalityResult = reactive({
   rel: 0,
   rat: 0
 });
-// ячейку выбрал, надо будет сделать запрос
-// потом надо сделать выбор из
 
 onMounted(async () => {
   await nextTick()
@@ -89,28 +87,7 @@ const setupWatchers = () => {
 const selectedCell = ref(false)
 const selectedModule = ref(false)
 
-// Обработчик выбора клетки
-async function onCellSelected(x: number, z: number) {
-  selectedCell.value = true
-  if (selectedModule.value && currentModule.value != undefined
-    && currentModule.value?.x != undefined && currentModule.value?.y != undefined) {
-    currentModule.value.x = x
-    currentModule.value.y = z
-    await onModuleSelect(undefined)
-  }
-}
-
-function offModuleSelect() {
-  //?
-  selectedModule.value = false
-}
-
 const currentModule = ref<null | Module>(null)
-
-function getSelect(): number {
-  return Number(currentModule.value?.typeModule)
-}
-
 async function onModuleSelect(module: Module | undefined) {
 
   // Вызов проверки эффективности
@@ -143,8 +120,6 @@ async function onModuleSelect(module: Module | undefined) {
     }
   }
 }
-
-
 </script>
 
 <style scoped>

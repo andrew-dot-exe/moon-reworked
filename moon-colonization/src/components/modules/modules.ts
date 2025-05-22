@@ -1,6 +1,3 @@
-import type { TypeModule, TypeModuleModel } from '../typeModules/typeModules'
-import { ModuleMesh } from '../engine/map-renderer/baseModule'
-
 export interface ModuleModel {
   idZone: number
   typeModule: number
@@ -32,22 +29,5 @@ export class ModulePlacePosibillity {
     this.possible = possible
     this.relief = relief
     this.rationality = rationality
-  }
-}
-
-export class MeshedModule {
-  // Хранит в себе и модель для карты, и информацию (неоптимально)
-
-  moduleMesh: ModuleMesh // мэш модуля, который будет расположен на карте
-  moduleInfo: TypeModule
-
-  constructor(moduleInfo: TypeModule) {
-    this.moduleInfo = moduleInfo
-    // информация о меше будет привязана по названию самого модуля
-    this.moduleMesh = new ModuleMesh(moduleInfo.name)
-  }
-
-  getMesh() {
-    return this.moduleMesh.getMesh()
   }
 }

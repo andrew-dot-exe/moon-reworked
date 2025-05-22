@@ -6,11 +6,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { MoonMap } from '../engine/map-renderer/map'
 import { Mesh } from 'three'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
-import { BaseModule } from '../engine/map-renderer/baseModule'
 import { useCellStore } from '@/stores/cellStore'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import type { TypeModule } from '@/components/typeModules/typeModules'
-import { useModuleInfoStore } from '@/stores/moduleInfoStore'
 import { useSelectedCellStore } from '@/stores/selectedCellStore'
 import { useZoneStore } from '@/stores/zoneStore';
 
@@ -116,6 +112,11 @@ onMounted(() => {
   for (let i = 0; i < map.size; i++) {
     for (let j = 0; j < map.size; j++) {
       const mesh: Mesh = map.getCellMesh(i, j)
+      mesh.userData = {
+        i,
+        j,
+        originalColor: (mesh.material as THREE.MeshStandardMaterial).color.clone()
+      }
       mesh.position.x = i - offset // если карта 10х10, то 4,5
       mesh.position.z = j - offset
       mesh.castShadow = true
@@ -124,37 +125,145 @@ onMounted(() => {
     }
   }
 
-  map.setupClickHandler(camera, renderer, (x, z) => {
-    return false
-    // // Например, выбранный модуль 2x2
-    // const width = 2, height = 2
-    // if (canPlaceMultiCellModule(x, z, width, height)) {
-    //   cellStore.selectCell(x, z) // сохранить координаты
-    //   return true
-    // }
-    // return false
-  })
-
-  // Обработчик клика
-  map.setupClickHandler(camera, renderer, (x: number, z: number) => {
-    // // кастомные методы
-    // cellStore.selectCell(x, z);
-    // emit('cell-selected', x, z);
-    return false
-  })
-
+  renderer.domElement.addEventListener('mousemove', handleMeshHover);
   renderer.domElement.addEventListener('click', handleMeshClick)
 
   window.addEventListener('resize', onWindowResize)
   animate()
 })
 
-function handleMeshClick() {
-  /* Обработка клика на ячейку. Если на ячейке стоит модуль, то получаем инфу о модуле
-  Сейчас обрабатывает клик и на пустое место, так что надо
-  */
-  console.log('anything on map click')
+function handleMeshHover(event: MouseEvent) {
+  if (!renderer || !camera || !map) return;
 
+  const rect = renderer.domElement.getBoundingClientRect();
+  const mouse = new THREE.Vector2(
+    ((event.clientX - rect.left) / rect.width) * 2 - 1,
+    -((event.clientY - rect.top) / rect.height) * 2 + 1
+  );
+
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(mouse, camera);
+
+  const meshes: Mesh[] = [];
+  for (let i = 0; i < map.size; i++) {
+    for (let j = 0; j < map.size; j++) {
+      meshes.push(map.getCellMesh(i, j));
+    }
+  }
+
+  const intersects = raycaster.intersectObjects(meshes);
+
+  // if (intersects.length > 0) {
+  //   const mesh = intersects[0].object as Mesh;
+  //   highlightMesh(mesh); // подсветка наведённого меша
+  // } else {
+  //   // Снять подсветку, если ни на одном меше
+  //   if (highlightedMesh && originalColor) {
+  //     (highlightedMesh.material as THREE.MeshStandardMaterial).color.copy(originalColor);
+  //     highlightedMesh = null;
+  //     originalColor = null;
+  //   }
+  // }
+
+  // для нескольких ячеек
+  if (intersects.length > 0) {
+    const mesh = intersects[0].object as Mesh;
+    highlightMesh(mesh); // подсветка центрального меша
+    highlightBorderMeshes(mesh, 2, 1);
+  } else {
+    // Сбросить подсветку с граничных мешей
+    highlightBorderMeshes({ userData: {} } as Mesh, 0, 0); // сброс
+    // ...сброс подсветки центрального меша...
+  }
+}
+
+function handleMeshClick(event: MouseEvent) {
+  if (!renderer || !camera || !map) return;
+
+  // Получаем нормализованные координаты мыши
+  const rect = renderer.domElement.getBoundingClientRect();
+  const mouse = new THREE.Vector2(
+    ((event.clientX - rect.left) / rect.width) * 2 - 1,
+    -((event.clientY - rect.top) / rect.height) * 2 + 1
+  );
+
+  // Создаем Raycaster
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(mouse, camera);
+
+  // Собираем все меши карты
+  const meshes: Mesh[] = [];
+  for (let i = 0; i < map.size; i++) {
+    for (let j = 0; j < map.size; j++) {
+      meshes.push(map.getCellMesh(i, j));
+    }
+  }
+
+  // Проверяем пересечения
+  const intersects = raycaster.intersectObjects(meshes);
+
+  if (intersects.length > 0) {
+    const mesh = intersects[0].object as Mesh;
+    highlightMesh(mesh);
+    console.log('Клик по мешу:', mesh.userData);
+    // emit('cell-selected', ...);
+  } else {
+    // Клик по пустому месту
+    //console.log('Клик по пустому месту');
+    if (highlightedMesh && originalColor) {
+      (highlightedMesh.material as THREE.MeshStandardMaterial).color.copy(originalColor);
+    }
+  }
+}
+let highlightedMesh: Mesh | null = null;
+const originalColor: THREE.Color | null = null;
+
+function highlightMesh(mesh: Mesh) {
+  if (highlightedMesh && highlightedMesh.userData && highlightedMesh.userData.originalColor) {
+    (highlightedMesh.material as THREE.MeshStandardMaterial).color.copy(highlightedMesh.userData.originalColor);
+  }
+  highlightedMesh = mesh;
+  (mesh.material as THREE.MeshStandardMaterial).color.set(0xbcfe37);
+}
+
+let lastBorderMeshes: Mesh[] = [];
+
+function highlightBorderMeshes(centerMesh: Mesh, n: number, m: number, borderColor = 0xbcfe37) {
+  // Сбросить цвет всем, кто был подсвечен ранее
+  lastBorderMeshes.forEach(mesh => {
+    if (mesh.userData && mesh.userData.originalColor) {
+      (mesh.material as THREE.MeshStandardMaterial).color.copy(mesh.userData.originalColor);
+    }
+  });
+
+  // Получаем новые граничные меши
+  const borderMeshes = getBorderMeshesAround(centerMesh, n, m);
+
+  // Сохраняем новые подсвеченные меши
+  lastBorderMeshes = borderMeshes;
+  borderMeshes.forEach(mesh => {
+    (mesh.material as THREE.MeshStandardMaterial).color.set(borderColor);
+  });
+}
+
+function getBorderMeshesAround(centerMesh: Mesh, n: number, m: number): Mesh[] {
+  if (!centerMesh.userData) return [];
+  const { i: i0, j: j0 } = centerMesh.userData;
+  const borderMeshes: Mesh[] = [];
+
+  const iStart = Math.max(0, i0 - Math.floor((n - 1) / 2));
+  const iEnd = Math.min(map.size - 1, iStart + n - 1);
+  const jStart = Math.max(0, j0 - Math.floor((m - 1) / 2));
+  const jEnd = Math.min(map.size - 1, jStart + m - 1);
+
+  for (let i = iStart; i <= iEnd; i++) {
+    for (let j = jStart; j <= jEnd; j++) {
+      if (i === iStart || i === iEnd || j === jStart || j === jEnd) {
+        borderMeshes.push(map.getCellMesh(i, j));
+      }
+    }
+  }
+  return borderMeshes;
 }
 
 function onWindowResize() {
