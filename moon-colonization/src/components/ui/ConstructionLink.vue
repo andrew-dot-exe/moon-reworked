@@ -65,7 +65,7 @@ opening();
                                 <div class="icon">
                                     <div class="icon-object">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="90" height="53" viewBox="0 0 90 53" fill="none">
-                                            <path d="M11.4042 42.0172L71.8767 7.10346L78.5958 10.9828L18.1233 45.8966L11.4042 42.0172Z" fill="#3F3FFF" fill-opacity="0.7"/>
+                                            <path d="M11.4042 42.0172L71.8767 7.10346L78.5958 10.9828L18.1233 45.8966L11.4042 42.0172Z" fill="#ff4f00" fill-opacity="0.7"/>
                                         </svg>
                                     </div>
                                 </div>

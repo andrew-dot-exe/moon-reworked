@@ -5,7 +5,7 @@
     <MapRenderer ref="mapRendererRef" @cell-selected="onCellSelected"/>
     <div class="ui-overlay">
       <div class="header">
-        <UIHeader name="Режим строительства" />
+        <UIHeader name="Режим строительства"  @end_col="endColonisation" />
       </div>
       <div style="pointer-events: auto;">
         <BuildButton @close-opt="offModuleSelect" @get-select="getSelect"/>
@@ -49,6 +49,10 @@ const uInfo = userInfoStore();
 
 const mapRendererRef = ref(null)
 const mapStore = useMapStore()
+
+const endColonisation =  async () => {
+  end.value = true
+}
 
 const optimalityResult = reactive({
   opt: 0,

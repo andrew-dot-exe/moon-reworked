@@ -5,5 +5,5 @@ export const linkApi = {
   createLink: async (link: Link) => {
      const response = await axiosInstance.post('/api/link', link)
      return response.data as number
-  },
+  }
 }

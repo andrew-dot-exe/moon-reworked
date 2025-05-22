@@ -11,6 +11,7 @@ import { linkApi } from '@/components/link/LinkApi';
 import { Link, PrimaryKey } from '@/components/link/Link';
 import { userInfoStore } from '@/stores/userInfoStore';
 import { colonyApi } from '@/components/colony/colony';
+import { useLinkStore } from '@/stores/useLinkStore';
 const end = ref(false)
 
 
@@ -56,12 +57,17 @@ const originalPositions = [
 const componentStore = useComponentStore()
 const zoneStore = useZoneStore()
 const uInfo = userInfoStore();
+const linkStore = useLinkStore()
 
 onMounted(async () => {
   centerMap()
   zoneStore.fetchAllZones()
   window.addEventListener('resize', centerMap)
   await uInfo.fetchUserInfo();
+  await linkStore.getLink()
+  if (linkStore.links) {
+    redrawLines();
+  }
   if(!uInfo.userInfo.live){
     end.value = true
   }
@@ -185,7 +191,33 @@ const handleZoneClick = async (zone: ZonePosition, i: number) => {
 
 watch([scale, translatePos], () => {
   checkBoundaries()
+  //redrawLines()
 })
+
+const redrawLines = () => {
+  if (!canvas.value || !linkStore.links){
+    return;
+  }
+  
+  const ctx = canvas.value.getContext('2d');
+  if (!ctx){
+    return;
+  }
+  
+  // Очищаем canvas
+  ctx.clearRect(0, 0, imgWidth, imgHeight);
+  
+  // Перерисовываем все линии
+  if(linkStore.links != undefined){
+    for(let i = 0; i < linkStore.links.length; i++){
+
+      const t1 = originalPositions[linkStore.links[i].idZone1].point
+      const t2 = originalPositions[linkStore.links[i].idZone2].point
+      //console.log(`Drawing line from zone ${linkStore.links[i].id_zone1} (${t1.x},${t1.y}) to zone ${linkStore.links[i].id_zone2} (${t2.x},${t2.y})`);
+      drawLine(t1.x, t1.y, t2.x, t2.y, linkStore.links[i].type)
+    }
+  }
+};
 
 const open = ref(true)
 const opening = () =>{
@@ -224,6 +256,26 @@ const buildLink = async () => {
 const endColonisation =  async () => {
   end.value = true
 }
+
+const canvas = ref<HTMLCanvasElement | null>(null);
+
+function drawLine(x1: number, y1: number, x2: number, y2: number, type: number) {
+  if (!canvas.value) {
+    return;
+  }
+  
+  const ctx = canvas.value.getContext('2d');
+  if (!ctx) {
+    return;
+  }
+  
+  ctx.beginPath();
+  ctx.moveTo(x1, y1 + type * 2);
+  ctx.lineTo(x2, y2 + type * 2);
+  ctx.strokeStyle = type === 0 ? "#F3FF73B2" : "#ff4f00"; // Используем strokeStyle вместо color
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
 </script>
 
 <template>
@@ -239,6 +291,7 @@ const endColonisation =  async () => {
         cursor: isDragging ? 'grabbing' : 'grab'
       }">
         <img ref="mapImage" class="map-image" :src="imgSrc" alt="Moon Map" draggable="false" />
+        <canvas ref="canvas" class="map-canvas" :width="imgWidth" :height="imgHeight"></canvas>
 
         <div v-for="(position, index) in originalPositions" :key="position.name" class="zone-marker" :style="{
           left: `${(position.point.x / imgWidth) * 100}%`,
@@ -265,6 +318,13 @@ const endColonisation =  async () => {
 </template>
 
 <style scoped>
+.map-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  pointer-events: none; /* Чтобы события мыши проходили сквозь canvas */
+}
 .stat-overlay {
   position: fixed;
   top: 0;
