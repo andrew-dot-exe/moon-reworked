@@ -16,7 +16,7 @@ services:
       - app-network
 
   backend:
-    image: openjdk:21-jdk-slim
+    image: openjdk:23-jdk-slim
     container_name: moon-backend
     depends_on:
       - postgres
