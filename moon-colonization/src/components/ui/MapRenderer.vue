@@ -24,6 +24,7 @@ const selectedMesh: THREE.Object3D | null = null
 const selectedCellStore = useSelectedCellStore()
 const zoneStore = useZoneStore()
 
+const multipleView = false
 
 onMounted(() => {
 
@@ -161,7 +162,6 @@ function handleMeshHover(event: MouseEvent) {
   //   if (highlightedMesh && originalColor) {
   //     (highlightedMesh.material as THREE.MeshStandardMaterial).color.copy(originalColor);
   //     highlightedMesh = null;
-  //     originalColor = null;
   //   }
   // }
 
@@ -169,7 +169,7 @@ function handleMeshHover(event: MouseEvent) {
   if (intersects.length > 0) {
     const mesh = intersects[0].object as Mesh;
     highlightMesh(mesh); // подсветка центрального меша
-    highlightBorderMeshes(mesh, 2, 1);
+    // highlightBorderMeshes(mesh, 2, 1);
   } else {
     // Сбросить подсветку с граничных мешей
     highlightBorderMeshes({ userData: {} } as Mesh, 0, 0); // сброс
@@ -205,11 +205,13 @@ function handleMeshClick(event: MouseEvent) {
   if (intersects.length > 0) {
     const mesh = intersects[0].object as Mesh;
     highlightMesh(mesh);
+
     console.log('Клик по мешу:', mesh.userData);
-    // emit('cell-selected', ...);
+    emit('cell-selected', mesh.userData.x, mesh.userData.y);
   } else {
     // Клик по пустому месту
     //console.log('Клик по пустому месту');
+    emit('cell-selected', -1, -1);
     if (highlightedMesh && originalColor) {
       (highlightedMesh.material as THREE.MeshStandardMaterial).color.copy(originalColor);
     }
@@ -219,13 +221,14 @@ let highlightedMesh: Mesh | null = null;
 const originalColor: THREE.Color | null = null;
 
 function highlightMesh(mesh: Mesh) {
-  if (highlightedMesh && highlightedMesh.userData && highlightedMesh.userData.originalColor) {
+  // Сбросить цвет с предыдущего выделенного меша
+  if (highlightedMesh && highlightedMesh !== mesh && highlightedMesh.userData && highlightedMesh.userData.originalColor) {
     (highlightedMesh.material as THREE.MeshStandardMaterial).color.copy(highlightedMesh.userData.originalColor);
   }
   highlightedMesh = mesh;
+  // Подсветить новый меш
   (mesh.material as THREE.MeshStandardMaterial).color.set(0xbcfe37);
 }
-
 let lastBorderMeshes: Mesh[] = [];
 
 function highlightBorderMeshes(centerMesh: Mesh, n: number, m: number, borderColor = 0xbcfe37) {
