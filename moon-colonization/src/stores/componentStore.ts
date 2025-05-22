@@ -4,7 +4,6 @@
 import { defineStore } from 'pinia'
 import { markRaw, type Component } from 'vue'
 import LoginView from '@/views/LoginView.vue'
-import ZoneChooserView from '@/views/ZoneChooserView.vue'
 import ZoneChooseMapView from '@/views/ZoneChooseMapView.vue'
 import MapView from '@/views/MapView.vue'
 
