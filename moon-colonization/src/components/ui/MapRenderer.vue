@@ -207,7 +207,7 @@ function handleMeshClick(event: MouseEvent) {
     highlightMesh(mesh);
 
     console.log('Клик по мешу:', mesh.userData);
-    emit('cell-selected', mesh.userData.x, mesh.userData.y);
+    emit('cell-selected', mesh.userData.i, mesh.userData.j);
   } else {
     // Клик по пустому месту
     //console.log('Клик по пустому месту');

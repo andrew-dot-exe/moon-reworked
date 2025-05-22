@@ -123,7 +123,7 @@ async function onModuleSelect(module: Module){
                             >
                                 <p class="ss-p">Обитаемые модули</p>
                             </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="2" height="30" viewBox="0 0 2 30" fill="none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="4" height="30" viewBox="0 0 2 30" fill="none">
                                 <path d="M0 30V0H2V30H0Z" fill="#464646"/>
                             </svg>
                             <div 
@@ -132,9 +132,6 @@ async function onModuleSelect(module: Module){
                             >
                                 <p class="ss-p">Технологические модули</p>
                             </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="2" height="30" viewBox="0 0 2 30" fill="none">
-                                <path d="M0 30V0H2V30H0Z" fill="#464646"/>
-                            </svg>
                         </div>
                     </div>
                 </div>

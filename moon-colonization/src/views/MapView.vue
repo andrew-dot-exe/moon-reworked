@@ -1,25 +1,3 @@
-<template>
-  <div class="map-view">
-    <MapRenderer ref="mapRendererRef" />
-    <div class="ui-overlay">
-      <div class="header">
-        <UIHeader name="Режим строительства" @end_col="endColonisation" />
-      </div>
-      <div class="success-block">
-        <Success />
-      </div>
-      <div v-if="selectedCell && selectedModule" class="optimality-block">
-        <Optimality :opt="optimalityResult.opt" :rel="optimalityResult.rel" :rat="optimalityResult.rat" />
-      </div>
-      <div class="construction-block">
-        <Construction @select-module="onModuleSelect" />
-      </div>
-    </div>
-    <div v-if="end" class="stat-overlay">
-      <EndColonyWindow />
-    </div>
-  </div>
-</template>
 
 <script setup lang="ts">
 import { nextTick, onMounted, ref, reactive, watch, onUnmounted } from 'vue'
@@ -32,10 +10,10 @@ import Optimality from '@/components/ui/Optimality.vue'
 import Success from '@/components/ui/Success.vue';
 import EndColonyWindow from '@/components/ui/EndColonyWindow.vue';
 import { useSelectedCellStore } from '@/stores/selectedCellStore'
-import { useModuleInfoStore } from '@/stores/moduleInfoStore'
 import { Module } from '@/components/modules/modules'
 import { modulesApi } from '@/components/modules/modulesApi'
 import { userInfoStore } from '@/stores/userInfoStore';
+import CellInfo from '@/components/ui/CellInfo.vue'
 
 const end = ref(false)
 
@@ -56,7 +34,6 @@ const optimalityResult = reactive({
 
 onMounted(async () => {
   await nextTick()
-  console.log('mapRendererRef after nextTick:', mapRendererRef.value)
   mapStore.setRender(mapRendererRef)
   await uInfo.fetchUserInfo();
   if (!uInfo.userInfo.live) {
@@ -71,7 +48,6 @@ const setupWatchers = () => {
   const unwatchLive = watch(
     () => uInfo.userInfo.live, // отслеживаем массив ресурсов
     (newLive, oldLive) => {
-      console.log('Resources changed:', newLive);
       // Здесь можно добавить любую логику, которая должна выполняться при изменении ресурсов
       if(newLive == false){
         end.value = true
@@ -85,6 +61,17 @@ const setupWatchers = () => {
 }
 
 const selectedCell = ref(false)
+const cellX = ref(-1)
+const cellY = ref(-1)
+function selectingCell(x: number, y: number){
+  if(x < 0 || y < 0){
+    selectedCell.value = false
+    return
+  }
+  cellX.value = x
+  cellY.value = y
+  selectedCell.value = true
+}
 const selectedModule = ref(false)
 
 const currentModule = ref<null | Module>(null)
@@ -122,7 +109,104 @@ async function onModuleSelect(module: Module | undefined) {
 }
 </script>
 
+<template>
+  <div class="map-view">
+    <MapRenderer ref="mapRendererRef" @cell-selected="selectingCell"/>
+    <div class="ui-overlay">
+      <div class="header">
+        <UIHeader name="Режим строительства" @end_col="endColonisation" />
+      </div>
+      <div class="cellinfo-block">
+        <div class="area-container">
+          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="16" viewBox="0 0 11 16" fill="none">
+            <path d="M8.8 16H11V0H8.8L0 7.30709V8.72441L8.8 16Z" fill="#A3A3A3"/>
+          </svg>
+          <p>Области</p>
+        </div>
+        <svg class="Separator" xmlns="http://www.w3.org/2000/svg" width="2" height="45" viewBox="0 0 2 45" fill="none">
+          <path d="M0 32V0H2V45H0Z" fill="#A3A3A3"/>
+        </svg>
+        <div class="question-container">
+          <svg xmlns="http://www.w3.org/2000/svg" width="9" height="16" viewBox="0 0 9 16" fill="none">
+            <path d="M4.63171 11.4853H3.88537L3.6 10.4485V7.44853H5.88293L7.68293 5.59559V3.67647L5.88293 1.82353H3.11707L1.31707 3.67647V5.44118H0V3.14706L2.56829 0.5H6.43171L9 3.14706V6.125L6.43171 8.77206H4.91707V10.4485L4.63171 11.4853ZM5.22439 15.5H3.33659V13.4706H5.22439V15.5Z" fill="#BCFE37"/>
+          </svg>
+        </div>
+        <div class="cell">
+          <CellInfo v-if="selectedCell" :x="cellX" :y="cellY"/>
+        </div>
+        
+      </div>
+      <div class="success-block">
+        <Success />
+      </div>
+      <div v-if="selectedCell && selectedModule" class="optimality-block">
+        <Optimality :opt="optimalityResult.opt" :rel="optimalityResult.rel" :rat="optimalityResult.rat" />
+      </div>
+      <div class="construction-block">
+        <Construction @select-module="onModuleSelect" />
+      </div>
+    </div>
+    <div v-if="end" class="stat-overlay">
+      <EndColonyWindow />
+    </div>
+  </div>
+</template>
+
+
 <style scoped>
+.cell{
+  display: flex;
+}
+.question-container{
+  display: flex;
+padding: 8px;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+gap: 10px;
+align-self: stretch;
+background: rgba(0, 0, 0, 0.80);
+}
+.question-container svg{
+  fill: #BCFE37;
+  width: 9px;
+height: 15px;
+aspect-ratio: 3/5;
+}
+.Separator{
+  fill: #A3A3A3;
+  width: 2px;
+  align-self: stretch;
+  height: 45px;
+}
+p{
+  margin: 0;
+}
+.area-container{
+  display: flex;
+  width: 141px;
+  padding: 8px 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  background: #464646;
+}
+.area-container svg{
+  fill: #A3A3A3;
+  width: 11px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.area-container p{
+  color: #A3A3A3;
+  font-feature-settings: 'dlig' on;
+  font-family: "Feature Mono";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: 1px;
+}
 .stat-overlay {
   position: fixed;
   top: 0;
@@ -161,6 +245,15 @@ async function onModuleSelect(module: Module | undefined) {
   position: absolute;
   margin: 20px;
   bottom: 230px;
+}
+.cellinfo-block{
+  pointer-events: auto;
+  position: absolute;
+  display: flex;
+  top: 92px;
+  left: 20px;
+  display: inline-flex;
+  align-items: flex-start;
 }
 
 .success-block {
