@@ -14,9 +14,11 @@ import { Module } from '@/components/modules/modules'
 import { modulesApi } from '@/components/modules/modulesApi'
 import { userInfoStore } from '@/stores/userInfoStore';
 import CellInfo from '@/components/ui/CellInfo.vue'
+import { useComponentStore } from '@/stores/componentStore';
 
 const end = ref(false)
 
+const componentStore = useComponentStore()
 const uInfo = userInfoStore();
 
 const mapRendererRef = ref(null)
@@ -58,6 +60,16 @@ const setupWatchers = () => {
   onUnmounted(() => {
     unwatchLive();
   });
+}
+
+const returnChoseMap = () => {
+  componentStore.setComponent('zoneChooser')
+
+}
+
+const cellInfopen = ref(false)
+const openCell = () => {
+  cellInfopen.value = !cellInfopen.value
 }
 
 const selectedCell = ref(false)
@@ -117,7 +129,7 @@ async function onModuleSelect(module: Module | undefined) {
         <UIHeader name="Режим строительства" @end_col="endColonisation" />
       </div>
       <div class="cellinfo-block">
-        <div class="area-container">
+        <div class="area-container" @click="returnChoseMap">
           <svg xmlns="http://www.w3.org/2000/svg" width="11" height="16" viewBox="0 0 11 16" fill="none">
             <path d="M8.8 16H11V0H8.8L0 7.30709V8.72441L8.8 16Z" fill="#A3A3A3"/>
           </svg>
@@ -126,13 +138,13 @@ async function onModuleSelect(module: Module | undefined) {
         <svg class="Separator" xmlns="http://www.w3.org/2000/svg" width="2" height="45" viewBox="0 0 2 45" fill="none">
           <path d="M0 32V0H2V45H0Z" fill="#A3A3A3"/>
         </svg>
-        <div class="question-container">
+        <div class="question-container" @click="openCell">
           <svg xmlns="http://www.w3.org/2000/svg" width="9" height="16" viewBox="0 0 9 16" fill="none">
             <path d="M4.63171 11.4853H3.88537L3.6 10.4485V7.44853H5.88293L7.68293 5.59559V3.67647L5.88293 1.82353H3.11707L1.31707 3.67647V5.44118H0V3.14706L2.56829 0.5H6.43171L9 3.14706V6.125L6.43171 8.77206H4.91707V10.4485L4.63171 11.4853ZM5.22439 15.5H3.33659V13.4706H5.22439V15.5Z" fill="#BCFE37"/>
           </svg>
         </div>
         <div class="cell">
-          <CellInfo v-if="selectedCell" :x="cellX" :y="cellY"/>
+          <CellInfo v-if="cellInfopen && selectedCell" :x="cellX" :y="cellY"/>
         </div>
         
       </div>
@@ -166,6 +178,7 @@ align-items: center;
 gap: 10px;
 align-self: stretch;
 background: rgba(0, 0, 0, 0.80);
+cursor: pointer;
 }
 .question-container svg{
   fill: #BCFE37;
@@ -190,6 +203,7 @@ p{
   align-items: center;
   gap: 12px;
   background: #464646;
+  cursor: pointer;
 }
 .area-container svg{
   fill: #A3A3A3;

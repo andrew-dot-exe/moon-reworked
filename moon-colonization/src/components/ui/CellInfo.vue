@@ -12,7 +12,7 @@ const props = defineProps({
 });
 const cellStore = useCellStore()
 const zoneStore = useZoneStore()
-const idZone = ref(zoneStore.current_zone?.id)
+const idZone = ref(zoneStore.current_zone?.id) //
 
 onMounted(async () => {
     await cellStore.getCells(idZone.value)
@@ -20,20 +20,20 @@ onMounted(async () => {
 
 // Безопасные computed свойства
 const currentCell = computed(() => {
-  if (idZone.value === undefined || !cellStore.cells[idZone.value]) return null
-  return cellStore.cells[idZone.value][props.y]?.[props.x]
+    if (idZone.value !== undefined) return cellStore.cells[idZone.value][props.y][props.x]
+    return null
 })
 
 const angleC = computed(() => currentCell.value?.angle ?? 'N/A')
 const heightCor = computed(() => {
-  if (!currentCell.value) return 'N/A'
+  if (currentCell.value == null) return 'N/A'
   const grad = currentCell.value.widthSecond
-  return `${grad%60}°${Math.floor(grad/60)%60}'${(grad/3600).toFixed(2)}"`
+  return `${grad%60}°${Math.floor(grad/60)%60}'${Math.floor((grad/3600)%60)}"в.д.`
 })
 const widgthCor = computed(() => {
-  if (!currentCell.value) return 'N/A'
+  if (currentCell.value == null) return 'N/A'
   const grad = currentCell.value.longitudeSecond
-  return `${grad%60}°${Math.floor(grad/60)%60}'${(grad/3600).toFixed(2)}"`
+  return `${grad%60}°${Math.floor(grad/60)%60}'${Math.floor((grad/3600)%60)}"ю.ш.`
 })
 const heightC = computed(() => currentCell.value?.height ?? 'N/A')
 </script>

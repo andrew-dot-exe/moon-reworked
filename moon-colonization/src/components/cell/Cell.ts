@@ -1,6 +1,4 @@
-import { h } from "vue"
 
-  
   export class Cell {
     angle: number
     widthSecond: number
