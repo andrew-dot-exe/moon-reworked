@@ -6,6 +6,7 @@ export interface ZoneModel {
   widthSecond: number
   longitudeSecond: number
   ways: number[]
+  size: number
 }
 
 export interface ZoneLinkModel {
@@ -20,6 +21,7 @@ export class Zone implements ZoneModel {
   widthSecond: number
   longitudeSecond: number
   ways: number[]
+  size: number
 
   constructor(
     id: number,
@@ -33,6 +35,11 @@ export class Zone implements ZoneModel {
     this.widthSecond = widthSecond
     this.longitudeSecond = longitudeSecond
     this.ways = ways
+    if (this.id % 2 != 0) {
+      this.size = 20
+    } else {
+      this.size = 10
+    }
   }
 }
 

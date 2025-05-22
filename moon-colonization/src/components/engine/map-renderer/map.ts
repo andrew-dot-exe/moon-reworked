@@ -60,19 +60,21 @@ export class MoonMap {
   map: MoonCell[][]
   selectedCell: MoonCell | null = null
   selectedMesh: Mesh | null = null // Для хранения выделенного модуля
+  size: number
 
-  constructor(name: string = 'Test') {
+  constructor(name: string = 'Test', size: number = 20) {
     this.name = name
-    this.map = Array(10)
+    this.size = size
+    this.map = Array(this.size)
       .fill(null)
-      .map(() => Array(10).fill(null))
+      .map(() => Array(this.size).fill(null))
 
     const textureLoader = new TextureLoader()
     const cellTexture = textureLoader.load('/textures/moon-texture.png')
 
     // Генерация карты
-    for (let i: number = 0; i < 10; i++) {
-      for (let j: number = 0; j < 10; j++) {
+    for (let i: number = 0; i < this.size; i++) {
+      for (let j: number = 0; j < this.size; j++) {
         this.map[i][j] = new MoonCell(i, j, cellTexture)
       }
     }
@@ -152,6 +154,8 @@ export class MoonMap {
 
         // Найдена ячейка, на которую кликнули
         const cell = this.findCellByMesh(clickedMesh)
+
+        if (!cell) return // добавлена проверка на null
 
         // Снимаем выделение с предыдущей выбранной области (если была)
         if (this.selectedCell) {
