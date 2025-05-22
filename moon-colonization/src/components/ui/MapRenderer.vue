@@ -1,13 +1,16 @@
 <script setup lang="ts">
-const emit = defineEmits(['cell-selected']);
+const emit = defineEmits(['cell-selected', 'module-selected']);
 import { ref, onMounted } from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { MoonMap } from '../engine/map-renderer/map'
+import { MoonMap, Module3D } from '../engine/map-renderer/map'
 import { Mesh } from 'three'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 
 import { useZoneStore } from '@/stores/zoneStore';
+import { useModuleStore } from '@/stores/ModuleStore';
+
+const moduleStore = useModuleStore()
 
 const mapRef = ref<HTMLElement | null>(null)
 let renderer: THREE.WebGLRenderer
@@ -25,7 +28,7 @@ let hoveredMesh: Mesh | null = null;
 let selectedMesh: Mesh | null = null;
 let lastBorderMeshes: Mesh[] = [];
 
-onMounted(() => {
+onMounted(async () => {
 
   const zone = zoneStore.current_zone;
   if (!zone) {
@@ -129,6 +132,15 @@ onMounted(() => {
     }
   }
 
+  await moduleStore.getModules()
+  for(let i = 0; i < moduleStore.modules.length; i++){
+    if(moduleStore.modules[i].idZone == zoneStore.current_zone?.id){
+      const module3d = new Module3D(moduleStore.modules[i]);
+      await map.addModule(module3d)
+      scene.add(module3d.model);
+    }
+  }
+
   renderer.domElement.addEventListener('mousemove', handleMeshHover);
   renderer.domElement.addEventListener('click', handleMeshClick)
 
@@ -221,7 +233,19 @@ function handleMeshClick(event: MouseEvent) {
     }
     selectedMesh = mesh;
     (mesh.material as THREE.MeshStandardMaterial).color.set(0xbcfe37); // выделение
-    emit('cell-selected', mesh.userData.i, mesh.userData.j);
+    const cellX = mesh.userData.i;
+    const cellY = mesh.userData.j;
+    
+    // Проверяем, есть ли модуль в этой ячейке
+    const module = map.getModuleAt(cellX, cellY);
+    
+    if (module) {
+      // Выделяем все ячейки модуля
+      highlightModule(module);
+      emit('module-selected', module);
+    } else {
+      emit('cell-selected', cellX, cellY);
+    }
     // Подсветка границ вокруг выбранной ячейки (пример: 3x3)
     //highlightBorderMeshes(mesh, 3, 3, 0xbcfe37); // цвет для границы при клике
   } else {
@@ -232,6 +256,19 @@ function handleMeshClick(event: MouseEvent) {
     emit('cell-selected', -1, -1);
     // Сбросить подсветку границ
     highlightBorderMeshes({ userData: {} } as Mesh, 0, 0);
+  }
+}
+
+
+function highlightModule(module: Module3D) {
+  // Сбрасываем предыдущее выделение
+  resetHoverMesh();
+  
+  // Подсвечиваем все ячейки модуля
+  for (const cell of module.occupiedCells) {
+    const mesh = map.getCellMesh(cell.x, cell.y);
+    (mesh.material as THREE.MeshStandardMaterial).color.set(0x00ff00); // Зеленый для модуля
+    lastBorderMeshes.push(mesh);
   }
 }
 

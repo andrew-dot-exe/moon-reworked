@@ -10,7 +10,7 @@ export const useModuleStore = defineStore('moduleSStore', {
   actions: {
     async createModule(module: Module) {
       const response = await modulesApi.createModule(module)
-      if (response) {
+      if (response.data) {
         module.id = response.data.id
         this.modules.push(module)
       }

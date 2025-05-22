@@ -1,10 +1,90 @@
+import type { Module } from '@/components/modules/modules';
 import { Material, Mesh, MeshStandardMaterial, BoxGeometry, TextureLoader, Texture } from 'three'
+import * as THREE from 'three'
+import { createMeshFromGLTF } from './baseModule';
+
+class TypeM{
+  name: string
+  size:{width: number, height: number}
+
+  constructor(name: string, size:{width: number, height: number}){
+    this.name = name
+    this.size = size
+  }
+}
+
+const modulesType = [
+  new TypeM("livx", {width: 2, height: 1}),
+  new TypeM("livey", {width: 1, height: 2}),
+  new TypeM( "AMLive", {width: 2, height: 2}),
+  new TypeM( "sport", {width: 1, height: 1}),
+  new TypeM( "med", {width: 1, height: 1}),
+  new TypeM("plantations.glb", {width: 3, height: 3}),
+  new TypeM( "search", {width: 1, height: 1}),
+  new TypeM( "search", {width: 1, height: 1}),
+  new TypeM( "search", {width: 1, height: 1}),
+  new TypeM( "search", {width: 1, height: 1}),
+  new TypeM("hallway", {width: 1, height: 1}),
+  new TypeM( "AM", {width: 2, height: 2}),
+  new TypeM( "solar", {width: 1, height: 1}),
+  new TypeM( "construction.glb", {width: 2, height: 2}),
+  new TypeM( "cosmic_base.glb", {width: 6, height: 6}),
+  new TypeM( "tower", {width: 1, height: 1}),
+  new TypeM( "trashcan.glb", {width: 2, height: 2}),
+  new TypeM( "trashcan.glb", {width: 2, height: 2}),
+  new TypeM( "manufacture.glb", {width: 2, height: 2}),
+  new TypeM( "manufacture.glb", {width: 2, height: 2}),
+  new TypeM( "asronomic", {width: 2, height: 2}),
+  new TypeM( "mine_base.glb", {width: 2, height: 2}),
+  new TypeM( "warehouse", {width: 2, height: 2}),
+  new TypeM( "warehouse", {width: 2, height: 2}),
+  new TypeM( "warehouse", {width: 2, height: 2}),
+  new TypeM( "warehouse", {width: 2, height: 2})
+]
+
+export class Module3D {
+  id: number;
+  type: number;
+  model: THREE.Object3D;
+  occupiedCells: {x: number, y: number}[]; // Ячейки, которые занимает модуль
+  size: {width: number, height: number}; // Размеры в ячейках
+
+  constructor(module: Module) {
+    this.id = module.id
+    this.type = module.moduleType;
+    // this.model = createMeshFromGLTF(modulesType[module.typeModule].name);
+    this.size = modulesType[module.moduleType].size;
+    this.occupiedCells = this.calculateOccupiedCells({x: module.x, y:module.y});
+    this.model = new THREE.Object3D();
+  }
+  static async create(module: Module): Promise<Module3D> {
+    const instance = new Module3D(module);
+    await instance.loadModel();
+    return instance;
+  }
+
+  async loadModel() {
+    const model = await createMeshFromGLTF(modulesType[this.type].name);
+    this.model.add(model); // Добавляем загруженную модель к временному объекту
+  }
+
+  private calculateOccupiedCells(position: {x: number, y: number}): {x: number, y: number}[] {
+    const cells = [];
+    for (let x = position.x; x < position.x + this.size.width; x++) {
+      for (let y = position.y; y < position.y + this.size.height; y++) {
+        cells.push({x, y});
+      }
+    }
+    return cells;
+  }
+}
 
 export class MoonCell {
   x: number
   y: number
   mesh: Mesh
   material: Material
+  module: Module3D | null = null; // Ссылка на модуль
 
   constructor(x: number, y: number, texture?: Texture) {
     this.x = x
@@ -47,6 +127,7 @@ export class MoonMap {
   selectedCell: MoonCell | null = null
   selectedMesh: Mesh | null = null // Для хранения выделенного модуля
   size: number
+  modules: Module3D[] = []; 
 
   constructor(name: string = 'Test', size: number = 20) {
     this.name = name
@@ -65,8 +146,37 @@ export class MoonMap {
       }
     }
   }
+    
+  async addModule(module: Module3D) {
+    // Проверяем, свободны ли все ячейки
+    for (const cell of module.occupiedCells) {
+      if (cell.x >= this.size || cell.y >= this.size || this.map[cell.x][cell.y].module) {
+        return false; // Нельзя разместить модуль
+      }
+    }
+    
+    // Загружаем модель
+    await module.loadModel();
+
+    // Размещаем модуль
+    this.modules.push(module);
+    for (const cell of module.occupiedCells) {
+      this.map[cell.x][cell.y].module = module;
+    }
+
+    // Позиционируем модель модуля
+    const offset = this.size == 20 ? 9 : 4.5;
+    module.model.position.x = module.occupiedCells[0].x - offset + module.size.width / 2;
+    module.model.position.z = module.occupiedCells[0].y - offset + module.size.height / 2;
+    module.model.position.y = 0.1; // Немного выше поверхности
+
+  }
 
   getCellMesh(i: number, j: number): Mesh {
     return this.map[i][j].mesh
+  }
+  getModuleAt(x: number, y: number): Module3D | null {
+    if (x < 0 || y < 0 || x >= this.size || y >= this.size) return null;
+    return this.map[x][y].module;
   }
 }

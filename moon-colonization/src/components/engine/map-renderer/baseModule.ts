@@ -15,18 +15,33 @@ export class ModuleMesh {
     // мб здесь будет модуль, но не знаю
   }
 
-  async createMeshFromGLTF(gltfFile: string): Promise<THREE.Object3D> {
-    return new Promise((resolve, reject) => {
-      this.loader.load(
-        this.basePath + gltfFile,
-        (gltf) => {
-          resolve(gltf.scene)
-        },
-        undefined,
-        (error) => {
-          reject(error)
-        },
-      )
-    })
-  }
+  // createMeshFromGLTF(gltfFile: string): Promise<THREE.Object3D> {
+  //   return new Promise((resolve, reject) => {
+  //     this.loader.load(
+  //       this.basePath + gltfFile,
+  //       (gltf) => {
+  //         resolve(gltf.scene)
+  //       },
+  //       undefined,
+  //       (error) => {
+  //         reject(error)
+  //       },
+  //     )
+  //   })
+  // }
+}
+export function createMeshFromGLTF(gltfFile: string): Promise<THREE.Object3D> {
+  const loader = new GLTFLoader()
+  return new Promise((resolve, reject) => {
+    loader.load(
+      basePath + gltfFile,
+      (gltf) => {
+        resolve(gltf.scene)
+      },
+      undefined,
+      (error) => {
+        reject(error)
+      },
+    )
+  })
 }
