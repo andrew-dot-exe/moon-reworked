@@ -20,15 +20,22 @@ let map: MoonMap
 let gridHelper: THREE.GridHelper
 let axesHelper: THREE.AxesHelper
 let directionalLight: THREE.DirectionalLight
-const selectedMesh: THREE.Object3D | null = null
 const selectedCellStore = useSelectedCellStore()
 const zoneStore = useZoneStore()
 
 const multipleView = false
 
+let hoveredMesh: Mesh | null = null;
+let selectedMesh: Mesh | null = null;
+let lastBorderMeshes: Mesh[] = [];
+
 onMounted(() => {
 
-  const zone = zoneStore.current_zone
+  const zone = zoneStore.current_zone;
+  if (!zone) {
+    console.error('zone is null');
+    return;
+  }
   console.log(zone.name + ' size:' + zone.size);
 
   if (!mapRef.value) {
@@ -133,6 +140,23 @@ onMounted(() => {
   animate()
 })
 
+function resetHoverMesh() {
+  if (hoveredMesh && hoveredMesh.userData && hoveredMesh.userData.originalColor) {
+    (hoveredMesh.material as THREE.MeshStandardMaterial).color.copy(hoveredMesh.userData.originalColor);
+    hoveredMesh = null;
+  }
+  // Если ячейка выбрана кликом, вернуть ей цвет выделения
+  if (selectedMesh) {
+    (selectedMesh.material as THREE.MeshStandardMaterial).color.set(0xbcfe37);
+  }
+  // Вернуть цвет границ, если они есть
+  lastBorderMeshes.forEach(mesh => {
+    if (mesh !== selectedMesh && mesh.userData && mesh.userData.originalColor) {
+      (mesh.material as THREE.MeshStandardMaterial).color.copy(mesh.userData.originalColor);
+    }
+  });
+}
+
 function handleMeshHover(event: MouseEvent) {
   if (!renderer || !camera || !map) return;
 
@@ -154,44 +178,36 @@ function handleMeshHover(event: MouseEvent) {
 
   const intersects = raycaster.intersectObjects(meshes);
 
-  // if (intersects.length > 0) {
-  //   const mesh = intersects[0].object as Mesh;
-  //   highlightMesh(mesh); // подсветка наведённого меша
-  // } else {
-  //   // Снять подсветку, если ни на одном меше
-  //   if (highlightedMesh && originalColor) {
-  //     (highlightedMesh.material as THREE.MeshStandardMaterial).color.copy(originalColor);
-  //     highlightedMesh = null;
-  //   }
-  // }
-
-  // для нескольких ячеек
   if (intersects.length > 0) {
     const mesh = intersects[0].object as Mesh;
-    highlightMesh(mesh); // подсветка центрального меша
-    // highlightBorderMeshes(mesh, 2, 1);
+    if (hoveredMesh && hoveredMesh !== mesh && hoveredMesh !== selectedMesh && hoveredMesh.userData.originalColor) {
+      (hoveredMesh.material as THREE.MeshStandardMaterial).color.copy(hoveredMesh.userData.originalColor);
+    }
+    if (mesh !== selectedMesh) {
+      (mesh.material as THREE.MeshStandardMaterial).color.set(0xbcfe37); // hover color
+    }
+    hoveredMesh = mesh;
+    // Подсветка границ вокруг наведённой ячейки (пример: 3x3)
+    //highlightBorderMeshes(mesh, 2, 2); // цвет для границы при hover
   } else {
-    // Сбросить подсветку с граничных мешей
-    highlightBorderMeshes({ userData: {} } as Mesh, 0, 0); // сброс
-    // ...сброс подсветки центрального меша...
+    resetHoverMesh();
+    // Сбросить подсветку границ
+    highlightBorderMeshes({ userData: {} } as Mesh, 0, 0);
   }
 }
 
 function handleMeshClick(event: MouseEvent) {
   if (!renderer || !camera || !map) return;
 
-  // Получаем нормализованные координаты мыши
   const rect = renderer.domElement.getBoundingClientRect();
   const mouse = new THREE.Vector2(
     ((event.clientX - rect.left) / rect.width) * 2 - 1,
     -((event.clientY - rect.top) / rect.height) * 2 + 1
   );
 
-  // Создаем Raycaster
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(mouse, camera);
 
-  // Собираем все меши карты
   const meshes: Mesh[] = [];
   for (let i = 0; i < map.size; i++) {
     for (let j = 0; j < map.size; j++) {
@@ -199,42 +215,34 @@ function handleMeshClick(event: MouseEvent) {
     }
   }
 
-  // Проверяем пересечения
   const intersects = raycaster.intersectObjects(meshes);
 
   if (intersects.length > 0) {
     const mesh = intersects[0].object as Mesh;
-    highlightMesh(mesh);
-
-    console.log('Клик по мешу:', mesh.userData);
-    emit('cell-selected', mesh.userData.x, mesh.userData.y);
-  } else {
-    // Клик по пустому месту
-    //console.log('Клик по пустому месту');
-    emit('cell-selected', -1, -1);
-    if (highlightedMesh && originalColor) {
-      (highlightedMesh.material as THREE.MeshStandardMaterial).color.copy(originalColor);
+    // Сбросить предыдущий выделенный
+    if (selectedMesh && selectedMesh.userData.originalColor) {
+      (selectedMesh.material as THREE.MeshStandardMaterial).color.copy(selectedMesh.userData.originalColor);
     }
+    selectedMesh = mesh;
+    (mesh.material as THREE.MeshStandardMaterial).color.set(0xbcfe37); // выделение
+    emit('cell-selected', mesh.userData.i, mesh.userData.j);
+    // Подсветка границ вокруг выбранной ячейки (пример: 3x3)
+    highlightBorderMeshes(mesh, 3, 3, 0xbcfe37); // цвет для границы при клике
+  } else {
+    if (selectedMesh && selectedMesh.userData.originalColor) {
+      (selectedMesh.material as THREE.MeshStandardMaterial).color.copy(selectedMesh.userData.originalColor);
+    }
+    selectedMesh = null;
+    emit('cell-selected', -1, -1);
+    // Сбросить подсветку границ
+    highlightBorderMeshes({ userData: {} } as Mesh, 0, 0);
   }
 }
-let highlightedMesh: Mesh | null = null;
-const originalColor: THREE.Color | null = null;
-
-function highlightMesh(mesh: Mesh) {
-  // Сбросить цвет с предыдущего выделенного меша
-  if (highlightedMesh && highlightedMesh !== mesh && highlightedMesh.userData && highlightedMesh.userData.originalColor) {
-    (highlightedMesh.material as THREE.MeshStandardMaterial).color.copy(highlightedMesh.userData.originalColor);
-  }
-  highlightedMesh = mesh;
-  // Подсветить новый меш
-  (mesh.material as THREE.MeshStandardMaterial).color.set(0xbcfe37);
-}
-let lastBorderMeshes: Mesh[] = [];
 
 function highlightBorderMeshes(centerMesh: Mesh, n: number, m: number, borderColor = 0xbcfe37) {
-  // Сбросить цвет всем, кто был подсвечен ранее
+  // Сбросить цвет всем, кто был подсвечен ранее, кроме выбранной
   lastBorderMeshes.forEach(mesh => {
-    if (mesh.userData && mesh.userData.originalColor) {
+    if (mesh !== selectedMesh && mesh.userData && mesh.userData.originalColor) {
       (mesh.material as THREE.MeshStandardMaterial).color.copy(mesh.userData.originalColor);
     }
   });
@@ -245,7 +253,9 @@ function highlightBorderMeshes(centerMesh: Mesh, n: number, m: number, borderCol
   // Сохраняем новые подсвеченные меши
   lastBorderMeshes = borderMeshes;
   borderMeshes.forEach(mesh => {
-    (mesh.material as THREE.MeshStandardMaterial).color.set(borderColor);
+    if (mesh !== selectedMesh) {
+      (mesh.material as THREE.MeshStandardMaterial).color.set(borderColor);
+    }
   });
 }
 
