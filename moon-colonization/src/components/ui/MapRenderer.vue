@@ -153,7 +153,7 @@ function handleMeshClick() {
   /* Обработка клика на ячейку. Если на ячейке стоит модуль, то получаем инфу о модуле
   Сейчас обрабатывает клик и на пустое место, так что надо
   */
-  console.log('mesh click')
+  console.log('anything on map click')
 
 }
 

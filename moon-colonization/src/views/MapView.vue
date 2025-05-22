@@ -1,14 +1,9 @@
-
-
 <template>
   <div class="map-view">
-    <MapRenderer ref="mapRendererRef" @cell-selected="onCellSelected"/>
+    <MapRenderer ref="mapRendererRef" @cell-selected="onCellSelected" />
     <div class="ui-overlay">
       <div class="header">
-        <UIHeader name="Режим строительства"  @end_col="endColonisation" />
-      </div>
-      <div style="pointer-events: auto;">
-        <BuildButton @close-opt="offModuleSelect" @get-select="getSelect"/>
+        <UIHeader name="Режим строительства" @end_col="endColonisation" />
       </div>
       <div class="success-block">
         <Success />
@@ -17,11 +12,11 @@
         <Optimality :opt="optimalityResult.opt" :rel="optimalityResult.rel" :rat="optimalityResult.rat" />
       </div>
       <div class="construction-block">
-        <Construction @select-module="onModuleSelect"/>
+        <Construction @select-module="onModuleSelect" />
       </div>
     </div>
     <div v-if="end" class="stat-overlay">
-      <EndColonyWindow/>
+      <EndColonyWindow />
     </div>
   </div>
 </template>
@@ -30,7 +25,6 @@
 import { nextTick, onMounted, ref, reactive } from 'vue'
 import MapRenderer from '@/components/ui/MapRenderer.vue'
 import UIHeader from '@/components/ui/UIHeader.vue'
-import BuildButton from '@/components/ui/BuildButton.vue'
 import type { MoonCell } from '@/components/engine/map-renderer/map'
 import { useMapStore } from '@/stores/mapStore'
 import Construction from '@/components/ui/Construction.vue'
@@ -50,7 +44,7 @@ const uInfo = userInfoStore();
 const mapRendererRef = ref(null)
 const mapStore = useMapStore()
 
-const endColonisation =  async () => {
+const endColonisation = async () => {
   end.value = true
 }
 
@@ -67,7 +61,7 @@ onMounted(async () => {
   console.log('mapRendererRef after nextTick:', mapRendererRef.value)
   mapStore.setRender(mapRendererRef)
   await uInfo.fetchUserInfo();
-  if(!uInfo.userInfo.live){
+  if (!uInfo.userInfo.live) {
     end.value = true
   }
 })
@@ -78,31 +72,32 @@ const selectedModule = ref(false)
 // Обработчик выбора клетки
 async function onCellSelected(x: number, z: number) {
   selectedCell.value = true
-  if(selectedModule.value && currentModule.value != undefined
-    && currentModule.value?.x != undefined && currentModule.value?.y != undefined){
+  if (selectedModule.value && currentModule.value != undefined
+    && currentModule.value?.x != undefined && currentModule.value?.y != undefined) {
     currentModule.value.x = x
     currentModule.value.y = z
     await onModuleSelect(undefined)
   }
 }
 
-function offModuleSelect(){
+function offModuleSelect() {
+  //?
   selectedModule.value = false
 }
 
 const currentModule = ref<null | Module>(null)
 
-function getSelect(): number{
+function getSelect(): number {
   return Number(currentModule.value?.typeModule)
 }
 
-async function onModuleSelect(module: Module | undefined){
-  
+async function onModuleSelect(module: Module | undefined) {
+
   // Вызов проверки эффективности
-  if(selectedCell.value){
+  if (selectedCell.value) {
     selectedModule.value = true
     Object.assign(optimalityResult, { opt: 0, rel: 0, rat: 0 });
-    if(module !== undefined){
+    if (module !== undefined) {
       currentModule.value = module
     }
     // Проверка и вывод всех полей объекта moduleToCheck
@@ -111,10 +106,10 @@ async function onModuleSelect(module: Module | undefined){
     })
     console.log('Module для API:', module)*/
     try {
-      if(currentModule.value != undefined){
+      if (currentModule.value != undefined) {
         const result = await modulesApi.checkModule(currentModule.value)
         //console.log('Эффективность модуля (ответ API):', result)
-        if(result && result.rationality && result.relief){
+        if (result && result.rationality && result.relief) {
           // Принудительное обновление через новое присваивание
           optimalityResult.rat = result.rationality ?? 0;
           optimalityResult.rel = result.relief ?? 0;
