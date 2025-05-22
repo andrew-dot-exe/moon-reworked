@@ -106,6 +106,7 @@ const name = ["Равнина 1", "Равнина 2", "Высота 1", "Выс�
     align-self: stretch;
     aspect-ratio: 1/1;
     background: #A3A3A3;
+    cursor: pointer;
 }
 .master-arrowsUp {
     display: flex;

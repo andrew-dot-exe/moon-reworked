@@ -1,6 +1,7 @@
 import { statisticApi } from '@/components/statistic/statisticApi'
 import { Statistic } from '@/components/statistic/statistic'
 import { defineStore } from 'pinia'
+import { ZoneProduction } from '@/components/statistic/ZoneProduction'
 
 function delenie(arr: number[]){
   for(let i = 0; i < arr.length; i++){
@@ -23,12 +24,13 @@ export const statisticStore = defineStore('statisticStore', {
           countResources: delenie(response.countResources) || [],
           sumConsumption: delenie(response.sumConsumption) || [],
           sumProduction:  delenie(response.sumProduction) || [],
-          zoneProductions: response.zoneProductions.map(zone => ({
+          zoneProductions: response.zoneProductions.map((zone: ZoneProduction) => ({
             id: zone.id,
-            production:  Math.floor(zone.production /1000),
-            consumption:  Math.floor(zone.consumption /1000)
+            production:  delenie(zone.production),
+            consumption:  delenie(zone.consumption)
           }))
         };
+        console.log(this.statistic)
       }
     },
   },

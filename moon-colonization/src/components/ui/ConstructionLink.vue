@@ -203,6 +203,7 @@ p {
     margin: 0px;
 }
 .Construction {
+    pointer-events: none;
     display: flex;
     flex-shrink: 1;
     align-items: flex-start;
@@ -214,6 +215,7 @@ p {
     flex: 1 0 0;
 }
 .button {
+    pointer-events: auto;
     display: flex;
     width: 30px;
     height: 196px;
@@ -226,6 +228,7 @@ p {
     align-items: center;
     gap: 10px;
     background: #464646;
+    cursor: pointer;
 }
 .arrow-left {
     display: flex;
@@ -261,7 +264,7 @@ p {
     font-family: "Feature Mono";
     font-size: 15px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 350;
     line-height: normal;
     letter-spacing: 0.75px;
 }
@@ -289,6 +292,7 @@ fill: #464646;
 }
 
 .select {
+    pointer-events: auto;
     background: #BCFE37;
     display: flex;
     padding: 7px 22px;
@@ -318,6 +322,7 @@ fill: #464646;
 }
 
 .object-container {
+    pointer-events: auto;
     position: relative; /* нужно для псевдоэлемента */
     display: flex;
     padding: 10px 20px;

@@ -188,6 +188,7 @@ p {
     flex: 1 0 0;
 }
 .button {
+    pointer-events: auto;
     display: flex;
     width: 30px;
     height: 196px;
@@ -200,6 +201,7 @@ p {
     align-items: center;
     gap: 10px;
     background: #464646;
+    cursor: pointer;
 }
 .arrow-left {
     display: flex;
@@ -253,6 +255,7 @@ p {
     align-self: stretch;
 }
 .section-section {
+    pointer-events: auto;
     display: flex;
     align-items: center;
 }
@@ -292,6 +295,7 @@ fill: #464646;
 }
 
 .object-container {
+    pointer-events: auto;
     position: relative; /* нужно для псевдоэлемента */
     display: flex;
     padding: 10px 20px;

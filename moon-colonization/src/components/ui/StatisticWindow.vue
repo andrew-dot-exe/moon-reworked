@@ -12,6 +12,9 @@ const statistic = statisticStore();
 // Lifecycle hooks
 onMounted(async () => {
   await statistic.getStatistic();
+  if(statistic.statistic != undefined){
+    console.log(statistic.statistic.zoneProductions)
+  }
 });
 
 // Вычисляемые свойства для безопасного доступа
@@ -73,9 +76,9 @@ const hasProductionData = computed(() => {
                 <div class="paragraph">
                     <p>Потребности по областям</p>
                 </div>
-                <div v-if="statistic">
+                <div v-if="statistic.statistic">
                     <AreaProduction 
-                        v-for="(item, index) in statistic.statistic?.zoneProductions"
+                        v-for="(item, index) in statistic.statistic.zoneProductions"
                         :key="index"
                         :data="item"/>
                 </div>

@@ -10,7 +10,6 @@ import { useZoneStore } from '@/stores/zoneStore';
 import { linkApi } from '@/components/link/LinkApi';
 import { Link, PrimaryKey } from '@/components/link/Link';
 import { userInfoStore } from '@/stores/userInfoStore';
-import { colonyApi } from '@/components/colony/colony';
 import { useLinkStore } from '@/stores/useLinkStore';
 const end = ref(false)
 
@@ -46,12 +45,12 @@ const imgWidth = 2696
 const imgHeight = 2360
 
 const originalPositions = [
-  new ZonePosition("Равнина 1", new ImagePoint(1646, 1226), `${markerPaths}/lowlands-default.svg`),
-  new ZonePosition("Равнина 2", new ImagePoint(1699, 1264), `${markerPaths}/lowlands-default.svg`),
-  new ZonePosition("Высота 1", new ImagePoint(1477, 1285), `${markerPaths}/lowlands-default.svg`),
-  new ZonePosition("Высота 2", new ImagePoint(1408, 1322), `${markerPaths}/lowlands-default.svg`),
-  new ZonePosition("Низина 1", new ImagePoint(1479, 1449), `${markerPaths}/lowlands-default.svg`),
-  new ZonePosition("Низина 2", new ImagePoint(1467, 1532), `${markerPaths}/lowlands-default.svg`),
+  new ZonePosition("Равнина 1", new ImagePoint(1646, 1226), `${markerPaths}/plains1.svg`),
+  new ZonePosition("Равнина 2", new ImagePoint(1699, 1264), `${markerPaths}/plains2.svg`),
+  new ZonePosition("Высота 1", new ImagePoint(1477, 1285), `${markerPaths}/heights1.svg`),
+  new ZonePosition("Высота 2", new ImagePoint(1408, 1322), `${markerPaths}/heights2.svg`),
+  new ZonePosition("Низина 1", new ImagePoint(1479, 1449), `${markerPaths}/lowlands1.svg`),
+  new ZonePosition("Низина 2", new ImagePoint(1467, 1532), `${markerPaths}/lowlands2.svg`),
 ]
 
 const componentStore = useComponentStore()
@@ -345,6 +344,7 @@ function drawLine(x1: number, y1: number, x2: number, y2: number, type: number) 
   margin-left: 20px;
   margin-right: 20px;
   bottom: 20px;
+  pointer-events: none;
 
 }
 

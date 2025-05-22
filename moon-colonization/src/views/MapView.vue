@@ -158,7 +158,7 @@ async function onModuleSelect(module: Module | undefined){
 }
 
 .construction-block {
-  pointer-events: auto;
+  pointer-events: none;
   display: flex;
   position: absolute;
   margin: 20px;
