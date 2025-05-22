@@ -31,15 +31,16 @@ export const userApi = {
     return response.status
   },
 
-  register: async (email: string, password: string) => {
+  register: async (name: String, email: string, password: string) => {
     const response = await axiosInstance.post(`${API_URL}/create`, {
+      name: name,
       email: email,
       password: password,
     })
     if (response.status != 200) {
       console.error(`Error at /api/create. The data is ${response.data}`)
     }
-    return response.headers
+    return response.status
   },
 
   get_info: async () => {

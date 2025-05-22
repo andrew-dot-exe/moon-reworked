@@ -48,6 +48,9 @@
       <button class="button-sign-in">
         <div class="text-wrapper-3">Войти</div>
       </button>
+      <div class="reg-button" @click="goToReg">
+        <p>Зарегистрироваться</p>
+      </div>
     </form>
   </div>
 </template>
@@ -63,6 +66,10 @@ const email = ref('');
 const password = ref('');
 const componentStore = useComponentStore();
 
+const goToReg = () => {
+  componentStore.setComponent("register");
+}
+
 const handleLogin = async () => {
   if (email.value && password.value) {
     const response: Promise<number> = userApi.login(email.value, password.value);
@@ -77,6 +84,15 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
+.reg-button{
+  text-decoration: underline;
+
+}
+.reg-button p{
+  
+  color: #a3a3a3;
+  font-family: "Feature Mono-Medium", Helvetica;
+}
 .master-screen-acount {
   align-items: center;
   background-color: #454545;
@@ -117,6 +133,7 @@ const handleLogin = async () => {
 }
 
 .master-screen-acount .create-account {
+  margin: 0 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -141,13 +158,13 @@ const handleLogin = async () => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 24px;
+  gap: 12px;
   align-self: stretch;
 }
 
 .master-screen-acount .div {
   display: flex;
-  height: 44px;
+  height: 65px;
   justify-content: space-between;
   align-items: center;
   align-self: stretch;
@@ -160,6 +177,7 @@ const handleLogin = async () => {
   align-items: center;
   gap: 10px;
   flex: 1 0 0;
+  height: 65px;
 }
 
 .master-screen-acount .text-wrapper {
@@ -182,6 +200,7 @@ const handleLogin = async () => {
   justify-content: flex-end;
   padding: 10px;
   position: relative;
+  height: 65px;
 }
 
 .master-screen-acount .text-wrapper-2 {

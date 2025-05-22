@@ -259,7 +259,7 @@
     <StatisticWindow @toggle="toggleStatistics"/>
   </div>
   <div v-if="isMenuVisible" class="menu-overlay">
-    <MenuWindow name="Имя" @toggle="toggleMenu" @end_col="endColonisation"/>
+    <MenuWindow @toggle="toggleMenu" @end_col="endColonisation"/>
   </div>
   </div>
   

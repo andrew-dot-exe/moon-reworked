@@ -9,13 +9,15 @@ import { User } from '../user/userInfo';
 
 import {generatePDF} from "@/components/pdf/generate"
 const emit = defineEmits(['toggle', 'end_col']); 
-const props = defineProps({
-  name: { type: String, default: "Anonim" }
-});
+// const props = defineProps({
+//   name: { type: String, default: "Anonim" }
+// });
 
 const successStore = useSuccessStore()
 const uInfo = userInfoStore();
 const statistic = statisticStore();
+
+const name = ref(uInfo.userInfo.name)
 
 onMounted(async () => {
     try {
