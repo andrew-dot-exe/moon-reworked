@@ -15,10 +15,12 @@ import { modulesApi } from '@/components/modules/modulesApi'
 import { userInfoStore } from '@/stores/userInfoStore';
 import CellInfo from '@/components/ui/CellInfo.vue'
 import { useComponentStore } from '@/stores/componentStore';
+import { useModuleStore } from '@/stores/ModuleStore'
 
 const end = ref(false)
 
 const componentStore = useComponentStore()
+const moduleStore = useModuleStore()
 const uInfo = userInfoStore();
 
 const mapRendererRef = ref(null)
@@ -96,6 +98,9 @@ async function onModuleSelect(module: Module | undefined) {
     if (module !== undefined) {
       currentModule.value = module
     }
+    currentModule.value.x = cellX.value
+    currentModule.value.y = cellY.value
+    
     // Проверка и вывод всех полей объекта moduleToCheck
     /*Object.entries(module).forEach(([key, value]) => {
       console.log(`moduleToCheck.${key}:`, value)
@@ -117,6 +122,13 @@ async function onModuleSelect(module: Module | undefined) {
       console.error('Ошибка при вычислении эффективности:', e)
       //emit('optimality', null)
     }
+  }
+}
+
+function buildModule(){
+  console.log(currentModule.value)
+  if(currentModule.value){
+    moduleStore.createModule(currentModule.value)
   }
 }
 </script>
@@ -157,6 +169,7 @@ async function onModuleSelect(module: Module | undefined) {
       <div class="construction-block">
         <Construction @select-module="onModuleSelect" />
       </div>
+      <div v-if="selectedCell && selectedModule" class="button-build" @click="buildModule">Build</div>
     </div>
     <div v-if="end" class="stat-overlay">
       <EndColonyWindow />
@@ -166,6 +179,22 @@ async function onModuleSelect(module: Module | undefined) {
 
 
 <style scoped>
+.button-build{
+  pointer-events: auto;
+  position: absolute;
+  left: 20px;
+  top:150px;
+    display: flex;
+    flex-direction: column;
+  height: 20px;
+  width: 100px;
+    justify-content: center;
+    align-items: center;
+    background-color: #BCFE37;
+    cursor: pointer;
+    border-radius: 5px;
+    cursor: pointer;
+  }
 .cell{
   display: flex;
 }

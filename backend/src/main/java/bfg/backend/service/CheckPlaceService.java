@@ -94,13 +94,13 @@ public class CheckPlaceService {
             Component component,
             ColonyData data) {
         Integer relief = component.getRelief();
-        Integer rationality = component.getRationality(data.modules, data.links, data.resources);
+        Integer rationality = 100;// component.getRationality(data.modules, data.links, data.resources);
 
         // TODO вернуть нормально
         return new CheckedPlace(
                 relief != null && rationality != null,
                 relief,
-                100
+                rationality
         );
     }
 

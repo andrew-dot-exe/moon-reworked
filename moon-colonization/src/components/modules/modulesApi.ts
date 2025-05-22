@@ -14,7 +14,7 @@ export const modulesApi = {
   createModule: async(module: Module) => {
     const resourceStore = useResourceStore()
     const uInfo = userInfoStore()
-    const response = await axiosInstance.post('/api/module', module)
+    const response = await axiosInstance.post('/api/module', {id_zone: module.idZone, module_type: module.typeModule, x: module.x, y:module.y})
     if(response.data){
       await uInfo.fetchUserInfo()
       await resourceStore.getResources()
