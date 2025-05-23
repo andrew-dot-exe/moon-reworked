@@ -35,7 +35,6 @@ onMounted(async () => {
     console.error('zone is null');
     return;
   }
-  console.log(zone.name + ' size:' + zone.size);
 
   if (!mapRef.value) {
     console.error('mapRef is null')
@@ -89,11 +88,11 @@ onMounted(async () => {
   controls.minDistance = 8
   controls.maxDistance = 20
 
-  gridHelper = new THREE.GridHelper()
-  scene.add(gridHelper)
+  // gridHelper = new THREE.GridHelper()
+  // scene.add(gridHelper)
 
-  axesHelper = new THREE.AxesHelper(5)
-  scene.add(axesHelper)
+  // axesHelper = new THREE.AxesHelper(5)
+  // scene.add(axesHelper)
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 1)
   ambientLight.position.set(10, 10, 10)
@@ -116,9 +115,24 @@ onMounted(async () => {
   // Карта
   map = new MoonMap(zone.name, zone.size)
   const offset = map.size == 20 ? 9 : 4.5; // так как у нас только 10х10 и 20х20
+
+  await moduleStore.getModules()
+  for(let i = 0; i < moduleStore.modules.length; i++){
+    if(moduleStore.modules[i].idZone == zoneStore.current_zone?.id){
+      const module3d = new Module3D(moduleStore.modules[i]);
+      await map.addModule(module3d)
+      scene.add(module3d.model);
+    }
+  }
+
   for (let i = 0; i < map.size; i++) {
     for (let j = 0; j < map.size; j++) {
+
       const mesh: Mesh = map.getCellMesh(i, j)
+      // Если mesh не null, но ячейка занята → не добавляем
+      if (map.getModuleAt(i, j)) {  // Проверяем, есть ли модуль в ячейке
+        mesh.visible = false  // Скрываем занятые ячейки
+      }
       mesh.userData = {
         i,
         j,
@@ -132,14 +146,7 @@ onMounted(async () => {
     }
   }
 
-  await moduleStore.getModules()
-  for(let i = 0; i < moduleStore.modules.length; i++){
-    if(moduleStore.modules[i].idZone == zoneStore.current_zone?.id){
-      const module3d = new Module3D(moduleStore.modules[i]);
-      await map.addModule(module3d)
-      scene.add(module3d.model);
-    }
-  }
+  
 
   renderer.domElement.addEventListener('mousemove', handleMeshHover);
   renderer.domElement.addEventListener('click', handleMeshClick)
@@ -180,7 +187,10 @@ function handleMeshHover(event: MouseEvent) {
   const meshes: Mesh[] = [];
   for (let i = 0; i < map.size; i++) {
     for (let j = 0; j < map.size; j++) {
-      meshes.push(map.getCellMesh(i, j));
+      const mesh = map.getCellMesh(i, j);
+      if (map.getModuleAt(i, j)) { // Игнорируем null (занятые ячейки)
+        meshes.push(mesh);
+      }
     }
   }
 
@@ -219,12 +229,15 @@ function handleMeshClick(event: MouseEvent) {
   const meshes: Mesh[] = [];
   for (let i = 0; i < map.size; i++) {
     for (let j = 0; j < map.size; j++) {
-      meshes.push(map.getCellMesh(i, j));
+      const mesh = map.getCellMesh(i, j);
+      meshes.push(mesh);
+      
     }
   }
 
   const intersects = raycaster.intersectObjects(meshes);
 
+  // TODO добавлять ячейки с модулем
   if (intersects.length > 0) {
     const mesh = intersects[0].object as Mesh;
     // Сбросить предыдущий выделенный
@@ -242,7 +255,9 @@ function handleMeshClick(event: MouseEvent) {
     if (module) {
       // Выделяем все ячейки модуля
       highlightModule(module);
-      emit('module-selected', module);
+      
+      // TODO выделение модуля
+      emit('module-selected', module.id);
     } else {
       emit('cell-selected', cellX, cellY);
     }
@@ -263,13 +278,6 @@ function handleMeshClick(event: MouseEvent) {
 function highlightModule(module: Module3D) {
   // Сбрасываем предыдущее выделение
   resetHoverMesh();
-  
-  // Подсвечиваем все ячейки модуля
-  for (const cell of module.occupiedCells) {
-    const mesh = map.getCellMesh(cell.x, cell.y);
-    (mesh.material as THREE.MeshStandardMaterial).color.set(0x00ff00); // Зеленый для модуля
-    lastBorderMeshes.push(mesh);
-  }
 }
 
 function highlightBorderMeshes(centerMesh: Mesh, n: number, m: number, borderColor = 0xbcfe37) {
@@ -305,7 +313,10 @@ function getBorderMeshesAround(centerMesh: Mesh, n: number, m: number): Mesh[] {
   for (let i = iStart; i <= iEnd; i++) {
     for (let j = jStart; j <= jEnd; j++) {
       if (i === iStart || i === iEnd || j === jStart || j === jEnd) {
-        borderMeshes.push(map.getCellMesh(i, j));
+        const mesh = map.getCellMesh(i, j);
+        if (mesh !== null) {
+          borderMeshes.push(mesh);
+        }
       }
     }
   }

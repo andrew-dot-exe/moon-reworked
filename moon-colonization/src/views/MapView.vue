@@ -78,6 +78,7 @@ const selectedCell = ref(false)
 const cellX = ref(-1)
 const cellY = ref(-1)
 function selectingCell(x: number, y: number){
+  optimal.value = false
   if(x < 0 || y < 0){
     selectedCell.value = false
     return
@@ -90,10 +91,11 @@ const selectedModule = ref(false)
 
 const currentModule = ref<null | Module>(null)
 async function onModuleSelect(module: Module | undefined) {
-
+  optimal.value = false
   // Вызов проверки эффективности
   if (selectedCell.value) {
     selectedModule.value = true
+    
     Object.assign(optimalityResult, { opt: 0, rel: 0, rat: 0 });
     if (module !== undefined) {
       currentModule.value = module
@@ -131,11 +133,24 @@ function buildModule(){
     moduleStore.createModule(currentModule.value)
   }
 }
+const optimal = ref(false)
+
+async function moduleSelect(id: number){
+  await moduleStore.getOptimality()
+  const o = moduleStore.getOptimal(id);
+  if(o == null) return
+  optimalityResult.rel = o.relief
+  optimalityResult.rat = o.rationality
+  optimalityResult.opt = o.relief * 0.3 + o.rationality * 0.7
+  optimal.value = true
+  selectedCell.value = false
+  selectedModule.value = false
+}
 </script>
 
 <template>
   <div class="map-view">
-    <MapRenderer ref="mapRendererRef" @cell-selected="selectingCell"/>
+    <MapRenderer ref="mapRendererRef" @cell-selected="selectingCell" @module-selected="moduleSelect"/>
     <div class="ui-overlay">
       <div class="header">
         <UIHeader name="Режим строительства" @end_col="endColonisation" />
@@ -163,7 +178,7 @@ function buildModule(){
       <div class="success-block">
         <Success />
       </div>
-      <div v-if="selectedCell && selectedModule" class="optimality-block">
+      <div v-if="(selectedCell && selectedModule) || optimal" class="optimality-block">
         <Optimality :opt="optimalityResult.opt" :rel="optimalityResult.rel" :rat="optimalityResult.rat" />
       </div>
       <div class="construction-block">

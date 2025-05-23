@@ -122,7 +122,6 @@ public class RepairModule extends Module implements Component {
 
     @Override
     public void getConsumption(List<Module> modules, List<Long> consumption) {
-        modules.sort(Module::compareTo);
         countingRepairingModules(modules);
 
         consumption.set(TypeResources.WT.ordinal(), consumption.get(TypeResources.WT.ordinal()) + 120000L + 2000L * count);

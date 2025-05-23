@@ -20,5 +20,9 @@ export const modulesApi = {
       await resourceStore.getResources()
     }
     return response.data // id
+  },
+  getOptimal: async () => {
+    const response = await axiosInstance.get('/api/module')
+    return response.data
   }
 }

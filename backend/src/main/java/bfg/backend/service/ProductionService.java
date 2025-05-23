@@ -85,6 +85,7 @@ public class ProductionService {
             consumption.add(0L);
         }
 
+        modules.sort(Module::compareTo);
         for(Module mod : modules){
             Component component = TypeModule.values()[mod.getModule_type()].createModule(mod);
             component.getProduction(modules, production);
