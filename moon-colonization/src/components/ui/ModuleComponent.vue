@@ -23,8 +23,8 @@ async function selectForBuild() {
   const moduleToCheck = new Module(
     zoneStore.current_zone.id ?? 0, // null?
     props.data.type ?? 0, // null?
-    cellStore.selectedCellCoords.x ?? 0,
-    cellStore.selectedCellCoords.z ?? 0
+    0,
+    0
   )
   emit("select-module", moduleToCheck)
 }

@@ -1,4 +1,5 @@
 export interface ModuleModel {
+  id: number
   idZone: number
   typeModule: number
   // координаты относительно канваса
@@ -7,6 +8,7 @@ export interface ModuleModel {
 }
 
 export class Module implements ModuleModel {
+  id: number
   idZone: number
   typeModule: number
   x: number
@@ -17,6 +19,7 @@ export class Module implements ModuleModel {
     this.typeModule = typeModule
     this.x = x
     this.y = y
+    this.id = -1
   }
 }
 

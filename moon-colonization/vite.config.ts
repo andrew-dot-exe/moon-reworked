@@ -13,6 +13,9 @@ export default defineConfig({
     },
   },
   server: {
+     host: '0.0.0.0',
+    port: 5173,
+    allowedHosts: ['bfg10k.ru'],
     proxy: {
       // Перенаправляем все запросы, начинающиеся с `/api`, на бэкенд
       '/api': {

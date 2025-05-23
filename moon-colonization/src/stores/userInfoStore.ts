@@ -5,9 +5,15 @@ import userApi from '@/components/user/userApi'
 export const userInfoStore = defineStore('userInfoStore', {
   state: () => ({
     userInfo: {} as User, // Чистая реактивность без ref
+    lastFetchTime: 0, // Время последнего запроса
+    cacheDuration: 5000, // 5 секунд в миллисекундах
   }),
   actions: {
     async fetchUserInfo() {
+      const now = Date.now()
+      if (now - this.lastFetchTime < this.cacheDuration) {
+        return
+      }
       try {
         const response = await userApi.get_info()
         if (response) {
@@ -20,6 +26,7 @@ export const userInfoStore = defineStore('userInfoStore', {
             response.links,
             response.modules
           )
+          this.lastFetchTime = now
         }
       } catch (error) {
         console.error('Failed to fetch user info:', error)

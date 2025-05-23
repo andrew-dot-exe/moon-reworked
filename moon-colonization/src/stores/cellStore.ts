@@ -1,12 +1,17 @@
+import type { Cell } from '@/components/cell/Cell'
+import { CellApi } from '@/components/cell/CellApi'
 import { defineStore } from 'pinia'
 
 export const useCellStore = defineStore('cellStore', {
   state: () => ({
-    selectedCellCoords: { x: null as number | null, z: null as number | null },
+    cells: [] as Cell[][][]
   }),
   actions: {
-    selectCell(x: number, z: number) {
-      this.selectedCellCoords = { x, z }
+    async getCells(idZone: number | undefined) {
+      if(idZone == undefined) return
+      if (!this.cells[idZone]) {
+        this.cells[idZone] = await CellApi.getCellFromZone(idZone)
+      }
     },
   },
 })
