@@ -43,7 +43,7 @@ onMounted(async () => {
 });
 
 const couningVisible = () => {
-  
+
   const count = Math.floor((screenWidth.value - 110) / 400);
 
   const typeModules = activeHabitable.value ? liveItems : techItems;
@@ -102,7 +102,7 @@ async function onModuleSelect(module: Module){
     <div class="Construction">
         <div class="master-construction">
             <div class="button">
-                <div class="Arrows" @click="opening"> 
+                <div class="Arrows" @click="opening">
                     <div class="arrow-left">
                         <svg class="arrow-icon" :class="direction" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none">
                             <path d="M5.73166 8L2.12522 4.48157V3.51843L5.73166 0H6.44007V0.648649L3.45617 3.4398V3.55774H12V4.44226H3.45617V4.54054L6.44007 7.3317V8H5.73166ZM0 8V0H0.880143V8H0Z" fill="#A3A3A3"/>
@@ -117,7 +117,7 @@ async function onModuleSelect(module: Module){
                 <div class="section">
                     <div class="section-section">
                         <div class="section-section">
-                            <div 
+                            <div
                             :class="{ 'select': activeHabitable == true, 'default': activeHabitable == false }"
                             @click="setActiveTab(true)"
                             >
@@ -126,7 +126,7 @@ async function onModuleSelect(module: Module){
                             <svg xmlns="http://www.w3.org/2000/svg" width="4" height="30" viewBox="0 0 2 30" fill="none">
                                 <path d="M0 30V0H2V30H0Z" fill="#464646"/>
                             </svg>
-                            <div 
+                            <div
                             :class="{ 'select': activeHabitable == false, 'default': activeHabitable == true }"
                             @click="setActiveTab(false)"
                             >
@@ -135,11 +135,11 @@ async function onModuleSelect(module: Module){
                         </div>
                     </div>
                 </div>
-                <div class="object-container" v-if="{ isLoaded }" >
+                <div class="object-container">
                     <div class="object-container-container">
                         <div class="object-object" id="cont">
-                            <ModuleComponent 
-                            v-for="(item, index) in visibleItems" 
+                            <ModuleComponent
+                            v-for="(item, index) in visibleItems"
                             :key="index"
                             :data="item"
                             @select-module="onModuleSelect"
@@ -423,7 +423,7 @@ flex: 1 0 0;
   user-select: none;
 }
 
-.pp-left:hover:not(.disabled), 
+.pp-left:hover:not(.disabled),
 .pp-rigth:hover:not(.disabled) {
   opacity: 0.8;
 }

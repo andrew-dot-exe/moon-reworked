@@ -131,19 +131,19 @@ function getLink(links: ZoneLink[]): (string | number)[][] {
             res.push(t);
         }
     }
-    
+
     return res;
 }
 
 function findLinkByZones(links: ZoneLink[], id1: number, id2: number): number[] {
     const res: number[] = [0, 0];
-    
+
     links.forEach(element => {
         if (element.id_zone1 == id1 && element.id_zone2 == id2) {
             res[element.type] = 1;
         }
     });
-    
+
     return res;
 }
 
@@ -159,7 +159,7 @@ function getModulesInZone(modules: Module[], idZone: number): (string | number)[
             c++;
         }
     });
-    
+
     return res;
 }
 

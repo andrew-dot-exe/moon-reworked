@@ -20,8 +20,9 @@ async function selectForBuild() {
   buildModuleStore.setBuildModule(props.data, baseName + '.gltf')
   console.log('Выбран модуль для постройки:', props.data, 'GLTF:', baseName + '.gltf')
   // Пример объекта типа Module для API
+  const zoneId = zoneStore.current_zone?.id ?? 0;
   const moduleToCheck = new Module(
-    zoneStore.current_zone.id ?? 0, // null?
+    zoneId, // null-safe
     props.data.type ?? 0, // null?
     0,
     0

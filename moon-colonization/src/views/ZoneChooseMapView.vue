@@ -230,8 +230,8 @@ const redrawLines = () => {
   if(linkStore.links != undefined){
     for(let i = 0; i < linkStore.links.length; i++){
 
-      const t1 = originalPositions[linkStore.links[i].idZone1].point
-      const t2 = originalPositions[linkStore.links[i].idZone2].point
+      const t1 = originalPositions[linkStore.links[i].id_zone1].point
+      const t2 = originalPositions[linkStore.links[i].id_zone2].point
       //console.log(`Drawing line from zone ${linkStore.links[i].id_zone1} (${t1.x},${t1.y}) to zone ${linkStore.links[i].id_zone2} (${t2.x},${t2.y})`);
       drawLine(t1.x, t1.y, t2.x, t2.y, linkStore.links[i].type)
     }

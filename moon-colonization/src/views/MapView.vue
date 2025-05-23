@@ -98,8 +98,10 @@ async function onModuleSelect(module: Module | undefined) {
     if (module !== undefined) {
       currentModule.value = module
     }
-    currentModule.value.x = cellX.value
-    currentModule.value.y = cellY.value
+    if (currentModule.value) {
+      currentModule.value.x = cellX.value
+      currentModule.value.y = cellY.value
+    }
     
     // Проверка и вывод всех полей объекта moduleToCheck
     /*Object.entries(module).forEach(([key, value]) => {

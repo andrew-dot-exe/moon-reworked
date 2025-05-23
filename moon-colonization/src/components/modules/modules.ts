@@ -13,6 +13,7 @@ export class Module implements ModuleModel {
   typeModule: number
   x: number
   y: number
+  moduleType: any
 
   constructor(idZone: number, typeModule: number, x: number, y: number) {
     this.idZone = idZone
